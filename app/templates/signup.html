@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Sign Up</h1>
+    <form action="" method="post" novalidate>   <!-- post提交模式即可，get会将字段添加到url，novalidate属性表示不对表单进行验证
+                                                     无html表单元素，表单的字段对象的在渲染时会自动转化为HTML元素 -->
+        {{ form.hidden_tag() }}     <!--保护表单免受CSRF攻击-->
+        <p>
+            {{ form.username.label }}<br>   <!--需要字段标签的地方加上form.<field_name>.label -->
+            {{ form.username(size=32) }}<br>
+            {% for error in form.username.errors %} <!--用form.<field_name>.errors来渲染错误信息,且一般为一个列表-->
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password.label }}<br>
+            {{ form.password(size=32) }}<br>
+            {% for error in form.password.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
