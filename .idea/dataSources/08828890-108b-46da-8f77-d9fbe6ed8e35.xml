@@ -909,44 +909,110 @@
       <Charset>utf8mb4</Charset>
       <DefaultForCharset>0</DefaultForCharset>
     </collation>
-    <table id="229" parent="8" name="user"/>
-    <column id="230" parent="229" name="id">
+    <table id="229" parent="8" name="alembic_version"/>
+    <table id="230" parent="8" name="post"/>
+    <table id="231" parent="8" name="user"/>
+    <column id="232" parent="229" name="version_num">
       <Position>1</Position>
+      <DataType>varchar(32)|0s</DataType>
+      <NotNull>1</NotNull>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <key id="233" parent="229" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>version_num</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="234" parent="230" name="id">
+      <Position>1</Position>
+      <DataType>int(11)|0s</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="235" parent="230" name="body">
+      <Position>2</Position>
+      <DataType>varchar(140)|0s</DataType>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="236" parent="230" name="timestamp">
+      <Position>3</Position>
+      <DataType>datetime|0s</DataType>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="237" parent="230" name="user_id">
+      <Position>4</Position>
       <DataType>int(11)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="231" parent="229" name="username">
+    <index id="238" parent="230" name="ix_post_timestamp">
+      <ColNames>timestamp</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="239" parent="230" name="user_id">
+      <ColNames>user_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="240" parent="230" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <foreign-key id="241" parent="230" name="post_ibfk_1">
+      <ColNames>user_id</ColNames>
+      <RefSchemaName>test2</RefSchemaName>
+      <RefTableName>user</RefTableName>
+      <RefColNames>id</RefColNames>
+    </foreign-key>
+    <column id="242" parent="231" name="id">
+      <Position>1</Position>
+      <DataType>int(11)|0s</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="243" parent="231" name="username">
       <Position>2</Position>
       <DataType>varchar(64)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="232" parent="229" name="email">
+    <column id="244" parent="231" name="email">
       <Position>3</Position>
       <DataType>varchar(120)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="233" parent="229" name="password_hash">
+    <column id="245" parent="231" name="password_hash">
       <Position>4</Position>
       <DataType>varchar(128)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="234" parent="229" name="user_username_uindex">
+    <column id="246" parent="231" name="type">
+      <Position>5</Position>
+      <DataType>int(11)|0s</DataType>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <index id="247" parent="231" name="ix_user_username">
       <ColNames>username</ColNames>
       <Unique>1</Unique>
       <Type>btree</Type>
     </index>
-    <index id="235" parent="229" name="user_email_uindex">
+    <index id="248" parent="231" name="ix_user_email">
       <ColNames>email</ColNames>
       <Unique>1</Unique>
       <Type>btree</Type>
     </index>
-    <key id="236" parent="229" name="user_username_uindex">
-      <ColNames>username</ColNames>
-      <UnderlyingIndexName>user_username_uindex</UnderlyingIndexName>
+    <key id="249" parent="231" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
     </key>
-    <key id="237" parent="229" name="user_email_uindex">
+    <key id="250" parent="231" name="ix_user_username">
+      <ColNames>username</ColNames>
+      <UnderlyingIndexName>ix_user_username</UnderlyingIndexName>
+    </key>
+    <key id="251" parent="231" name="ix_user_email">
       <ColNames>email</ColNames>
-      <UnderlyingIndexName>user_email_uindex</UnderlyingIndexName>
+      <UnderlyingIndexName>ix_user_email</UnderlyingIndexName>
     </key>
   </database-model>
 </dataSource>

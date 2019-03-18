@@ -1,7 +1,7 @@
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-
+from hashlib import md5
 
 # class User(UserMixin, db.Model):
 #     __tablename__ = 'user'
@@ -29,20 +29,20 @@ from flask_login import UserMixin
 #         return '<User %r>' % self.username
 #
 # #
-# # class Student(db.Model):
-# #     __tablename__ = 'student'
-# #     id = db.Column(db.Integer, primary_key=True, nullable=False)
-# #     stu_class = db.Column(db.String(30))
-# #     tel_num = db.Column(db.String(30))
-# #     email = db.Column(db.String(30))
-# #     work_name = db.Column(db.String(30))
-# #     work_type = db.Column(db.String(30))
+
 # #
 # #
 # # class Teacher(db.Model):#     __tablename__ = 'teacher'
 # #     id = db.Column(db.Integer, primary_key=True, nullable=False)
 # #     tea_type = db.Column(db.String(30))
-#
+
+
+# class Contest(db.Model):
+#     __tablename__ == 'contest'
+#     contest_id = db.Column(db.Integer, primary_key=True)
+#     contest_name = db.Column(db.String(20))
+#     contest_type = db.Column(db.String(20))
+#     level = db.Column(db.String(20))
 #
 # @login.user_loader
 # def load_user(id):
@@ -58,7 +58,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    posts = db.relationship('Post', backref='author', lazy='dynamic')
+    type = db.Column(db.Integer, default=1)
+    # posts = db.relationship('Post', backref='author', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -69,17 +70,24 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def avatar(self, size):     # 载入头像
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+            digest, size)
+
+
+class Student(db.Model):
+    __tablename__ = 'student'
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    stu_class = db.Column(db.String(30))
+    tel_num = db.Column(db.String(30))
+    work_name = db.Column(db.String(30))
+    work_type = db.Column(db.String(30))
+
 
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
 
 
-class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.String(140))
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __repr__(self):
-        return '<Post {}>'.format(self.body)

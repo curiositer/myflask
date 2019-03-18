@@ -6,9 +6,9 @@
                                                      无html表单元素，表单的字段对象的在渲染时会自动转化为HTML元素 -->
         {{ form.hidden_tag() }}     <!--保护表单免受CSRF攻击-->
         <p>
-            {{ form.username.label }}<br>   <!--需要字段标签的地方加上form.<field_name>.label -->
-            {{ form.username(size=32) }}<br>
-            {% for error in form.username.errors %} <!--用form.<field_name>.errors来渲染错误信息,且一般为一个列表-->
+            {{ form.id.label }}<br>   <!--需要字段标签的地方加上form.<field_name>.label -->
+            {{ form.id(size=32) }}<br>
+            {% for error in form.id.errors %} <!--用form.<field_name>.errors来渲染错误信息,且一般为一个列表-->
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
