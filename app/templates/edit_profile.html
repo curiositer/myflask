@@ -1,10 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block content %}
+    <h1>修改个人信息</h1>
+    {% from "_field.html" import render_field %}
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <table>
+            {{ render_field(form.username) }}
+            {{ render_field(form.email) }}
+        </table>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
