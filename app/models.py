@@ -32,17 +32,10 @@ from hashlib import md5
 
 # #
 # #
-# # class Teacher(db.Model):#     __tablename__ = 'teacher'
-# #     id = db.Column(db.Integer, primary_key=True, nullable=False)
-# #     tea_type = db.Column(db.String(30))
 
 
-# class Contest(db.Model):
-#     __tablename__ == 'contest'
-#     contest_id = db.Column(db.Integer, primary_key=True)
-#     contest_name = db.Column(db.String(20))
-#     contest_type = db.Column(db.String(20))
-#     level = db.Column(db.String(20))
+
+
 #
 # @login.user_loader
 # def load_user(id):
@@ -83,6 +76,25 @@ class Student(db.Model):
     tel_num = db.Column(db.String(30))
     work_name = db.Column(db.String(30))
     work_type = db.Column(db.String(30))
+
+
+class Teacher(db.Model):
+    __tablename__ = 'teacher'
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    tea_class = db.Column(db.String(30))
+    tea_type = db.Column(db.String(30))
+
+
+class Contest(db.Model):
+    __tablename__ = 'contest'
+    contest_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    contest_name = db.Column(db.String(20))
+    contest_type = db.Column(db.String(20))
+    details = db.Column(db.String(150))
+    level = db.Column(db.String(20))
+
+    # def contest_list(self):
+
 
 
 @login.user_loader
