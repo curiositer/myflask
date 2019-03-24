@@ -14,14 +14,17 @@
                 <a href="{{ url_for('login') }}">登陆</a>
             {% else %}
                 <a href="{{ url_for('user', username=current_user.username) }}">个人信息</a>
+                <a href="{{ url_for('contest_list') }}">竞赛列表</a>
+{#                <a href="{{ url_for('contest') }}">参赛情况</a>#}
                 <a href="{{ url_for('logout') }}">注销</a>
                 {% if current_user.type==0 %}   {#管理员功能#}
                     <a href="{{ url_for('add_contest') }}">添加竞赛</a>
-
+                    <a href="{{ url_for('add_user') }}">添加用户</a>
                 {% elif current_user.type==1 %} {#学生功能#}
+{#                    <a href="{{ url_for('apply_contest') }}">申报竞赛</a>#}
 
                 {% elif current_user.type==2 %} {#教师功能#}
-                    
+
                 {% endif %}
             {% endif %}
         </div>

@@ -34,8 +34,9 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
+@app.route('/add_user', methods=['GET', 'POST'])
+@login_required
+def add_user():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = RegistrationForm()
@@ -45,6 +46,23 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash('恭喜您，用户%s已注册成功!' % form.username.data)
+        return redirect(url_for('index'))
+    return render_template('add_user.html', form=form)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegistrationForm()
+    form.type.data = 1
+    if form.validate_on_submit():
+        user = User(username=form.username.data, id=int(form.id.data), email=form.email.data, type=1)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        print(user)
+        flash('恭喜您，学生用户%s已注册成功!' % form.username.data)
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
@@ -80,7 +98,7 @@ def edit_profile():
 @app.route('/contest')
 def contest_list():
     lists = Contest.query.filter().all()
-    return render_template("contest.html", list=lists)
+    return render_template("contest.html", lists=lists)
 
 
 @app.route('/contest/add', methods=['GET', 'POST'])
