@@ -1,10 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block content %}
+    <h1>Hi, {{ current_user.username }}!</h1>
+{#    {% if form %}#}
+{#    <form action="" method="post">#}
+{#        {{ form.hidden_tag() }}#}
+{#        <p>#}
+{#            {{ form.post.label }}<br>#}
+{#            {{ form.post(cols=32, rows=4) }}<br>#}
+{#            {% for error in form.post.errors %}#}
+{#            <span style="color: red;">[{{ error }}]</span>#}
+{#            {% endfor %}#}
+{#        </p>#}
+{#        <p>{{ form.submit() }}</p>#}
+{#    </form>#}
+{#    {% endif %}#}
+    <table border="1">
+        <caption>竞赛列表</caption>
+        <tr valign="top">
+            <th>竞赛名</th>
+            <th>竞赛类型</th>
+            <th>竞赛等级</th>
+            <th>竞赛描述</th>
+        </tr>
+        {% for list in lists %}
+            <tr valign="top">
+                <td>{{ list.contest_name }}</td>
+                <td>{{ list.contest_type }}</td>
+                <td>{{ list.level }}</td>
+                <td>{{ list.details }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{#    {% if prev_url %}#}
+{#    <a href="{{ prev_url }}">Newer posts</a>#}
+{#    {% endif %}#}
+{#    {% if next_url %}#}
+{#    <a href="{{ next_url }}">Older posts</a>#}
+{#    {% endif %}#}
+{% endblock %}

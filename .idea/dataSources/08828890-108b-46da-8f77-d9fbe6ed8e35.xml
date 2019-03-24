@@ -1035,26 +1035,17 @@
       <DataType>int(11)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="257" parent="233" name="ix_user_username">
-      <ColNames>username</ColNames>
-      <Unique>1</Unique>
-      <Type>btree</Type>
-    </index>
-    <index id="258" parent="233" name="ix_user_email">
+    <index id="257" parent="233" name="ix_user_email">
       <ColNames>email</ColNames>
       <Unique>1</Unique>
       <Type>btree</Type>
     </index>
-    <key id="259" parent="233" name="PRIMARY">
+    <key id="258" parent="233" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="260" parent="233" name="ix_user_username">
-      <ColNames>username</ColNames>
-      <UnderlyingIndexName>ix_user_username</UnderlyingIndexName>
-    </key>
-    <key id="261" parent="233" name="ix_user_email">
+    <key id="259" parent="233" name="ix_user_email">
       <ColNames>email</ColNames>
       <UnderlyingIndexName>ix_user_email</UnderlyingIndexName>
     </key>

@@ -23,9 +23,15 @@ class RegistrationForm(FlaskForm):
 
     def validate_id(self, id):
         id_num = User.query.filter_by(id=id.data).first()
-        print(id.data)
+        # print(id.data)
+        # print(id_num)
         if id_num is not None:
             raise ValidationError('该ID已被使用！')
+
+    def validate_email(self, email):
+        email_list = User.query.filter_by(email=email.data).first()
+        if email_list is not None:
+            raise ValidationError('该邮箱已被使用！')
 
 
 class EditProfileForm(FlaskForm):
