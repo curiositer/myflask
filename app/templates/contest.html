@@ -22,7 +22,10 @@
             <th>竞赛类型</th>
             <th>竞赛等级</th>
             <th>竞赛描述</th>
-            <th>申报该竞赛</th>
+            {% if current_user.type==1 %}
+                <th>申报该竞赛</th>
+            {% endif %}
+
         </tr>
         {% for list in lists %}
             <tr valign="top">
@@ -30,11 +33,18 @@
                 <td>{{ list.contest_type }}</td>
                 <td>{{ list.level }}</td>
                 <td>{{ list.details }}</td>
-                <td><a href="{{ url_for('apply_contest',contest_name=list.contest_name) }}">申请</a></td>
+                {% if current_user.type==1 %}
+                    <td><a href="{{ url_for('apply_contest',contest_name=list.contest_name) }}">申请</a></td>
+                {% endif %}
             </tr>
         {% endfor %}
     </table>
-
+    {% if prev_url %}
+        <a href="{{ prev_url }}">上一页</a>
+        {% endif %}
+        {% if next_url %}
+        <a href="{{ next_url }}">下一页</a>
+        {% endif %}
 {#    {% if prev_url %}#}
 {#    <a href="{{ prev_url }}">Newer posts</a>#}
 {#    {% endif %}#}

@@ -26,7 +26,7 @@ def login():
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
-    return render_template('login.html', title='Sign In', form=form)
+    return render_template('login.html', title='登陆', form=form)
 
 
 @app.route('/logout')
@@ -46,7 +46,7 @@ def add_user():
         db.session.commit()
         flash('恭喜您，用户%s已注册成功!' % form.username.data)
         return redirect(url_for('index'))
-    return render_template('add_user.html', form=form)
+    return render_template('add_user.html', title='添加用户', form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -63,7 +63,7 @@ def register():
         print(user)
         flash('恭喜您，学生用户%s已注册成功!' % form.username.data)
         return redirect(url_for('login'))
-    return render_template('register.html', form=form)
+    return render_template('register.html', title='注册', form=form)
 
 
 @app.route('/user/<username>')
@@ -90,14 +90,21 @@ def edit_profile():
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
-    return render_template('edit_profile.html', title='Edit Profile',
+    return render_template('edit_profile.html', title='编辑资料',
                            form=form)
 
 
 @app.route('/contest')
 def contest_list():
-    lists = Contest.query.filter().all()
-    return render_template("contest.html", lists=lists)
+    page = request.args.get('page', 1, type=int)
+    lists = Contest.query.filter().paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('contest_list', page=lists.next_num) \
+        if lists.has_next else None
+    prev_url = url_for('contest_list', page=lists.prev_num) \
+        if lists.has_prev else None
+    return render_template("contest.html", title='竞赛列表',
+                           lists=lists.items, next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/contest/add', methods=['GET', 'POST'])
@@ -111,7 +118,7 @@ def add_contest():
         db.session.commit()
         flash('添加竞赛信息成功!')
         return redirect(url_for('index'))
-    return render_template("add_contest.html", form=form)
+    return render_template("add_contest.html", title='添加竞赛', form=form)
 
 
 @app.route('/user/apply/<contest_name>', methods=['GET', 'POST'])
@@ -126,4 +133,4 @@ def apply_contest(contest_name):
         db.session.commit()
         flash('恭喜您，竞赛%s已申请成功!' % contest_name)
         return redirect(url_for('index'))
-    return render_template('apply_contest.html', form=form, contest_name=contest_name)
+    return render_template('apply_contest.html', title='申请竞赛', form=form, contest_name=contest_name)
