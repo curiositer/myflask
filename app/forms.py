@@ -57,3 +57,9 @@ class AddContestForm(FlaskForm):
     details = StringField('竞赛描述', validators=[Length(min=0, max=150)])
     level = StringField('竞赛等级', validators=[DataRequired()])
     submit = SubmitField('添加竞赛')
+
+
+class ApplyContestForm(FlaskForm):
+    notes = StringField('备注', validators=[Length(min=0, max=150)])
+    submit = SubmitField('确认申请')
+

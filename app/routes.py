@@ -1,9 +1,10 @@
 from flask import render_template
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, AddContestForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, AddContestForm, ApplyContestForm
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User, Contest
+from app.models import User, Contest, Request
+from datetime import datetime
 
 
 @app.route('/')
@@ -37,8 +38,6 @@ def logout():
 @app.route('/add_user', methods=['GET', 'POST'])
 @login_required
 def add_user():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User(username=form.username.data, id=int(form.id.data), email=form.email.data, type=form.type.data)
@@ -113,3 +112,18 @@ def add_contest():
         flash('添加竞赛信息成功!')
         return redirect(url_for('index'))
     return render_template("add_contest.html", form=form)
+
+
+@app.route('/user/apply/<contest_name>', methods=['GET', 'POST'])
+@login_required
+def apply_contest(contest_name):
+    # print(type(contest_name))
+    form = ApplyContestForm()
+    if form.validate_on_submit():
+        req = Request(id=current_user.id,username=current_user.username,contest_name=contest_name,
+                      notes=form.notes.data, add_time=datetime.now())
+        db.session.add(req)
+        db.session.commit()
+        flash('恭喜您，竞赛%s已申请成功!' % contest_name)
+        return redirect(url_for('index'))
+    return render_template('apply_contest.html', form=form, contest_name=contest_name)

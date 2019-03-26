@@ -96,6 +96,15 @@ class Contest(db.Model):
     # def contest_list(self):
 
 
+class Request(db.Model):
+    __tablename__ = 'request'
+    request_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, nullable=False)
+    username = db.Column(db.String(64), nullable=False)
+    contest_name = db.Column(db.String(20))
+    add_time = db.Column(db.DateTime)
+    notes = db.Column(db.String(150))
+
 
 @login.user_loader
 def load_user(id):
