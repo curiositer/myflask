@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>提交竞赛申请</h1>
+    {% from "_field.html" import render_field %}
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <table>
+            <tr>
+                <td>竞赛名：{{ contest_name }}</td>
+                <td>申请人学号：{{ current_user.id }}</td>
+                <td>申请人姓名：{{ current_user.username }}</td>
+            </tr>
+            {{ render_field(form.notes) }}
+        </table>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}

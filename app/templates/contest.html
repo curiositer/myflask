@@ -22,6 +22,7 @@
             <th>竞赛类型</th>
             <th>竞赛等级</th>
             <th>竞赛描述</th>
+            <th>申报该竞赛</th>
         </tr>
         {% for list in lists %}
             <tr valign="top">
@@ -29,6 +30,7 @@
                 <td>{{ list.contest_type }}</td>
                 <td>{{ list.level }}</td>
                 <td>{{ list.details }}</td>
+                <td><a href="{{ url_for('apply_contest',contest_name=list.contest_name) }}">申请</a></td>
             </tr>
         {% endfor %}
     </table>
