@@ -10,14 +10,14 @@
                 {{ form.hidden_tag() }}
                 用户类型：学生
                 {{ wtf.form_field(form.username) }}
-                {{ wtf.form_field(form.id) }}
+                {{ wtf.form_field(form.user_id) }}
                 {{ wtf.form_field(form.email) }}
                 {{ wtf.form_field(form.password) }}
                 {{ wtf.form_field(form.password2) }}
                 {{ wtf.form_field(form.submit) }}
         {#        <table>#}
         {#            {{ render_field(form.username) }}#}
-        {#            {{ render_field(form.id) }}#}
+        {#            {{ render_field(form.user_id) }}#}
         {#            {{ render_field(form.email) }}#}
         {#            {{ render_field(form.password) }}#}
         {#            {{ render_field(form.password2) }}#}
@@ -37,9 +37,9 @@
 {#            {% endfor %}#}
 {#        </p>#}
 {#        <p>#}
-{#            {{ form.id.label }}<br>#}
-{#            {{ form.id(size=64) }}<br>#}
-{#            {% for error in form.id.errors %}#}
+{#            {{ form.user_id.label }}<br>#}
+{#            {{ form.user_id(size=64) }}<br>#}
+{#            {% for error in form.user_id.errors %}#}
 {#            <span style="color: red;">[{{ error }}]</span>#}
 {#            {% endfor %}#}
 {#        </p>#}
