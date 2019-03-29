@@ -1,18 +1,27 @@
 {% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
 
-{% block content %}
+{% block app_content %}
     <h1>提交竞赛申请</h1>
     {% from "_field.html" import render_field %}
     <form action="" method="post">
         {{ form.hidden_tag() }}
-        <table>
+        <table class="table table-hover table-bordered">
             <tr>
-                <td>竞赛名：{{ contest_name }}</td>
-                <td>申请人学号：{{ current_user.id }}</td>
-                <td>申请人姓名：{{ current_user.username }}</td>
+                <th>竞赛名</th>
+                <td>{{ contest_name }}</td>
             </tr>
-            {{ render_field(form.notes) }}
+            <tr>
+                <th>学号</th>
+                <td>{{ current_user.id }}</td>
+            </tr>
+            <tr>
+                <th>姓名</th>
+                <td>{{ current_user.username }}</td>
+            </tr>
+
         </table>
-        <p>{{ form.submit() }}</p>
+        {{ wtf.form_field(form.notes) }}
+        {{ wtf.form_field(form.submit) }}
     </form>
 {% endblock %}
