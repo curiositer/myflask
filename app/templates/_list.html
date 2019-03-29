@@ -1,0 +1,9 @@
+<tr valign="top">
+    <td>{{ list.contest_name }}</td>
+    <td>{{ list.contest_type }}</td>
+    <td>{{ list.level }}</td>
+    <td>{{ list.details }}</td>
+    {% if current_user.type==1 %}
+        <td><a href="{{ url_for('apply_contest',contest_name=list.contest_name) }}">申请</a></td>
+    {% endif %}
+</tr>

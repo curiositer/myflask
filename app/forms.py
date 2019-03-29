@@ -5,7 +5,7 @@ from app.models import User
 
 
 class LoginForm(FlaskForm):
-    id = StringField('用户名', validators=[DataRequired('请输入用户名')])
+    id = StringField('学号', validators=[DataRequired('请输入学号')])
     password = PasswordField('密码', validators=[DataRequired('请输入密码')])
     remember_me = BooleanField('记住我')
     submit = SubmitField('登陆')
@@ -13,7 +13,7 @@ class LoginForm(FlaskForm):
 
 class RegistrationForm(FlaskForm):
     username = StringField('姓名', validators=[DataRequired()])
-    id = StringField('用户名', validators=[DataRequired()])
+    id = StringField('学号', validators=[DataRequired()])
     email = StringField('邮箱', validators=[DataRequired(), Email()])
     password = PasswordField('密码', validators=[DataRequired()])
     password2 = PasswordField(

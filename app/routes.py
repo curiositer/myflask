@@ -22,7 +22,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(id=form.id.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+            flash('用户名或密码错误')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))

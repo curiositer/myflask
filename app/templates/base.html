@@ -1,44 +1,102 @@
-<html>
-    <head>
-        {% if title %}
-        <title>{{ title }} - Microblog</title>
-        {% else %}
-        <title>Welcome to Microblog</title>
-        {% endif %}
-    </head>
-    <body>
-        <div>
-            菜单:
-            <a href="{{ url_for('index') }}">主页</a>
-            {% if current_user.is_anonymous %}
-                <a href="{{ url_for('login') }}">登陆</a>
-            {% else %}
-                {% if current_user.type==0 %}   {#管理员功能#}
-                    <a href="{{ url_for('add_contest') }}">添加竞赛</a>
-                    <a href="{{ url_for('add_user') }}">添加用户</a>
-                {% elif current_user.type==1 %} {#学生功能#}
-{#                    <a href="{{ url_for('apply_contest') }}">申报竞赛</a>#}
+{% extends 'bootstrap/base.html' %}
 
-                {% elif current_user.type==2 %} {#教师功能#}
-{#                    <a href="{{ url_for('apply_list') }}">申请列表</a>#}
-                {% endif %}
-                <a href="{{ url_for('user', username=current_user.username) }}">个人信息</a>
-                <a href="{{ url_for('contest_list') }}">竞赛列表</a>
-{#                <a href="{{ url_for('contest') }}">参赛情况</a>#}
-                <a href="{{ url_for('logout') }}">注销</a>
+{% block title %}
+    {% if title %}
+    {{ title }} - 竞赛管理系统
+    {% else %}
+    Welcome to Microblog
+    {% endif %}
+{% endblock %}
 
-            {% endif %}
+{% block navbar %}
+    <nav class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('index') }}">主页</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav"> {#导航栏左侧显示#}
+                    <li><a href="{{ url_for('index') }}">左侧菜单，先放一个主页</a></li>
+{#                    <li>左侧</li>#}
+                </ul>
+                <ul class="nav navbar-nav navbar-right">    {#导航栏右侧显示#}
+                    {% if current_user.is_anonymous %}
+                    <li><a href="{{ url_for('login') }}">登陆</a></li>
+                    {% else %}
+                        {% if current_user.type==0 %}   {#管理员功能#}
+                        <li><a href="{{ url_for('add_contest') }}">添加竞赛</a></li>
+                        <li><a href="{{ url_for('add_user') }}">添加用户</a></li>
+                    {% elif current_user.type==1 %} {#学生功能#}
+    {#                    <a href="{{ url_for('apply_contest') }}">申报竞赛</a>#}
+
+                    {% elif current_user.type==2 %} {#教师功能#}
+    {#                    <a href="{{ url_for('apply_list') }}">申请列表</a>#}
+                    {% endif %}
+                    <li><a href="{{ url_for('user', username=current_user.username) }}">个人信息</a></li>
+                    <li><a href="{{ url_for('contest_list') }}">竞赛列表</a></li>
+    {#                <a href="{{ url_for('contest') }}">参赛情况</a>#}
+                    <li><a href="{{ url_for('logout') }}">注销</a></li>
+
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-        <hr>
-        {% with messages = get_flashed_messages() %}
+    </nav>
+{% endblock %}
+
+{#    <body>#}
+{#        <div>#}
+{#            菜单:#}
+{#            <a href="{{ url_for('index') }}">主页</a>#}
+{#            {% if current_user.is_anonymous %}#}
+{#                <a href="{{ url_for('login') }}">登陆</a>#}
+{#            {% else %}#}
+{#                {% if current_user.type==0 %}   {#管理员功能#}
+{#                    <a href="{{ url_for('add_contest') }}">添加竞赛</a>#}
+{#                    <a href="{{ url_for('add_user') }}">添加用户</a>#}
+{#                {% elif current_user.type==1 %} {#学生功能#}
+{#                    <a href="{{ url_for('apply_contest') }}">申报竞赛</a>#}
+{##}
+{#                {% elif current_user.type==2 %} {#教师功能#}
+{#                    <a href="{{ url_for('apply_list') }}">申请列表</a>#}
+{#                {% endif %}#}
+{#                <a href="{{ url_for('user', username=current_user.username) }}">个人信息</a>#}
+{#                <a href="{{ url_for('contest_list') }}">竞赛列表</a>#}
+{#                <a href="{{ url_for('contest') }}">参赛情况</a>#}
+{#                <a href="{{ url_for('logout') }}">注销</a>#}
+{##}
+{#            {% endif %}#}
+{#        </div>#}
+{#        <hr>#}
+{#        {% with messages = get_flashed_messages() %}#}
+{#        {% if messages %}#}
+{#        <ul>#}
+{#            {% for message in messages %}#}
+{#            <li>{{ message }}</li>#}
+{#            {% endfor %}#}
+{#        </ul>#}
+{#        {% endif %}#}
+{#        {% endwith %}#}
+{#        {% block content %}{% endblock %}#}
+{#    </body>#}
+
+{% block content %}
+    <div class="container">
+       {% with messages = get_flashed_messages() %}     {# 显示警示信息#}
         {% if messages %}
-        <ul>
             {% for message in messages %}
-            <li>{{ message }}</li>
+            <div class="alert alert-info" role="alert">{{ message }}</div>
             {% endfor %}
-        </ul>
         {% endif %}
         {% endwith %}
-        {% block content %}{% endblock %}
-    </body>
-</html>
+
+        {# 其他的模板应该用block app_content来继承#}
+        {% block app_content %}{% endblock %}
+    </div>
+{% endblock %}
