@@ -5,7 +5,7 @@ from app.models import User
 
 
 class LoginForm(FlaskForm):
-    id = StringField('学号', validators=[DataRequired('请输入学号')])
+    user_id = StringField('学号', validators=[DataRequired('请输入学号')])
     password = PasswordField('密码', validators=[DataRequired('请输入密码')])
     remember_me = BooleanField('记住我')
     submit = SubmitField('登陆')
@@ -13,7 +13,7 @@ class LoginForm(FlaskForm):
 
 class RegistrationForm(FlaskForm):
     username = StringField('姓名', validators=[DataRequired()])
-    id = StringField('学号', validators=[DataRequired()])
+    user_id = StringField('学号', validators=[DataRequired()])
     email = StringField('邮箱', validators=[DataRequired(), Email()])
     password = PasswordField('密码', validators=[DataRequired()])
     password2 = PasswordField(
@@ -21,8 +21,8 @@ class RegistrationForm(FlaskForm):
     type = SelectField('用户类型', choices=[(0, '管理员'), (1, '学生'), (2, '教师')], coerce=int)
     submit = SubmitField('注册')
 
-    def validate_id(self, id):
-        id_num = User.query.filter_by(id=id.data).first()
+    def validate_id(self, user_id):
+        id_num = User.query.filter_by(user_id=user_id.data).first()
         # print(id.data)
         # print(id_num)
         if id_num is not None:

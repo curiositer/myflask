@@ -47,12 +47,16 @@ from datetime import datetime
 
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
-    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, primary_key=True, unique=True)
     username = db.Column(db.String(64), index=True)
-    email = db.Column(db.String(120), index=True, unique=True)
+    email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String(128))
     type = db.Column(db.Integer, default=1)
     # posts = db.relationship('Post', backref='author', lazy='dynamic')
+
+    @property
+    def id(self):
+            return self.user_id
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -71,7 +75,7 @@ class User(UserMixin, db.Model):
 
 class Student(db.Model):
     __tablename__ = 'student'
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    user_id = db.Column(db.Integer, primary_key=True, nullable=False)
     stu_class = db.Column(db.String(30))
     tel_num = db.Column(db.String(30))
     work_name = db.Column(db.String(30))
@@ -80,9 +84,8 @@ class Student(db.Model):
 
 class Teacher(db.Model):
     __tablename__ = 'teacher'
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    user_id = db.Column(db.Integer, primary_key=True, nullable=False)
     tea_class = db.Column(db.String(30))
-    tea_type = db.Column(db.String(30))
 
 
 class Contest(db.Model):
@@ -90,6 +93,7 @@ class Contest(db.Model):
     contest_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     contest_name = db.Column(db.String(20))
     contest_type = db.Column(db.String(20))
+    contest_time = db.Column(db.Date)
     details = db.Column(db.String(150))
     level = db.Column(db.String(20))
 
@@ -99,16 +103,26 @@ class Contest(db.Model):
 class Request(db.Model):
     __tablename__ = 'request'
     request_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id = db.Column(db.Integer, nullable=False)
-    username = db.Column(db.String(64), nullable=False)
-    contest_name = db.Column(db.String(20))
+    user_id = db.Column(db.Integer, nullable=False)
+    user_type = db.Column(db.Integer, nullable=False)
+    contest_id = db.Column(db.Integer)
     add_time = db.Column(db.DateTime)
     notes = db.Column(db.String(150))
+    status = db.Column(db.Integer, default=0)
+
+
+class Award(db.Model):
+    __tablename__ = 'award'
+    award_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    user_type = db.Column(db.Integer, nullable=False)
+    contest_id = db.Column(db.Integer)
+    grade = db.Column(db.String(20))
 
 
 @login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 

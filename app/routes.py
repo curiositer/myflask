@@ -20,7 +20,7 @@ def login():
         return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(id=form.id.data).first()
+        user = User.query.filter_by(user_id=form.user_id.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('用户名或密码错误')
             return redirect(url_for('login'))
@@ -40,7 +40,8 @@ def logout():
 def add_user():
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, id=int(form.id.data), email=form.email.data, type=form.type.data)
+        user = User(username=form.username.data, user_id=int(form.user_id.data),
+                    email=form.email.data, type=form.type.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -56,7 +57,7 @@ def register():
     form = RegistrationForm()
     form.type.data = 1
     if form.validate_on_submit():
-        user = User(username=form.username.data, id=int(form.id.data), email=form.email.data, type=1)
+        user = User(username=form.username.data, user_id=int(form.user_id.data), email=form.email.data, type=1)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -127,7 +128,7 @@ def apply_contest(contest_name):
     # print(type(contest_name))
     form = ApplyContestForm()
     if form.validate_on_submit():
-        req = Request(id=current_user.id,username=current_user.username,contest_name=contest_name,
+        req = Request(user_id=current_user.user_id,username=current_user.username,contest_name=contest_name,
                       notes=form.notes.data, add_time=datetime.now())
         db.session.add(req)
         db.session.commit()
