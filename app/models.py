@@ -54,7 +54,7 @@ class User(UserMixin, db.Model):
     type = db.Column(db.Integer, default=1)
     # posts = db.relationship('Post', backref='author', lazy='dynamic')
 
-    @property
+    @property       # 为适应login_user中字段id，进行转换
     def id(self):
             return self.user_id
 
