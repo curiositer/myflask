@@ -22,7 +22,20 @@
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav"> {#导航栏左侧显示#}
-                    <li><a href="{{ url_for('index') }}">左侧菜单，先放一个主页</a></li>
+{#                    <li><a href="{{ url_for('index') }}"></a></li>#}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            左侧，先放一个下拉菜单
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">jmeter</a></li>
+
+                            <li class="divider"></li>
+                            <li><a href="#">分离的链接</a></li>
+
+                        </ul>
+                    </li>
 {#                    <li>左侧</li>#}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">    {#导航栏右侧显示#}
@@ -33,14 +46,14 @@
                         <li><a href="{{ url_for('add_contest') }}">添加竞赛</a></li>
                         <li><a href="{{ url_for('add_user') }}">添加用户</a></li>
                     {% elif current_user.type==1 %} {#学生功能#}
-    {#                    <a href="{{ url_for('apply_contest') }}">申报竞赛</a>#}
+    {#                    <a href="{{ url_for('apply_contest') }}">申报竞赛</a>#}   {# 已添加到竞赛列表中 #}
 
                     {% elif current_user.type==2 %} {#教师功能#}
-    {#                    <a href="{{ url_for('apply_list') }}">申请列表</a>#}
+
                     {% endif %}
-                    <li><a href="{{ url_for('user', username=current_user.username) }}">个人信息</a></li>
+                    <li><a href="{{ url_for('apply_list') }}">申请列表</a></li>
                     <li><a href="{{ url_for('contest_list') }}">竞赛列表</a></li>
-    {#                <a href="{{ url_for('contest') }}">参赛情况</a>#}
+                    <li><a href="{{ url_for('user', username=current_user.username) }}">个人信息</a></li>
                     <li><a href="{{ url_for('logout') }}">注销</a></li>
 
                     {% endif %}
@@ -99,4 +112,25 @@
         {# 其他的模板应该用block app_content来继承#}
         {% block app_content %}{% endblock %}
     </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        function myFunction(elem){//测试
+            if(confirm('Are you sure you want to ' + elem.name) == true){
+                alert("its done.");
+            }
+            else {
+                return false;
+            }
+        }
+        function if_agree(){//是否同意申请
+            var mymessage= confirm("同意申请吗？");
+            return mymessage;
+            }
+        $(function() {
+            // write start up code here
+        });
+    </script>
 {% endblock %}

@@ -11,6 +11,7 @@ from datetime import datetime
 @app.route('/index')
 @login_required
 def index():
+    # print(request.form['enable'])
     return render_template('index.html')
 
 
@@ -78,7 +79,7 @@ def user(username):
     return render_template('user.html', user=user, posts=posts)
 
 
-@app.route('/edit_profile', methods=['GET', 'POST'])
+@app.route('/user/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
     form = EditProfileForm(current_user.username)
@@ -113,8 +114,9 @@ def contest_list():
 def add_contest():
     form = AddContestForm()
     if form.validate_on_submit():
-        contest = Contest(contest_name=form.name.data, contest_type=form.type.data,
+        contest = Contest(contest_name=form.name.data, contest_type=form.type.data, contest_time=form.time.data,
                           details=form.details.data, level=form.level.data)
+        # print(form.contest_time.data)
         db.session.add(contest)
         db.session.commit()
         flash('添加竞赛信息成功!')
@@ -122,16 +124,45 @@ def add_contest():
     return render_template("add_contest.html", title='添加竞赛', form=form)
 
 
-@app.route('/user/apply/<contest_name>', methods=['GET', 'POST'])
+@app.route('/contest/apply/<contest_id>', methods=['GET', 'POST'])
 @login_required
-def apply_contest(contest_name):
+def apply_contest(contest_id):
     # print(type(contest_name))
     form = ApplyContestForm()
+    contest = Contest.query.filter(Contest.contest_id == contest_id).first()
     if form.validate_on_submit():
-        req = Request(user_id=current_user.user_id,username=current_user.username,contest_name=contest_name,
-                      notes=form.notes.data, add_time=datetime.now())
+        req = Request(user_id=current_user.user_id,contest_id=contest_id,status=0,
+                      notes=form.notes.data, add_time=datetime.now(), user_type=0)
         db.session.add(req)
         db.session.commit()
-        flash('恭喜您，竞赛%s已申请成功!' % contest_name)
+        flash('恭喜您，竞赛%s已申请成功!' % contest.contest_name)
         return redirect(url_for('index'))
-    return render_template('apply_contest.html', title='申请竞赛', form=form, contest_name=contest_name)
+    return render_template('apply_contest.html', title='申请竞赛', form=form, contest=contest)
+
+
+@app.route('/contest/apply_list', methods=['GET', 'POST'])
+@login_required
+def apply_list():
+    page = request.args.get('page', 1, type=int)
+    if current_user.type == 0:
+        lists = Request.query.filter().\
+            paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取所有学生申请信息
+    elif current_user.type == 1:
+        lists = Request.query.filter_by(user_id=current_user.user_id).\
+            paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取自己的申请信息
+    else:
+        lists = Request.query.filter().\
+            paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取自己管理班级的学生申请信息
+    next_url = url_for('apply_list', page=lists.next_num) \
+        if lists.has_next else None
+    prev_url = url_for('apply_list', page=lists.prev_num) \
+        if lists.has_prev else None
+    return render_template("request_list.html", title='竞赛申请列表',
+                           lists=lists.items, next_url=next_url, prev_url=prev_url)
+
+
+# @app.route('/contest/agree/<request_id>', method=['GET', 'POST'])
+# @login_required
+# def agree_request(request_id):
+#     detail = Request.query.filter_by(request_id=request_id)
+#     if request.method=="POST":

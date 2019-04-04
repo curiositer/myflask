@@ -9,23 +9,26 @@
         <table class="table table-hover table-bordered">
             <tr>
                 <th>竞赛名</th>
-                <td>{{ contest.contest_name }}</td>
+                <td>{{ list.contest_details.contest_name }}</td>
             </tr>
             <tr>
                 <th>竞赛时间</th>
-                <td>{{ contest.contest_time }}</td>
+                <td>{{ list.contest_details.contest_time }}</td>
             </tr>
             <tr>
                 <th>学号</th>
-                <td>{{ current_user.user_id }}</td>
+                <td>{{ list.user_id }}</td>
             </tr>
             <tr>
                 <th>姓名</th>
-                <td>{{ current_user.username }}</td>
+                <td>{{ list.applicant.username }}</td>
+            </tr>
+            <tr>
+                <th>备注</th>
+                <td>{{ list.notes }}</td>
             </tr>
 
         </table>
-        {{ wtf.form_field(form.notes) }}
-        {{ wtf.form_field(form.submit) }}
+        <input >
     </form>
 {% endblock %}
