@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>Hi, {{ current_user.username }}!</h1>
+    <table class="table table-hover">
+        <caption>申请列表</caption>
+        <tr>
+            <th>竞赛名</th>
+            <th>竞赛时间</th>
+            <th>竞赛类型</th>
+            <th>竞赛等级</th>
+            <th>学号</th>
+            <th>姓名</th>
+            <th>备注</th>
+            <th>申请状态</th>
+        </tr>
+        {% for list in lists %}
+            <tr valign="top">
+                <td>{{ list.contest_details.contest_name }}</td>
+                <td>{{ list.contest_details.contest_time }}</td>
+                <td>{{ list.contest_details.contest_type }}</td>
+                <td>{{ list.contest_details.level }}</td>
+                <td>{{ list.user_id }}</td>
+                <td>{{ list.applicant.username }}</td>
+                <td>{{ list.notes }}</td>
+                {% if list.status==0 %}
+                    {% if current_user.type == 2 %}          {# 教师才能通过审核#}
+                        <td><input type="button" onclick="if_agree()" value="审批"></td>
+{#                        <td><a href="{{ url_for('agree_request',request_id=list.request_id) }}"></a></td>#}
+                    {% else %}
+                        <td>待审核</td>
+                    {% endif %}
+                {% elif list.status==1 %}
+                    <td><span style="color: green;">已通过</span></td>
+                {% elif list.status==2 %}
+                    <td><span style="color: red;">已拒绝</span></td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </table>
+    <nav aria-label="...">
+        <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url or '#' }}">
+                    <span aria-hidden="true">&larr;</span> 上一页
+                </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}">
+                    下一页 <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endblock %}

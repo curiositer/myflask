@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, SelectField, BooleanField, SubmitField, DateField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 from app.models import User
 
@@ -13,9 +13,9 @@ class LoginForm(FlaskForm):
 
 class RegistrationForm(FlaskForm):
     username = StringField('姓名', validators=[DataRequired()])
-    user_id = StringField('学号', validators=[DataRequired()])
+    user_id = StringField('学号', validators=[DataRequired('请输入学号')])
     email = StringField('邮箱', validators=[DataRequired(), Email()])
-    password = PasswordField('密码', validators=[DataRequired()])
+    password = PasswordField('密码', validators=[DataRequired('请输入密码')])
     password2 = PasswordField(
         '确认密码', validators=[DataRequired(), EqualTo('password')])
     type = SelectField('用户类型', choices=[(0, '管理员'), (1, '学生'), (2, '教师')], coerce=int)
@@ -54,6 +54,7 @@ class EditProfileForm(FlaskForm):
 class AddContestForm(FlaskForm):
     name = StringField('竞赛名', validators=[DataRequired()])
     type = StringField('竞赛类型', validators=[DataRequired()])
+    time = DateField('竞赛时间', validators=[DataRequired("请按照2010-1-1的格式输入")], format='%Y-%m-%d')
     details = StringField('竞赛描述', validators=[Length(min=0, max=150)])
     level = StringField('竞赛等级', validators=[DataRequired()])
     submit = SubmitField('添加竞赛')

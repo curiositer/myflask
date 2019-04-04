@@ -85,7 +85,7 @@ class Student(db.Model):
 class Teacher(db.Model):
     __tablename__ = 'teacher'
     user_id = db.Column(db.Integer, primary_key=True, nullable=False)
-    tea_class = db.Column(db.String(30))
+    stu_class = db.Column(db.String(30))
 
 
 class Contest(db.Model):
@@ -103,21 +103,29 @@ class Contest(db.Model):
 class Request(db.Model):
     __tablename__ = 'request'
     request_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))  # 定义外键
     user_type = db.Column(db.Integer, nullable=False)
-    contest_id = db.Column(db.Integer)
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
     add_time = db.Column(db.DateTime)
     notes = db.Column(db.String(150))
     status = db.Column(db.Integer, default=0)
+
+    applicant = db.relationship('User', backref=db.backref('requests'))
+    # Request添加一个applicant属性，可直接访问申请人详细信息
+    # backref使得反向通过User.requests访问该表
+    contest_details = db.relationship('Contest')
 
 
 class Award(db.Model):
     __tablename__ = 'award'
     award_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
     user_type = db.Column(db.Integer, nullable=False)
-    contest_id = db.Column(db.Integer)
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
     grade = db.Column(db.String(20))
+
+    awards = db.relationship('User', backref=db.backref('awards'))
+    contest_details = db.relationship('Contest')
 
 
 @login.user_loader
