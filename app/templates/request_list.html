@@ -25,7 +25,14 @@
                 <td>{{ list.notes }}</td>
                 {% if list.status==0 %}
                     {% if current_user.type == 2 %}          {# 教师才能通过审核#}
-                        <td><input type="button" onclick="if_agree()" value="审批"></td>
+{#                        <form  action="" method="post">#}
+                        <td>
+                            <span id="{{ list.request_id }}">
+                                 <a href="javascript:if_agree('{{ list.request_id }}');">审批</a>
+                            </span>
+                        </td>
+{#                        </form>#}
+
 {#                        <td><a href="{{ url_for('agree_request',request_id=list.request_id) }}"></a></td>#}
                     {% else %}
                         <td>待审核</td>

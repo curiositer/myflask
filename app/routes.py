@@ -1,4 +1,5 @@
 from flask import render_template
+import os
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, AddContestForm, ApplyContestForm
 from flask import render_template, flash, redirect, url_for, request
@@ -117,6 +118,14 @@ def add_contest():
         contest = Contest(contest_name=form.name.data, contest_type=form.type.data, contest_time=form.time.data,
                           details=form.details.data, level=form.level.data)
         # print(form.contest_time.data)
+        # 获取上传文件的文件名;
+        filename = form.file.data.filename
+        print(filename)
+        basedir = os.path.abspath(os.path.dirname(__file__))  # 获取当前项目的绝对路径
+        file_dir = os.path.join(basedir, app.config['UPLOAD_FOLDER'], form.name.data)      # 存在以竞赛名的子文件夹中
+        if not os.path.exists(file_dir):
+            os.makedirs(file_dir)  # 文件夹不存在就创建
+        form.file.data.save(os.path.join(file_dir, filename))     # 将上传的文件保存到服务器;
         db.session.add(contest)
         db.session.commit()
         flash('添加竞赛信息成功!')
@@ -144,6 +153,7 @@ def apply_contest(contest_id):
 @login_required
 def apply_list():
     page = request.args.get('page', 1, type=int)
+
     if current_user.type == 0:
         lists = Request.query.filter().\
             paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取所有学生申请信息
@@ -157,12 +167,24 @@ def apply_list():
         if lists.has_next else None
     prev_url = url_for('apply_list', page=lists.prev_num) \
         if lists.has_prev else None
+
+        # return redirect(url_for('index'))
     return render_template("request_list.html", title='竞赛申请列表',
                            lists=lists.items, next_url=next_url, prev_url=prev_url)
 
 
-# @app.route('/contest/agree/<request_id>', method=['GET', 'POST'])
-# @login_required
-# def agree_request(request_id):
-#     detail = Request.query.filter_by(request_id=request_id)
-#     if request.method=="POST":
+@app.route('/contest/agree', methods=['POST'])
+@login_required
+def agree_request():
+    req_id = request.form['req']
+    # print(req_id)
+    status = request.form['agree_status']
+    req1 = Request.query.filter_by(request_id=req_id).first()
+    # print(status)
+    if status == 'true':
+        req1.status = 1
+    else:
+        req1.status = 2
+    db.session.commit()
+    return redirect('/contest/apply_list')
+

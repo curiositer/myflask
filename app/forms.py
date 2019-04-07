@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField, BooleanField, SubmitField, DateField
+from wtforms import StringField, PasswordField, SelectField, BooleanField, SubmitField, DateField, FileField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
+from flask_wtf.file import FileRequired, FileAllowed
 from app.models import User
 
 
@@ -57,6 +58,7 @@ class AddContestForm(FlaskForm):
     time = DateField('竞赛时间', validators=[DataRequired("请按照2010-1-1的格式输入")], format='%Y-%m-%d')
     details = StringField('竞赛描述', validators=[Length(min=0, max=150)])
     level = StringField('竞赛等级', validators=[DataRequired()])
+    file = FileField('添加文件', validators=[FileRequired("请上传pdf文件"), FileAllowed(['pdf'], "请上传pdf文件")])
     submit = SubmitField('添加竞赛')
 
 
