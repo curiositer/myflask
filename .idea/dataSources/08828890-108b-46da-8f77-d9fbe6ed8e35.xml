@@ -937,7 +937,6 @@
     <column id="239" parent="230" name="user_id">
       <Position>2</Position>
       <DataType>int(11)|0s</DataType>
-      <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="240" parent="230" name="user_type">
@@ -956,179 +955,218 @@
       <DataType>varchar(20)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <key id="243" parent="230" name="PRIMARY">
+    <index id="243" parent="230" name="user_id">
+      <ColNames>user_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="244" parent="230" name="contest_id">
+      <ColNames>contest_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="245" parent="230" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>award_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="244" parent="231" name="contest_id">
+    <foreign-key id="246" parent="230" name="award_ibfk_2">
+      <ColNames>user_id</ColNames>
+      <RefSchemaName>test2</RefSchemaName>
+      <RefTableName>user</RefTableName>
+      <RefColNames>user_id</RefColNames>
+    </foreign-key>
+    <foreign-key id="247" parent="230" name="award_ibfk_1">
+      <ColNames>contest_id</ColNames>
+      <RefSchemaName>test2</RefSchemaName>
+      <RefTableName>contest</RefTableName>
+      <RefColNames>contest_id</RefColNames>
+    </foreign-key>
+    <column id="248" parent="231" name="contest_id">
       <Position>1</Position>
       <DataType>int(11)|0s</DataType>
       <NotNull>1</NotNull>
       <SequenceIdentity>1</SequenceIdentity>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="245" parent="231" name="contest_name">
+    <column id="249" parent="231" name="contest_name">
       <Position>2</Position>
       <DataType>varchar(20)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="246" parent="231" name="contest_type">
+    <column id="250" parent="231" name="contest_type">
       <Position>3</Position>
       <DataType>varchar(20)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="247" parent="231" name="details">
+    <column id="251" parent="231" name="details">
       <Position>4</Position>
       <DataType>varchar(150)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="248" parent="231" name="level">
+    <column id="252" parent="231" name="level">
       <Position>5</Position>
       <DataType>varchar(20)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="249" parent="231" name="contest_time">
+    <column id="253" parent="231" name="contest_time">
       <Position>6</Position>
       <DataType>date|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <key id="250" parent="231" name="PRIMARY">
+    <key id="254" parent="231" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>contest_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="251" parent="232" name="request_id">
+    <column id="255" parent="232" name="request_id">
       <Position>1</Position>
       <DataType>int(11)|0s</DataType>
       <NotNull>1</NotNull>
       <SequenceIdentity>1</SequenceIdentity>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="252" parent="232" name="add_time">
+    <column id="256" parent="232" name="add_time">
       <Position>2</Position>
       <DataType>datetime|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="253" parent="232" name="notes">
+    <column id="257" parent="232" name="notes">
       <Position>3</Position>
       <DataType>varchar(150)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="254" parent="232" name="user_id">
+    <column id="258" parent="232" name="user_id">
       <Position>4</Position>
       <DataType>int(11)|0s</DataType>
-      <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="255" parent="232" name="contest_id">
+    <column id="259" parent="232" name="contest_id">
       <Position>5</Position>
       <DataType>int(11)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="256" parent="232" name="status">
+    <column id="260" parent="232" name="status">
       <Position>6</Position>
       <DataType>int(11)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="257" parent="232" name="user_type">
+    <column id="261" parent="232" name="user_type">
       <Position>7</Position>
       <DataType>int(11)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <key id="258" parent="232" name="PRIMARY">
+    <index id="262" parent="232" name="user_id">
+      <ColNames>user_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="263" parent="232" name="contest_id">
+      <ColNames>contest_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="264" parent="232" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>request_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="259" parent="233" name="stu_class">
+    <foreign-key id="265" parent="232" name="request_ibfk_1">
+      <ColNames>user_id</ColNames>
+      <RefSchemaName>test2</RefSchemaName>
+      <RefTableName>user</RefTableName>
+      <RefColNames>user_id</RefColNames>
+    </foreign-key>
+    <foreign-key id="266" parent="232" name="request_ibfk_2">
+      <ColNames>contest_id</ColNames>
+      <RefSchemaName>test2</RefSchemaName>
+      <RefTableName>contest</RefTableName>
+      <RefColNames>contest_id</RefColNames>
+    </foreign-key>
+    <column id="267" parent="233" name="stu_class">
       <Position>1</Position>
       <DataType>varchar(30)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="260" parent="233" name="tel_num">
+    <column id="268" parent="233" name="tel_num">
       <Position>2</Position>
       <DataType>varchar(30)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="261" parent="233" name="work_name">
+    <column id="269" parent="233" name="work_name">
       <Position>3</Position>
       <DataType>varchar(30)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="262" parent="233" name="work_type">
+    <column id="270" parent="233" name="work_type">
       <Position>4</Position>
       <DataType>varchar(30)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="263" parent="233" name="user_id">
+    <column id="271" parent="233" name="user_id">
       <Position>5</Position>
       <DataType>int(11)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="264" parent="234" name="tea_class">
+    <column id="272" parent="234" name="user_id">
       <Position>1</Position>
-      <DataType>varchar(30)|0s</DataType>
-      <ColumnKind>normal</ColumnKind>
-    </column>
-    <column id="265" parent="234" name="user_id">
-      <Position>2</Position>
       <DataType>int(11)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="266" parent="235" name="username">
+    <column id="273" parent="234" name="stu_class">
+      <Position>2</Position>
+      <DataType>varchar(30)|0s</DataType>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="274" parent="235" name="username">
       <Position>1</Position>
       <DataType>varchar(64)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="267" parent="235" name="email">
+    <column id="275" parent="235" name="email">
       <Position>2</Position>
       <DataType>varchar(120)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="268" parent="235" name="password_hash">
+    <column id="276" parent="235" name="password_hash">
       <Position>3</Position>
       <DataType>varchar(128)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="269" parent="235" name="type">
+    <column id="277" parent="235" name="type">
       <Position>4</Position>
       <DataType>int(11)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="270" parent="235" name="user_id">
+    <column id="278" parent="235" name="user_id">
       <Position>5</Position>
       <DataType>int(11)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="271" parent="235" name="ix_user_email">
+    <index id="279" parent="235" name="ix_user_email">
       <ColNames>email</ColNames>
       <Unique>1</Unique>
       <Type>btree</Type>
     </index>
-    <index id="272" parent="235" name="user_id">
+    <index id="280" parent="235" name="user_id">
       <ColNames>user_id</ColNames>
       <Unique>1</Unique>
       <Type>btree</Type>
     </index>
-    <index id="273" parent="235" name="ix_user_username">
+    <index id="281" parent="235" name="ix_user_username">
       <ColNames>username</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="274" parent="235" name="PRIMARY">
+    <key id="282" parent="235" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>user_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="275" parent="235" name="ix_user_email">
+    <key id="283" parent="235" name="ix_user_email">
       <ColNames>email</ColNames>
       <UnderlyingIndexName>ix_user_email</UnderlyingIndexName>
     </key>
-    <key id="276" parent="235" name="user_id">
+    <key id="284" parent="235" name="user_id">
       <ColNames>user_id</ColNames>
       <UnderlyingIndexName>user_id</UnderlyingIndexName>
     </key>

@@ -56,7 +56,7 @@ class User(UserMixin, db.Model):
 
     @property       # 为适应login_user中字段id，进行转换
     def id(self):
-            return self.user_id
+        return self.user_id
 
     def __repr__(self):
         return '<User {}>'.format(self.username)

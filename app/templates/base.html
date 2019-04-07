@@ -125,9 +125,24 @@
                 return false;
             }
         }
-        function if_agree(){//是否同意申请
+        function if_agree(req_id){//审核申请
             var mymessage= confirm("同意申请吗？");
-            return mymessage;
+            var ch_req = '#'+req_id;    {#用来表示选择器#}
+            $.post('/contest/agree', {
+                req :req_id,
+                agree_status : mymessage
+            }).done(function () {
+                {#alert(mymessage);#}
+                if (mymessage==true){
+                    $(ch_req).html("已通过").css("color","green");
+                    alert("修改成功");
+                } else {
+                    $(ch_req).html("已拒绝").css("color","red");
+                    alert("修改成功");
+                }
+            }).fail(function() {
+                alert("修改出错");
+            });
             }
         $(function() {
             // write start up code here
