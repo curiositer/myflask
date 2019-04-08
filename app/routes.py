@@ -12,7 +12,6 @@ from datetime import datetime
 @app.route('/index')
 @login_required
 def index():
-    # print(request.form['enable'])
     return render_template('index.html')
 
 
@@ -148,9 +147,34 @@ def apply_contest(contest_id):
     form = ApplyContestForm()
     contest = Contest.query.filter(Contest.contest_id == contest_id).first()
     if form.validate_on_submit():
-        req = Request(user_id=current_user.user_id,contest_id=contest_id,status=0,
-                      notes=form.notes.data, add_time=datetime.now(), user_type=0)
-        db.session.add(req)
+        if not form.name2.data:
+            req = Request(user_id=form.id1.data,contest_id=contest_id,status=0,
+                          notes=form.notes.data, add_time=datetime.now(), user_type=0)
+            db.session.add(req)
+        else:
+            team = Team(team_name=form.team_name.data)
+
+            # student = Student.query.filter_by(user_id=)
+            id = form.id1.data
+            if id:
+                team.parts.append(Student.query.get(id))
+            id = form.id2.data
+            if id:
+                team.parts.append(Student.query.get(id))
+            id = form.id3.data
+            if id:
+                team.parts.append(Student.query.get(id))
+            id = form.id4.data
+            if id:
+                team.parts.append(Student.query.get(id))
+            id = form.id5.data
+            if id:
+                team.parts.append(Student.query.get(id))
+            db.session.add(team)
+            # print(team.team_id)
+            req = Request(user_id=team.team_id, contest_id=contest_id, status=0,
+                          notes=form.notes.data, add_time=datetime.now(), user_type=1)
+            db.session.add(req)
         db.session.commit()
         flash('恭喜您，竞赛%s已申请成功!' % contest.contest_name)
         return redirect(url_for('index'))
@@ -188,10 +212,9 @@ def apply_list():
 @login_required
 def agree_request():
     req_id = request.form['req']
-    # print(req_id)
-    status = request.form['agree_status']
-    req1 = Request.query.filter_by(request_id=req_id).first()
-    # print(status)
+    status = request.form['agree_status']       # 利用ajax的post请求获取表单数据
+    req1 = Request.query.filter_by(req_id=req_id).first()
+
     if status == 'true':
         req1.status = 1
     else:

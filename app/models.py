@@ -74,8 +74,8 @@ class User(UserMixin, db.Model):
 
 
 team_student = db.Table('team_student',
-    db.Column('user_id', db.Integer, db.ForeignKey('student.user_id')),
-    db.Column('team_id', db.Integer, db.ForeignKey('team.team_id'))
+    db.Column('user_id', db.Integer, db.ForeignKey('student.user_id'), primary_key=True),
+    db.Column('team_id', db.Integer, db.ForeignKey('team.team_id'), primary_key=True)
 )
 
 
@@ -87,14 +87,13 @@ class Student(db.Model):
     work_name = db.Column(db.String(30))
     work_type = db.Column(db.String(30))
 
-    teams = db.relationship('Team', secondary=team_student, backref=db.backref('parts'))
-
 
 class Team(db.Model):
     __tablename__ = 'team'
     team_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=True)
     team_name = db.Column(db.String(30))
-    sup_teacher = db.Column(db.String(30))
+
+    parts = db.relationship('Student', secondary=team_student, backref=db.backref('teams'), lazy='dynamic')
 
 
 class Teacher(db.Model):
@@ -119,15 +118,16 @@ class Contest(db.Model):
 class Request(db.Model):
     __tablename__ = 'request'
     request_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))  # 定义外键
+    user_id = db.Column(db.Integer)  # 定义外键
     user_type = db.Column(db.Integer, nullable=False)
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
+    sup_teacher = db.Column(db.String(30))
     add_time = db.Column(db.DateTime)
     notes = db.Column(db.String(150))
     status = db.Column(db.Integer, default=0)
 
-    applicant = db.relationship('User', backref=db.backref('requests'))
-    # Request添加一个applicant属性，可直接访问申请人详细信息
+    # applicant = db.relationship('User', backref=db.backref('requests'))   申请人可能为用户或者队伍，故不能用外键
+    # # Request添加一个applicant属性，可直接访问申请人详细信息
     # backref使得反向通过User.requests访问该表
     contest_details = db.relationship('Contest')
 
