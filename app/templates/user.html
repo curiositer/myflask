@@ -3,11 +3,11 @@
 {% block app_content %}
     <table>
         <tr>
-            {% if user.type==0 %}
+            {% if user.type=='admin' %}
                 <td>用户类型：管理员</td>
-            {% elif user.type==1 %}
+            {% elif user.type=='student' %}
                 <td>用户类型：学生</td>
-            {% elif user.type==2 %}
+            {% elif user.type=='teacher' %}
                 <td>用户类型：教师</td>
             {% endif %}
         </tr>

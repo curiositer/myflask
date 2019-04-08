@@ -51,8 +51,12 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True)
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String(128))
-    type = db.Column(db.Integer, default=1)
+    type = db.Column(db.String(10), default='student')
     # posts = db.relationship('Post', backref='author', lazy='dynamic')
+    __mapper_args__ = {         # 表示继承
+        'polymorphic_identity': 'user',
+        'polymorphic_on': type
+    }
 
     @property       # 为适应login_user中字段id，进行转换
     def id(self):
@@ -79,13 +83,17 @@ team_student = db.Table('team_student',
 )
 
 
-class Student(db.Model):
+class Student(User):
     __tablename__ = 'student'
-    user_id = db.Column(db.Integer, primary_key=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
     stu_class = db.Column(db.String(30))
     tel_num = db.Column(db.String(30))
     work_name = db.Column(db.String(30))
     work_type = db.Column(db.String(30))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'student',
+    }
 
 
 class Team(db.Model):
@@ -96,11 +104,25 @@ class Team(db.Model):
     parts = db.relationship('Student', secondary=team_student, backref=db.backref('teams'), lazy='dynamic')
 
 
-class Teacher(db.Model):
+class Teacher(User):
     __tablename__ = 'teacher'
-    user_id = db.Column(db.Integer, primary_key=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
     stu_class = db.Column(db.String(30))
     tea_type = db.Column(db.Integer, default=0)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'teacher',
+    }
+
+
+class Admin(User):
+    __tablename__ = 'admin'
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
+    admin_type = db.Column(db.Integer, default=0)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'admin',
+    }
 
 
 class Contest(db.Model):
@@ -126,7 +148,7 @@ class Request(db.Model):
     notes = db.Column(db.String(150))
     status = db.Column(db.Integer, default=0)
 
-    # applicant = db.relationship('User', backref=db.backref('requests'))   申请人可能为用户或者队伍，故不能用外键
+    # applicant = db.relationship('User', backref=db.backref('requests'))   # 申请人可能为用户或者队伍，故不能用外键
     # # Request添加一个applicant属性，可直接访问申请人详细信息
     # backref使得反向通过User.requests访问该表
     contest_details = db.relationship('Contest')
