@@ -22,6 +22,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(user_id=form.user_id.data).first()
+        print(user)
         if user is None or not user.check_password(form.password.data):
             flash('用户名或密码错误')
             return redirect(url_for('login'))
@@ -40,18 +41,23 @@ def logout():
 @login_required
 def add_user():
     form = RegistrationForm()
-    user_type = form.type.data
     if form.validate_on_submit():
-        user = User(username=form.username.data, user_id=int(form.user_id.data),
-                    email=form.email.data, type=form.type.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        if user_type==1:
-            student = Student(user_id=int(form.user_id.data), stu_class=form.stu_class.data, tel_num=form.tel_num.data)
+        user_type = form.type.data
+        id = int(form.user_id.data)
+        if user_type == 'student':
+            student = Student(user_id=id, username=form.username.data, email=form.email.data, type=form.type.data,
+                              stu_class=form.stu_class.data, tel_num=form.tel_num.data)
+            student.set_password(form.password.data)
             db.session.add(student)
-        elif user_type==2:
-            teacher = Teacher(user_id=int(form.user_id.data),stu_class=form.stu_class.data,tea_type=form.tea_type.data)
+        elif user_type == 'teacher':
+            teacher = Teacher(user_id=id, username=form.username.data, email=form.email.data, type=form.type.data,
+                              stu_class=form.stu_class.data,tea_type=form.tea_type.data)
+            teacher.set_password(form.password.data)
             db.session.add(teacher)
+        else:
+            admin = User(user_id=id, username=form.username.data, email=form.email.data, type=form.type.data)
+            admin.set_password(form.password.data)
+            db.session.add(admin)
         db.session.commit()
         flash('恭喜您，用户%s已注册成功!' % form.username.data)
         return redirect(url_for('index'))
@@ -63,13 +69,14 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = RegistrationForm()
-    form.type.data = 1
     if form.validate_on_submit():
-        user = User(username=form.username.data, user_id=int(form.user_id.data), email=form.email.data, type=1)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        stu = Student(user_id=int(form.user_id.data), stu_class=form.stu_class.data, tel_num=form.tel_num.data)
-        db.session.add(stu)
+        id = int(form.user_id.data)
+        print(id)
+        student = Student(user_id=id, username=form.username.data, email=form.email.data, type=form.type.data,
+                          stu_class=form.stu_class.data, tel_num=form.tel_num.data)
+        student.set_password(form.password.data)
+        print(student)
+        db.session.add(student)
         db.session.commit()
         flash('恭喜您，学生用户%s已注册成功!' % form.username.data)
         return redirect(url_for('login'))
@@ -189,10 +196,10 @@ def apply_contest(contest_id):
 def apply_list():
     page = request.args.get('page', 1, type=int)
 
-    if current_user.type == 0:
+    if current_user.type == 'admin':
         lists = Request.query.filter().\
             paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取所有学生申请信息
-    elif current_user.type == 1:
+    elif current_user.type == 'student':
         lists = Request.query.filter_by(user_id=current_user.user_id).\
             paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取自己的申请信息
     else:
@@ -222,3 +229,9 @@ def agree_request():
     db.session.commit()
     return redirect('/contest/apply_list')
 
+
+# @app.route('/request/<team_id>/popup')
+# @login_required
+# def user_popup(team_id):
+#     team = Team.query.filter_by(team_id=team_id).first_or_404()
+#     return render_template('request_popup.html', team=team.parts)

@@ -24,7 +24,7 @@
                 <td>{{ list.applicant.username }}</td>
                 <td>{{ list.notes }}</td>
                 {% if list.status==0 %}
-                    {% if current_user.type == 2 %}          {# 教师才能通过审核#}
+                    {% if current_user.type == 'teacher' %}          {# 教师才能通过审核#}
 {#                        <form  action="" method="post">#}
                         <td>
                             <span id="{{ list.request_id }}">

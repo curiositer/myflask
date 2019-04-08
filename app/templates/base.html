@@ -42,13 +42,13 @@
                     {% if current_user.is_anonymous %}
                     <li><a href="{{ url_for('login') }}">登陆</a></li>
                     {% else %}
-                        {% if current_user.type==0 %}   {#管理员功能#}
+                        {% if current_user.type=='admin' %}   {#管理员功能#}
                         <li><a href="{{ url_for('add_contest') }}">添加竞赛</a></li>
                         <li><a href="{{ url_for('add_user') }}">添加用户</a></li>
-                    {% elif current_user.type==1 %} {#学生功能#}
+                    {% elif current_user.type=='student' %} {#学生功能#}
     {#                    <a href="{{ url_for('apply_contest') }}">申报竞赛</a>#}   {# 已添加到竞赛列表中 #}
 
-                    {% elif current_user.type==2 %} {#教师功能#}
+                    {% elif current_user.type=='teacher' %} {#教师功能#}
 
                     {% endif %}
                     <li><a href="{{ url_for('apply_list') }}">申请列表</a></li>
@@ -104,7 +104,9 @@
        {% with messages = get_flashed_messages() %}     {# 显示警示信息#}
         {% if messages %}
             {% for message in messages %}
-            <div class="alert alert-info" role="alert">{{ message }}</div>
+                <div class="alert alert-info" role="alert">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>{{ message }}
+                </div>
             {% endfor %}
         {% endif %}
         {% endwith %}

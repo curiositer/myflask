@@ -17,13 +17,13 @@ class RegistrationForm(FlaskForm):
     user_id = StringField('学号', validators=[DataRequired('请输入学号')])
     email = StringField('邮箱', validators=[DataRequired(), Email()])
     tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话')])
-    stu_class = StringField('班级(管理员无需填写)')
+    stu_class = StringField('班级(学生、教师填写)')
     tea_type = SelectField('教师类型（仅教师填写）',
                            choices=[(-1, '请选择...'), (0, '普通教师'), (1, '管理教师')], coerce=int)
     password = PasswordField('密码', validators=[DataRequired('请输入密码')])
     password2 = PasswordField(
         '确认密码', validators=[DataRequired(), EqualTo('password')])
-    type = SelectField('用户类型', choices=[(0, '管理员'), (1, '学生'), (2, '教师')], coerce=int)
+    type = SelectField('用户类型', choices=[('admin', '管理员'), ('student', '学生'), ('teacher', '教师')], coerce=str)
     submit = SubmitField('注册')
 
     def validate_id(self, user_id):
@@ -39,7 +39,7 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('该邮箱已被使用！')
 
     def validate_tea_type(self, tea_type):
-        if self.type.data == 2:
+        if self.type.data == 'teacher':
             if tea_type.data == -1:
                 raise ValidationError('请选择教师类型！')
 
@@ -66,7 +66,8 @@ class AddContestForm(FlaskForm):
     type = StringField('竞赛类型', validators=[DataRequired()])
     time = DateField('竞赛时间', validators=[DataRequired("请按照2010-1-1的格式输入")], format='%Y-%m-%d')
     details = StringField('竞赛描述', validators=[Length(min=0, max=150)])
-    level = StringField('竞赛等级', validators=[DataRequired()])
+    level = SelectField('竞赛等级', choices=[('校级', '校级'), ('市级', '市级'),
+                                         ('省级', '省级'), ('国家级', '国家级'), ('国际级', '国际级')], coerce=str)
     file = FileField('添加文件', validators=[FileRequired("请上传pdf文件"), FileAllowed(['pdf'], "请上传pdf文件")])
     submit = SubmitField('添加竞赛')
 
