@@ -4,7 +4,7 @@ from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, AddContestForm, ApplyContestForm
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User, Contest, Request
+from app.models import User, Contest, Request, Student, Teacher, Team
 from datetime import datetime
 
 
@@ -41,11 +41,18 @@ def logout():
 @login_required
 def add_user():
     form = RegistrationForm()
+    user_type = form.type.data
     if form.validate_on_submit():
         user = User(username=form.username.data, user_id=int(form.user_id.data),
                     email=form.email.data, type=form.type.data)
         user.set_password(form.password.data)
         db.session.add(user)
+        if user_type==1:
+            student = Student(user_id=int(form.user_id.data), stu_class=form.stu_class.data, tel_num=form.tel_num.data)
+            db.session.add(student)
+        elif user_type==2:
+            teacher = Teacher(user_id=int(form.user_id.data),stu_class=form.stu_class.data,tea_type=form.tea_type.data)
+            db.session.add(teacher)
         db.session.commit()
         flash('恭喜您，用户%s已注册成功!' % form.username.data)
         return redirect(url_for('index'))
@@ -62,8 +69,9 @@ def register():
         user = User(username=form.username.data, user_id=int(form.user_id.data), email=form.email.data, type=1)
         user.set_password(form.password.data)
         db.session.add(user)
+        stu = Student(user_id=int(form.user_id.data), stu_class=form.stu_class.data, tel_num=form.tel_num.data)
+        db.session.add(stu)
         db.session.commit()
-        print(user)
         flash('恭喜您，学生用户%s已注册成功!' % form.username.data)
         return redirect(url_for('login'))
     return render_template('register.html', title='注册', form=form)
@@ -146,6 +154,9 @@ def apply_contest(contest_id):
         db.session.commit()
         flash('恭喜您，竞赛%s已申请成功!' % contest.contest_name)
         return redirect(url_for('index'))
+    elif request.method == 'GET':
+        form.id1.data = current_user.id
+        form.name1.data = current_user.username
     return render_template('apply_contest.html', title='申请竞赛', form=form, contest=contest)
 
 
