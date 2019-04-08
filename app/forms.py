@@ -6,7 +6,7 @@ from app.models import User
 
 
 class LoginForm(FlaskForm):
-    user_id = StringField('学号', validators=[DataRequired('请输入学号')])
+    user_id = StringField('学号/工号', validators=[DataRequired('请输入学号')])
     password = PasswordField('密码', validators=[DataRequired('请输入密码')])
     remember_me = BooleanField('记住我')
     submit = SubmitField('登陆')
@@ -16,6 +16,10 @@ class RegistrationForm(FlaskForm):
     username = StringField('姓名', validators=[DataRequired()])
     user_id = StringField('学号', validators=[DataRequired('请输入学号')])
     email = StringField('邮箱', validators=[DataRequired(), Email()])
+    tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话')])
+    stu_class = StringField('班级(管理员无需填写)')
+    tea_type = SelectField('教师类型（仅教师填写）',
+                           choices=[(-1, '请选择...'), (0, '普通教师'), (1, '管理教师')], coerce=int)
     password = PasswordField('密码', validators=[DataRequired('请输入密码')])
     password2 = PasswordField(
         '确认密码', validators=[DataRequired(), EqualTo('password')])
@@ -33,6 +37,11 @@ class RegistrationForm(FlaskForm):
         email_list = User.query.filter_by(email=email.data).first()
         if email_list is not None:
             raise ValidationError('该邮箱已被使用！')
+
+    def validate_tea_type(self, tea_type):
+        if self.type.data == 2:
+            if tea_type.data == -1:
+                raise ValidationError('请选择教师类型！')
 
 
 class EditProfileForm(FlaskForm):
@@ -63,6 +72,19 @@ class AddContestForm(FlaskForm):
 
 
 class ApplyContestForm(FlaskForm):
+    teacher = StringField('指导教师', validators=[DataRequired()])
+    id1 = StringField('成员1（队长）学号', validators=[DataRequired()])
+    name1 = StringField('成员1（队长）姓名', validators=[DataRequired()])
+    team_name = StringField('队伍名（组队参加）')
+    id2 = StringField('成员2学号')
+    name2 = StringField('成员2姓名')
+    id3 = StringField('成员3学号')
+    name3 = StringField('成员3姓名')
+    id4 = StringField('成员4学号')
+    name4 = StringField('成员4姓名')
+    id5 = StringField('成员5学号')
+    name5 = StringField('成员5姓名')
     notes = StringField('备注', validators=[Length(min=0, max=150)])
     submit = SubmitField('确认申请')
+
 
