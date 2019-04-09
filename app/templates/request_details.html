@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>竞赛申请详情</h1>
+    <table class="table table-hover table-bordered">
+{#        <caption>申请详情</caption>#}
+        <tr>
+            <th>竞赛名</th>
+            <td>{{ request.contest_details.contest_name }}</td>
+        </tr>
+        <tr>
+            <th>竞赛时间</th>
+            <td>{{ request.contest_details.contest_time }}</td>
+        </tr>
+        <tr>
+            <th>竞赛类型</th>
+            <td>{{ request.contest_details.contest_type }}</td>
+        </tr>
+        <tr>
+            <th>竞赛等级</th>
+            <td>{{ request.contest_details.level }}</td>
+        </tr>
+        <tr>
+            <th>申请时间</th>
+            <td>{{ request.add_time }}</td>
+        </tr>
+        <tr>
+            <th>指导教师</th>
+            <td>{{ request.sup_teacher }}</td>
+        </tr>
+        <tr>
+            <th>个人(组队)</th>
+            {% if request.user_type==0 %}
+                <td>个人</td>
+            {% else %}
+                <td>组队</td>
+            {% endif %}
+        </tr>
+        {% if team %}
+            <tr>
+                <th>队伍名称</th>
+                <td>{{ team.team_name }}</td>
+            </tr>
+        {% endif %}
+        <tr>
+            <th>成员</th>
+            {% if user_details %}
+                <td>
+                    <ul>
+                        <li>学号：{{ user_details.user_id }}</li>
+                        <li>姓名：{{ user_details.username }}</li>
+                    </ul>
+                </td>
+            {% elif team %}
+                <td><ol>
+                {% for part in team.parts %}
+                    <li><ul>
+                        <li>学号：{{ part.user_id }}</li>
+                        <li>姓名：{{ part.username }}</li>
+                    </ul></li>
+                {% endfor %}
+                </ol></td>
+            {% endif %}
+        </tr>
+    </table>
+    {% if current_user.type != 'student' %}
+        <blockquote class="pull-right">
+            <a class="btn btn-success" type="button"
+               href="{{ url_for('agree_request', request_id= request.request_id ) }}">同意</a>
+            <a class="btn btn-danger" type="button"
+               href="{{ url_for('disagree_request', request_id= request.request_id ) }}">拒绝</a>
+        </blockquote>
+    {% endif %}
+{% endblock %}

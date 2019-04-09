@@ -119,9 +119,29 @@
 {% block scripts %}
     {{ super() }}
     <script>
-        function myFunction(elem){//测试
-            if(confirm('Are you sure you want to ' + elem.name) == true){
-                alert("its done.");
+        function request_agree(req_id){//同意申请
+            if(confirm('确定审核通过吗？')){
+                $.post('/contest/agree', {
+                    req :req_id,
+                }).done(function () {
+                    alert("审核成功");
+                }).fail(function() {
+                    alert("修改出错");
+                });
+            }
+            else {
+                return false;
+            }
+        }
+        function request_disagree(req_id){//拒绝申请
+            if(confirm('确定拒绝申请吗？')){
+                $.post('/contest/disagree', {
+                    req :req_id,
+                }).done(function () {
+                    alert("审核成功");
+                }).fail(function() {
+                    alert("修改出错");
+                });
             }
             else {
                 return false;
@@ -130,7 +150,7 @@
         function if_agree(req_id){//审核申请
             var mymessage= confirm("同意申请吗？");
             var ch_req = '#'+req_id;    {#用来表示选择器#}
-            $.post('/contest/agree', {
+            $.post('/contest/if_agree', {
                 req :req_id,
                 agree_status : mymessage
             }).done(function () {
