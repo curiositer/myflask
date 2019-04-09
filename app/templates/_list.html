@@ -4,6 +4,7 @@
     <td>{{ list.contest_type }}</td>
     <td>{{ list.level }}</td>
     <td>{{ list.details }}</td>
+    <td><a href="{{ url_for('downloader', contest_name=list.contest_name) }}">文件下载</a> </td>
     {% if current_user.type== 'student' %}
         <td><a href="{{ url_for('apply_contest',contest_id=list.contest_id) }}">申请</a></td>
     {% endif %}

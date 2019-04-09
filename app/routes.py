@@ -1,8 +1,9 @@
 from flask import render_template
 import os
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, AddContestForm, ApplyContestForm, AddUserForm
-from flask import render_template, flash, redirect, url_for, request
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, EditPassword, EditWorkForm,\
+    AddContestForm, ApplyContestForm, AddUserForm
+from flask import render_template, flash, redirect, url_for, request, send_from_directory, make_response
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Contest, Request, Student, Teacher, Team
 from datetime import datetime
@@ -22,7 +23,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(user_id=form.user_id.data).first()
-        print(user)
+        # print(user)
         if user is None or not user.check_password(form.password.data):
             flash('用户名或密码错误')
             return redirect(url_for('login'))
@@ -97,18 +98,55 @@ def user(username):
 @app.route('/user/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    form = EditProfileForm(current_user.username)
+    form = EditProfileForm(current_user.email)
     if form.validate_on_submit():
-        current_user.username = form.username.data
         current_user.email = form.email.data
         db.session.commit()
         flash('信息修改成功.')
         return redirect(url_for('edit_profile'))
     elif request.method == 'GET':
-        form.username.data = current_user.username
         form.email.data = current_user.email
     return render_template('edit_profile.html', title='编辑资料',
                            form=form)
+
+
+@app.route('/user/edit/work', methods=['GET', 'POST'])
+@login_required
+def edit_work():
+    form = EditWorkForm()
+    stu = Student.query.get(current_user.user_id)
+    if not stu.work_name:
+        exist = 'no'
+        if form.validate_on_submit():
+            stu.work_name = form.work_name.data
+            stu.work_type = form.work_type.data
+            db.session.commit()
+            flash('信息修改成功.')
+            return redirect(url_for('edit_work'))
+        elif request.method == 'GET':
+            form.work_name.data = stu.work_name
+            form.work_type.data = stu.work_type
+    else:
+        exist = 'yes'
+    return render_template('edit_profile.html', title='添加就业信息', form=form, exist=exist, student=stu)
+
+
+@app.route('/user/edit/password', methods=['GET', 'POST'])
+@login_required
+def edit_password():
+    form = EditPassword()
+    if form.validate_on_submit():
+        user = User.query.filter_by(user_id=current_user.user_id).first()
+        # print(user)
+        if not user.check_password(form.old_password.data):
+            flash('密码错误')
+            return redirect(url_for('edit_password'))
+        else:
+            user.set_password(form.password.data)
+            db.session.commit()
+            flash('密码修改成功')
+            return redirect(url_for('index'))
+    return render_template('edit_profile.html', title='修改密码', form=form)
 
 
 @app.route('/contest')
@@ -145,6 +183,18 @@ def add_contest():
         flash('添加竞赛信息成功!')
         return redirect(url_for('index'))
     return render_template("add_contest.html", title='添加竞赛', form=form)
+
+
+@app.route("/download/<contest_name>")
+def downloader(contest_name):
+    dirpath = os.path.join(app.root_path, 'upload', contest_name)  #
+    # print(contest_name)
+    file_name = os.listdir(dirpath)[0]
+    # print(file_name)
+    # return redirect(url_for('index'))
+    response = make_response(send_from_directory(dirpath, file_name, as_attachment=True) )  # as_attachment=True 一定要写，不然会变成打开，而不是下载
+    response.headers["Content-Disposition"] = "attachment; filename={}".format(file_name.encode().decode('latin-1'))
+    return response
 
 
 @app.route('/contest/apply/<contest_id>', methods=['GET', 'POST'])
