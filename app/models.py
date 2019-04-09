@@ -54,7 +54,7 @@ class User(UserMixin, db.Model):
     type = db.Column(db.String(10), default='student')
     # posts = db.relationship('Post', backref='author', lazy='dynamic')
     __mapper_args__ = {         # 表示继承
-        'polymorphic_identity': 'user',
+        # 'polymorphic_identity': 'user',
         'polymorphic_on': type
     }
 
@@ -115,14 +115,29 @@ class Teacher(User):
     }
 
 
-class Admin(User):
-    __tablename__ = 'admin'
-    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
-    admin_type = db.Column(db.Integer, default=0)
+# 使得非继承关系的管理员，无需再冗余建表
+from flask_sqlalchemy import event
+@event.listens_for(User, 'mapper_configured')
+def receive_mapper_configured(mapper, class_):
+    class FallbackToParentPolymorphicMap(dict):
+        def __missing__(self, key):
+            # return parent Item's mapper for undefined polymorphic_identity
+            return mapper
 
-    __mapper_args__ = {
-        'polymorphic_identity': 'admin',
-    }
+    new_polymorphic_map = FallbackToParentPolymorphicMap()
+    new_polymorphic_map.update(mapper.polymorphic_map)
+    mapper.polymorphic_map = new_polymorphic_map
+
+    # for prevent 'incompatible polymorphic identity' warning, not necessarily
+    mapper._validate_polymorphic_identity = None
+# class Admin(User):
+#     __tablename__ = 'admin'
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
+#     admin_type = db.Column(db.Integer, default=0)
+#
+#     __mapper_args__ = {
+#         'polymorphic_identity': 'admin',
+#     }
 
 
 class Contest(db.Model):

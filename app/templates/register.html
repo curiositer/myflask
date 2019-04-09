@@ -7,16 +7,7 @@
     <div class="row">
         <div class="col-md-4">
             <form action="" method="post">
-                {{ form.hidden_tag() }}
-                用户类型：学生
-                {{ wtf.form_field(form.username) }}
-                {{ wtf.form_field(form.user_id) }}
-                {{ wtf.form_field(form.email) }}
-                {{ wtf.form_field(form.tel_num) }}
-                {{ wtf.form_field(form.stu_class) }}
-                {{ wtf.form_field(form.password) }}
-                {{ wtf.form_field(form.password2) }}
-                {{ wtf.form_field(form.submit) }}
+                {{ wtf.quick_form(form) }}
         {#        <table>#}
         {#            {{ render_field(form.username) }}#}
         {#            {{ render_field(form.user_id) }}#}

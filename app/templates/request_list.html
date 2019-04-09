@@ -9,9 +9,8 @@
             <th>竞赛时间</th>
             <th>竞赛类型</th>
             <th>竞赛等级</th>
-            <th>学号</th>
-            <th>姓名</th>
-            <th>备注</th>
+            <th>指导教师</th>
+            <th>个人(组队)</th>
             <th>申请状态</th>
         </tr>
         {% for list in lists %}
@@ -20,23 +19,27 @@
                 <td>{{ list.contest_details.contest_time }}</td>
                 <td>{{ list.contest_details.contest_type }}</td>
                 <td>{{ list.contest_details.level }}</td>
-                <td>{{ list.user_id }}</td>
-                <td>{{ list.applicant.username }}</td>
-                <td>{{ list.notes }}</td>
+                <td>{{ list.sup_teacher }}</td>
+                {% if list.user_type == 0 %}
+                    <td>个人</td>
+                {% else %}
+                    <td>组队</td>
+                {% endif %}
                 {% if list.status==0 %}
-                    {% if current_user.type == 'teacher' %}          {# 教师才能通过审核#}
+                    <td><a href="/request/{{ list.request_id }}">待审核(详情...)</a></td>
+{#                    {% if current_user.type == 'teacher' %}          {# 教师才能通过审核#}
 {#                        <form  action="" method="post">#}
-                        <td>
-                            <span id="{{ list.request_id }}">
-                                 <a href="javascript:if_agree('{{ list.request_id }}');">审批</a>
-                            </span>
-                        </td>
+{#                        <td>#}
+{#                            <span id="{{ list.request_id }}">#}
+{#                                 <a href="javascript:if_agree('{{ list.request_id }}');">待审核(详情...)</a>#}
+{#                            </span>#}
+{#                        </td>#}
 {#                        </form>#}
-
+{##}
 {#                        <td><a href="{{ url_for('agree_request',request_id=list.request_id) }}"></a></td>#}
-                    {% else %}
-                        <td>待审核</td>
-                    {% endif %}
+{#                    {% else %}#}
+{#                        <td>待审核</td>#}
+{#                    {% endif %}#}
                 {% elif list.status==1 %}
                     <td><span style="color: green;">已通过</span></td>
                 {% elif list.status==2 %}

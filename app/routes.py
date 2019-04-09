@@ -1,7 +1,7 @@
 from flask import render_template
 import os
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, AddContestForm, ApplyContestForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, AddContestForm, ApplyContestForm, AddUserForm
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Contest, Request, Student, Teacher, Team
@@ -40,7 +40,7 @@ def logout():
 @app.route('/add_user', methods=['GET', 'POST'])
 @login_required
 def add_user():
-    form = RegistrationForm()
+    form = AddUserForm()
     if form.validate_on_submit():
         user_type = form.type.data
         id = int(form.user_id.data)
@@ -72,7 +72,7 @@ def register():
     if form.validate_on_submit():
         id = int(form.user_id.data)
         print(id)
-        student = Student(user_id=id, username=form.username.data, email=form.email.data, type=form.type.data,
+        student = Student(user_id=id, username=form.username.data, email=form.email.data, type='student',
                           stu_class=form.stu_class.data, tel_num=form.tel_num.data)
         student.set_password(form.password.data)
         print(student)
@@ -155,7 +155,7 @@ def apply_contest(contest_id):
     contest = Contest.query.filter(Contest.contest_id == contest_id).first()
     if form.validate_on_submit():
         if not form.name2.data:
-            req = Request(user_id=form.id1.data,contest_id=contest_id,status=0,
+            req = Request(user_id=form.id1.data,contest_id=contest_id,status=0,sup_teacher=form.teacher.data,
                           notes=form.notes.data, add_time=datetime.now(), user_type=0)
             db.session.add(req)
         else:
@@ -179,7 +179,7 @@ def apply_contest(contest_id):
                 team.parts.append(Student.query.get(id))
             db.session.add(team)
             # print(team.team_id)
-            req = Request(user_id=team.team_id, contest_id=contest_id, status=0,
+            req = Request(user_id=team.team_id, contest_id=contest_id, status=0, sup_teacher=form.teacher.data,
                           notes=form.notes.data, add_time=datetime.now(), user_type=1)
             db.session.add(req)
         db.session.commit()
@@ -209,18 +209,31 @@ def apply_list():
         if lists.has_next else None
     prev_url = url_for('apply_list', page=lists.prev_num) \
         if lists.has_prev else None
-
+    # current_user.
         # return redirect(url_for('index'))
     return render_template("request_list.html", title='竞赛申请列表',
                            lists=lists.items, next_url=next_url, prev_url=prev_url)
 
 
-@app.route('/contest/agree', methods=['POST'])
+@app.route('/request/<request_id>', methods=['GET', 'POST'])
 @login_required
-def agree_request():
+def request_details(request_id):
+    req = Request.query.get(request_id)
+    if req.user_type == 0:      # 如果为个人申请
+        stu = Student.query.get(req.user_id)
+        team = None
+    else:                       # 如果为组队申请
+        team = Team.query.get(req.user_id)
+        stu = None
+    return render_template("request_details.html", title='申请详情', request=req, user_details=stu, team=team)
+
+
+@app.route('/contest/if_agree', methods=['POST'])
+@login_required
+def if_agree_request():
     req_id = request.form['req']
     status = request.form['agree_status']       # 利用ajax的post请求获取表单数据
-    req1 = Request.query.filter_by(req_id=req_id).first()
+    req1 = Request.query.filter_by(request_id=req_id).first()
 
     if status == 'true':
         req1.status = 1
@@ -230,6 +243,24 @@ def agree_request():
     return redirect('/contest/apply_list')
 
 
+@app.route('/request/agree/<request_id>', methods=['GET', 'POST'])
+@login_required
+def agree_request(request_id):
+    req1 = Request.query.filter_by(request_id=request_id).first()
+    req1.status = 1
+    db.session.commit()
+    flash('申请已审核成功!')
+    return render_template('index.html')
+
+
+@app.route('/request/disagree/<request_id>', methods=['GET', 'POST'])
+@login_required
+def disagree_request(request_id):
+    req1 = Request.query.filter_by(request_id=request_id).first()
+    req1.status = 2
+    db.session.commit()
+    flash('申请已审核成功!')
+    return render_template('index.html')
 # @app.route('/request/<team_id>/popup')
 # @login_required
 # def user_popup(team_id):
