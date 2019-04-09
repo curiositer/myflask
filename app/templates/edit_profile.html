@@ -2,19 +2,28 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    <h1>修改个人信息</h1>
+    <h1>{{ title }}</h1><br>
+    {% if exist == 'no' %}
+        <span style="color: red;"><b>（请注意，就业信息添加后不能修改！！）</b></span>
+    {% endif %}
+    {% if exist == 'yes' %}
+        <form>
+        <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="disabledInput1">{{ form.work_name.label }}</label>
+                <input class="form-control" id="disabledInput1" type="text" placeholder="{{ student.work_name }}" disabled>
+                <label for="disabledInput2">{{ form.work_name.label }}</label>
+                <input class="form-control" id="disabledInput2" type="text" placeholder="{{ student.work_type }}" disabled>
+            </div>
+        </div>
+        </div>
+        </form>
+    {% else %}
     <div class="row">
         <div class="col-md-4">
             {{ wtf.quick_form(form) }}
         </div>
     </div>
-{#    {% from "_field.html" import render_field %}#}
-{#    <form action="" method="post">#}
-{#        {{ form.hidden_tag() }}#}
-{#        <table>#}
-{#            {{ render_field(form.username) }}#}
-{#            {{ render_field(form.email) }}#}
-{#        </table>#}
-{#        <p>{{ form.submit() }}</p>#}
-{#    </form>#}
+    {% endif %}
 {% endblock %}

@@ -50,7 +50,7 @@ class RegistrationForm(FlaskForm):
     stu_class = StringField('班级')
     password = PasswordField('密码', validators=[DataRequired('请输入密码')])
     password2 = PasswordField(
-        '确认密码', validators=[DataRequired(), EqualTo('password')])
+        '确认密码', validators=[DataRequired(), EqualTo('password', message='请确认两次输入密码是否一致')])
     submit = SubmitField('注册')
 
     def validate_user_id(self, user_id):
@@ -65,20 +65,33 @@ class RegistrationForm(FlaskForm):
 
 
 class EditProfileForm(FlaskForm):
-    username = StringField('用户名', validators=[DataRequired()])
-    email = StringField('电子邮箱', validators=[DataRequired()])
+    email = StringField('电子邮箱', validators=[DataRequired(), Email('请输入正确邮箱格式')])
     # about_me = TextAreaField('About me', validators=[Length(min=0, max=140)])
     submit = SubmitField('提交修改')
 
-    def __init__(self, original_username, *args, **kwargs):
+    def __init__(self, original_email, *args, **kwargs):
         super(EditProfileForm, self).__init__(*args, **kwargs)
-        self.original_username = original_username
+        self.original_email = original_email
 
-    def validate_username(self, username):
-        if username.data != self.original_username:
-            user = User.query.filter_by(username=self.username.data).first()
+    def validate_email(self, email):
+        if email.data != self.original_email:
+            user = User.query.filter_by(email=self.email.data).first()
             if user is not None:
-                raise ValidationError('该用户名已存在，请更换一个！')
+                raise ValidationError('该邮箱已存在，请更换一个！')
+
+
+class EditWorkForm(FlaskForm):
+    work_name = StringField('就业单位', validators=[DataRequired('请输入就业单位')])
+    work_type = StringField('就业类型', validators=[DataRequired('请输入就业类型')])
+    submit = SubmitField('提交修改')
+
+
+class EditPassword(FlaskForm):
+    old_password = PasswordField('旧密码', validators=[DataRequired('请输入密码')])
+    password = PasswordField('新密码', validators=[DataRequired('请输入密码')])
+    password2 = PasswordField(
+        '确认密码', validators=[DataRequired(), EqualTo('password', message='请确认两次输入密码是否一致')])
+    submit = SubmitField('提交修改')
 
 
 class AddContestForm(FlaskForm):
