@@ -246,15 +246,23 @@ def apply_contest(contest_id):
 def apply_list():
     page = request.args.get('page', 1, type=int)
 
-    if current_user.type == 'admin':
-        lists = Request.query.filter().\
-            paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取所有学生申请信息
-    elif current_user.type == 'student':
+    # if current_user.type == 'admin':
+    #     lists = Request.query.filter().\
+    #         paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取所有学生申请信息
+    if current_user.type == 'student':
         lists = Request.query.filter_by(user_id=current_user.user_id).\
             paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取自己的申请信息
-    else:
+    elif current_user.type == 'admin':
         lists = Request.query.filter().\
-            paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取自己管理班级的学生申请信息
+            paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取所有学生申请信息
+    else:
+        tea_type = current_user.get_teacher_type()
+        if tea_type == 0:      # 普通教师
+            lists = Request.query.filter_by(sup_teacher=current_user.user_id). \
+                paginate(page, app.config['POSTS_PER_PAGE'], False)  # 选取自己带队学生申请信息
+        else:           # 管理层教师
+            lists = Request.query.filter(). \
+                paginate(page, app.config['POSTS_PER_PAGE'], False)  # 选取所有学生申请信息
     next_url = url_for('apply_list', page=lists.next_num) \
         if lists.has_next else None
     prev_url = url_for('apply_list', page=lists.prev_num) \
