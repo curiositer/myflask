@@ -76,6 +76,11 @@ class User(UserMixin, db.Model):
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
             digest, size)
 
+    def get_teacher_type(self):     # 获取教师类型
+        teacher = Teacher.query.get(self.user_id)
+        # print(teacher)
+        return teacher.tea_type
+
 
 team_student = db.Table('team_student',
     db.Column('user_id', db.Integer, db.ForeignKey('student.user_id'), primary_key=True),
@@ -158,14 +163,15 @@ class Request(db.Model):
     user_id = db.Column(db.Integer)  # 定义外键
     user_type = db.Column(db.Integer, nullable=False)
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
-    sup_teacher = db.Column(db.String(30))
+    sup_teacher = db.Column(db.Integer, db.ForeignKey('user.user_id'))
     add_time = db.Column(db.DateTime)
     notes = db.Column(db.String(150))
     status = db.Column(db.Integer, default=0)
 
-    # applicant = db.relationship('User', backref=db.backref('requests'))   # 申请人可能为用户或者队伍，故不能用外键
+    # applicant = db.relationship('User', backref=db.backref('requests'))   # 对于user_id申请人可能为用户或者队伍，故不能用外键
     # # Request添加一个applicant属性，可直接访问申请人详细信息
     # backref使得反向通过User.requests访问该表
+    teacher_details = db.relationship('User')
     contest_details = db.relationship('Contest')
 
 
