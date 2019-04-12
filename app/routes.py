@@ -5,7 +5,7 @@ from app.forms import LoginForm, RegistrationForm, EditProfileForm, EditPassword
     AddContestForm, ApplyContestForm, AddUserForm
 from flask import render_template, flash, redirect, url_for, request, send_from_directory, make_response
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User, Contest, Request, Student, Teacher, Team
+from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student
 from datetime import datetime
 
 
@@ -13,6 +13,11 @@ from datetime import datetime
 @app.route('/index')
 @login_required
 def index():
+    # print(current_user._get_current_object().get_teacher_type())
+    # lists = Request.query.join(  # 选出学生和队伍合并后所有与自己相关的记录
+    #     team_student, (team_student.c.team_id == Request.user_id)).filter(
+    #     (Request.user_type == 1) and (team_student.c.user_id == current_user.user_id)).all()
+    # print(lists)
     return render_template('index.html')
 
 
@@ -101,11 +106,13 @@ def edit_profile():
     form = EditProfileForm(current_user.email)
     if form.validate_on_submit():
         current_user.email = form.email.data
+        current_user.tel_num = form.tel_num.data
         db.session.commit()
         flash('信息修改成功.')
         return redirect(url_for('edit_profile'))
     elif request.method == 'GET':
         form.email.data = current_user.email
+        form.tel_num.data = current_user.tel_num
     return render_template('edit_profile.html', title='编辑资料',
                            form=form)
 
@@ -241,34 +248,53 @@ def apply_contest(contest_id):
     return render_template('apply_contest.html', title='申请竞赛', form=form, contest=contest)
 
 
-@app.route('/contest/apply_list', methods=['GET', 'POST'])
+@app.route('/request', methods=['GET', 'POST'])
 @login_required
-def apply_list():
+def request_list():
     page = request.args.get('page', 1, type=int)
 
     # if current_user.type == 'admin':
     #     lists = Request.query.filter().\
     #         paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取所有学生申请信息
-    if current_user.type == 'student':
-        lists = Request.query.filter_by(user_id=current_user.user_id).\
-            paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取自己的申请信息
+    if current_user.type == 'student':          # 如果为学生，将个人参赛和组队参赛分开查看
+        lists = Request.query.filter_by(user_id=current_user.user_id, user_type=0)\
+            .paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取自己个人的申请信息
+        #
+
     elif current_user.type == 'admin':
         lists = Request.query.filter().\
             paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取所有学生申请信息
     else:
         tea_type = current_user.get_teacher_type()
-        if tea_type == 0:      # 普通教师
+        if tea_type == 0:       # 普通教师
             lists = Request.query.filter_by(sup_teacher=current_user.user_id). \
                 paginate(page, app.config['POSTS_PER_PAGE'], False)  # 选取自己带队学生申请信息
-        else:           # 管理层教师
+        else:                   # 管理层教师
             lists = Request.query.filter(). \
                 paginate(page, app.config['POSTS_PER_PAGE'], False)  # 选取所有学生申请信息
-    next_url = url_for('apply_list', page=lists.next_num) \
+    next_url = url_for('request_list', page=lists.next_num) \
         if lists.has_next else None
-    prev_url = url_for('apply_list', page=lists.prev_num) \
+    prev_url = url_for('request_list', page=lists.prev_num) \
         if lists.has_prev else None
     # current_user.
         # return redirect(url_for('index'))
+    return render_template("request_list.html", title='竞赛申请列表',
+                           lists=lists.items, next_url=next_url, prev_url=prev_url)
+
+
+@app.route('/request/team', methods=['GET', 'POST'])
+@login_required
+def request_list_team():        # 如果为学生，将个人参赛和组队参赛分开查看
+    page = request.args.get('page', 1, type=int)
+    lists = Request.query.join(  # 选出组队参加中所有与自己相关的记录
+        team_student, (team_student.c.team_id == Request.user_id)).filter(
+        Request.user_type == 1, team_student.c.user_id == current_user.user_id). \
+        paginate(page, app.config['POSTS_PER_PAGE'], False)
+    # print(lists.items)
+    next_url = url_for('request_list_team', page=lists.next_num) \
+        if lists.has_next else None
+    prev_url = url_for('request_list_team', page=lists.prev_num) \
+        if lists.has_prev else None
     return render_template("request_list.html", title='竞赛申请列表',
                            lists=lists.items, next_url=next_url, prev_url=prev_url)
 
@@ -286,6 +312,7 @@ def request_details(request_id):
     return render_template("request_details.html", title='申请详情', request=req, user_details=stu, team=team)
 
 
+# 最开始的ajax，采用JavaScript实现在当前界面做申请，后认为不合适改为跳转为另一界面显示其详细信息
 @app.route('/contest/if_agree', methods=['POST'])
 @login_required
 def if_agree_request():
@@ -298,7 +325,7 @@ def if_agree_request():
     else:
         req1.status = 2
     db.session.commit()
-    return redirect('/contest/apply_list')
+    return redirect('/contest/request_list')
 
 
 @app.route('/request/agree/<request_id>', methods=['GET', 'POST'])
@@ -306,6 +333,9 @@ def if_agree_request():
 def agree_request(request_id):
     req1 = Request.query.filter_by(request_id=request_id).first()
     req1.status = 1
+    award = Award(user_id=req1.user_id, user_type=req1.user_type, contest_id=req1.contest_id,
+                  sup_teacher=req1.sup_teacher)
+    db.session.add(award)
     db.session.commit()
     flash('申请已审核成功!')
     return render_template('index.html')

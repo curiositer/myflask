@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField, BooleanField, SubmitField, DateField, FileField
+from wtforms import StringField, PasswordField, SelectField, BooleanField,\
+    SubmitField, DateField, FileField, TextAreaField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 from flask_wtf.file import FileRequired, FileAllowed
 from app.models import User
@@ -65,7 +66,8 @@ class RegistrationForm(FlaskForm):
 
 
 class EditProfileForm(FlaskForm):
-    email = StringField('电子邮箱', validators=[DataRequired(), Email('请输入正确邮箱格式')])
+    email = StringField('电子邮箱', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
+    tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话')])
     # about_me = TextAreaField('About me', validators=[Length(min=0, max=140)])
     submit = SubmitField('提交修改')
 
@@ -118,7 +120,7 @@ class ApplyContestForm(FlaskForm):
     name4 = StringField('成员4姓名')
     id5 = StringField('成员5学号')
     name5 = StringField('成员5姓名')
-    notes = StringField('备注', validators=[Length(min=0, max=150)])
+    notes = TextAreaField('备注', validators=[Length(min=0, max=150)])
     submit = SubmitField('确认申请')
 
 
