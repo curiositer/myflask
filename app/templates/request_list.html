@@ -2,6 +2,14 @@
 
 {% block app_content %}
     <h1>Hi, {{ current_user.username }}!</h1>
+
+    {% if current_user.type == 'student' %}     {#  如果为学生，将个人参赛和组队参赛分开查看 #}
+    <div class="btn-group" role="group" aria-label="...">
+        <a class="btn btn-default" href="{{ url_for('request_list') }}" role="button">个人</a>
+        <a class="btn btn-default" href="{{ url_for('request_list_team') }}" role="button">组队</a>
+    </div>
+    {% endif %}
+
     <table class="table table-hover">
         <caption>申请列表</caption>
         <tr>

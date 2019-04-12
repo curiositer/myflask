@@ -67,7 +67,7 @@
             {% endif %}
         </tr>
     </table>
-    {% if (current_user.type == 'admin') or (current_user.type == 'teacher' and current_user.get_teacher_type==1) %}
+    {% if (current_user.type == 'admin') or (current_user.type == 'teacher' and current_user.get_teacher_type()==1) %}
         <blockquote class="pull-right">
             <a class="btn btn-success" type="button"
                href="{{ url_for('agree_request', request_id= request.request_id ) }}">同意</a>
