@@ -48,11 +48,11 @@
                             <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
-                            {% if current_user.type == 'student' %}
                             <li><a href="{{ url_for('edit_profile') }}">修改基本信息</a></li>
+                            {% if current_user.type == 'student' %}
                             <li><a href="{{ url_for('edit_work') }}">修改就业信息</a></li>
-                            <li class="divider"></li>
                             {% endif %}
+                            <li class="divider"></li>
                             <li><a href="{{ url_for('edit_password') }}">修改密码</a></li>
                         </ul>
                     </li>

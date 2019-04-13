@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h1>{{ title }}</h1><br>
+    {% if current_user.type == 'student' and
+        (title == '添加就业信息' or title == '添加考研信息') %}     {#  如果为学生，将就业和考研分开录入 #}
+        <div class="btn-group" role="group" aria-label="...">
+            <a class="btn btn-default {% if exist == 'study' %} disabled {% endif %}"
+               href="{{ url_for('edit_work') }}" role="button">就业</a>
+            <a class="btn btn-default {% if exist == 'work' %} disabled {% endif %}"
+               href="{{ url_for('edit_study') }}" role="button">考研</a>
+        </div>
+    {% endif %}
+    {% if exist == 'no' %}
+        <span style="color: red;"><b>（请注意，就业（考研）信息添加后不能修改！！）</b></span>
+    {% endif %}
+    {% if exist == 'work' %}    {#  如果填写过就业信息，使之不能修改 #}
+        <form>
+        <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="disabledInput1">{{ form.company_name.label }}</label>
+                <input class="form-control" id="disabledInput1" type="text" placeholder="{{ student.company_name }}" disabled>
+                <label for="disabledInput2">{{ form.company_name.label }}</label>
+                <input class="form-control" id="disabledInput2" type="text" placeholder="{{ student.company_type }}" disabled>
+                <label for="disabledInput3">{{ form.job.label }}</label>
+                <input class="form-control" id="disabledInput3" type="text" placeholder="{{ student.job }}" disabled>
+                <label for="disabledInput4">{{ form.salary.label }}</label>
+                <input class="form-control" id="disabledInput4" type="text" placeholder="{{ student.salary }}" disabled>
+            </div>
+        </div>
+        </div>
+        </form>
+    {% elif exist == 'study' %}         {#  如果填写过就业信息，使之不能修改 #}
+        <form>
+        <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="disabledInput1">{{ form.college_name.label }}</label>
+                <input class="form-control" id="disabledInput1" type="text" placeholder="{{ student.college_name }}" disabled>
+                <label for="disabledInput2">{{ form.college_name.label }}</label>
+                <input class="form-control" id="disabledInput2" type="text" placeholder="{{ student.college_type }}" disabled>
+            </div>
+        </div>
+        </div>
+        </form>
+    {% else %}
+    <div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
+    {% endif %}
+    {% if title == '登陆' %}
+        <br>
+        <b><p>新的用户？<a href="{{ url_for('register') }}">点击注册</a></p></b>
+    {% endif %}
+{% endblock %}
