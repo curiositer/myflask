@@ -1,7 +1,7 @@
 from flask import render_template
 import os
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, EditPassword, EditWorkForm,\
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, EditPassword, EditWorkForm, EditStudyForm,\
     AddContestForm, ApplyContestForm, AddUserForm
 from flask import render_template, flash, redirect, url_for, request, send_from_directory, make_response
 from flask_login import current_user, login_user, logout_user, login_required
@@ -13,11 +13,6 @@ from datetime import datetime
 @app.route('/index')
 @login_required
 def index():
-    # print(current_user._get_current_object().get_teacher_type())
-    # lists = Request.query.join(  # 选出学生和队伍合并后所有与自己相关的记录
-    #     team_student, (team_student.c.team_id == Request.user_id)).filter(
-    #     (Request.user_type == 1) and (team_student.c.user_id == current_user.user_id)).all()
-    # print(lists)
     return render_template('index.html')
 
 
@@ -34,7 +29,7 @@ def login():
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
-    return render_template('login.html', title='登陆', form=form)
+    return render_template('normal_form.html', title='登陆', form=form)
 
 
 @app.route('/logout')
@@ -56,18 +51,19 @@ def add_user():
             student.set_password(form.password.data)
             db.session.add(student)
         elif user_type == 'teacher':
-            teacher = Teacher(user_id=id, username=form.username.data, email=form.email.data, type=form.type.data,
-                              stu_class=form.stu_class.data,tea_type=form.tea_type.data)
+            teacher = Teacher(user_id=id, username=form.username.data, email=form.email.data, tel_num=form.tel_num.data,
+                              type=form.type.data,stu_class=form.stu_class.data,tea_type=form.tea_type.data)
             teacher.set_password(form.password.data)
             db.session.add(teacher)
         else:
-            admin = User(user_id=id, username=form.username.data, email=form.email.data, type=form.type.data)
+            admin = User(user_id=id, username=form.username.data, email=form.email.data, tel_num=form.tel_num.data,
+                         type=form.type.data)
             admin.set_password(form.password.data)
             db.session.add(admin)
         db.session.commit()
         flash('恭喜您，用户%s已注册成功!' % form.username.data)
         return redirect(url_for('index'))
-    return render_template('add_user.html', title='添加用户', form=form)
+    return render_template('normal_form.html', title='添加用户', form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -86,7 +82,7 @@ def register():
         db.session.commit()
         flash('恭喜您，学生用户%s已注册成功!' % form.username.data)
         return redirect(url_for('login'))
-    return render_template('register.html', title='注册', form=form)
+    return render_template('normal_form.html', title='注册', form=form)
 
 
 @app.route('/user/<username>')
@@ -113,7 +109,7 @@ def edit_profile():
     elif request.method == 'GET':
         form.email.data = current_user.email
         form.tel_num.data = current_user.tel_num
-    return render_template('edit_profile.html', title='编辑资料',
+    return render_template('normal_form.html', title='编辑资料',
                            form=form)
 
 
@@ -122,20 +118,51 @@ def edit_profile():
 def edit_work():
     form = EditWorkForm()
     stu = Student.query.get(current_user.user_id)
-    if not stu.work_name:
+    if (not stu.company_name) and (not stu.college_name):
         exist = 'no'
         if form.validate_on_submit():
-            stu.work_name = form.work_name.data
-            stu.work_type = form.work_type.data
+            stu.company_name = form.company_name.data
+            stu.company_type = form.company_type.data
+            stu.job = form.job.data
+            stu.salary = form.salary.data
             db.session.commit()
             flash('信息修改成功.')
             return redirect(url_for('edit_work'))
         elif request.method == 'GET':
-            form.work_name.data = stu.work_name
-            form.work_type.data = stu.work_type
+            form.company_name.data = stu.company_name
+            form.company_type.data = stu.company_type
+            form.job.data = stu.job
+            form.salary.data = stu.salary
     else:
-        exist = 'yes'
-    return render_template('edit_profile.html', title='添加就业信息', form=form, exist=exist, student=stu)
+        if stu.company_name:
+            exist = 'work'
+        elif stu.college_name:
+            exist = 'study'
+    return render_template('normal_form.html', title='添加就业信息', form=form, exist=exist, student=stu)
+
+
+@app.route('/user/edit/study', methods=['GET', 'POST'])
+@login_required
+def edit_study():
+    form = EditStudyForm()
+    stu = Student.query.get(current_user.user_id)
+    if (not stu.company_name) and (not stu.college_name):
+        exist = 'no'
+        if form.validate_on_submit():
+            stu.college_name = form.college_name.data
+            stu.college_type = form.college_type.data
+            db.session.commit()
+            flash('信息修改成功.')
+            return redirect(url_for('edit_study'))
+        elif request.method == 'GET':
+            form.college_name.data = stu.college_name
+            form.college_type.data = stu.college_type
+    else:
+        if stu.company_name:
+            exist = 'work'
+        elif stu.college_name:
+            exist = 'study'
+    return render_template('normal_form.html', title='添加考研信息', form=form, exist=exist, student=stu)
 
 
 @app.route('/user/edit/password', methods=['GET', 'POST'])
@@ -153,7 +180,7 @@ def edit_password():
             db.session.commit()
             flash('密码修改成功')
             return redirect(url_for('index'))
-    return render_template('edit_profile.html', title='修改密码', form=form)
+    return render_template('normal_form.html', title='修改密码', form=form)
 
 
 @app.route('/contest')
@@ -189,7 +216,7 @@ def add_contest():
         db.session.commit()
         flash('添加竞赛信息成功!')
         return redirect(url_for('index'))
-    return render_template("add_contest.html", title='添加竞赛', form=form)
+    return render_template("normal_form.html", title='添加竞赛', form=form)
 
 
 @app.route("/download/<contest_name>")
@@ -241,7 +268,7 @@ def apply_contest(contest_id):
             db.session.add(req)
         db.session.commit()
         flash('恭喜您，竞赛%s已申请成功!' % contest.contest_name)
-        return redirect(url_for('index'))
+        return redirect(url_for('request_list'))
     elif request.method == 'GET':
         form.id1.data = current_user.id
         form.name1.data = current_user.username
@@ -256,7 +283,7 @@ def request_list():
     # if current_user.type == 'admin':
     #     lists = Request.query.filter().\
     #         paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取所有学生申请信息
-    if current_user.type == 'student':          # 如果为学生，将个人参赛和组队参赛分开查看
+    if current_user.type == 'student':          # 如果为学生，将个人参赛和组队参赛分开查看e
         lists = Request.query.filter_by(user_id=current_user.user_id, user_type=0)\
             .paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取自己个人的申请信息
         #
@@ -338,7 +365,7 @@ def agree_request(request_id):
     db.session.add(award)
     db.session.commit()
     flash('申请已审核成功!')
-    return render_template('index.html')
+    return redirect(url_for('request_list'))
 
 
 @app.route('/request/disagree/<request_id>', methods=['GET', 'POST'])
@@ -348,7 +375,8 @@ def disagree_request(request_id):
     req1.status = 2
     db.session.commit()
     flash('申请已审核成功!')
-    return render_template('index.html')
+    return redirect(url_for('request_list'))
+
 # @app.route('/request/<team_id>/popup')
 # @login_required
 # def user_popup(team_id):

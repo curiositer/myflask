@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SelectField, BooleanField,\
-    SubmitField, DateField, FileField, TextAreaField
+    SubmitField, DateField, FileField, TextAreaField, IntegerField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 from flask_wtf.file import FileRequired, FileAllowed
 from app.models import User
@@ -83,8 +83,16 @@ class EditProfileForm(FlaskForm):
 
 
 class EditWorkForm(FlaskForm):
-    work_name = StringField('就业单位', validators=[DataRequired('请输入就业单位')])
-    work_type = StringField('就业类型', validators=[DataRequired('请输入就业类型')])
+    company_name = StringField('就业单位', validators=[DataRequired('请输入就业单位')])
+    company_type = StringField('单位类型', validators=[DataRequired('请输入就业类型')])
+    job = StringField('就职岗位', validators=[DataRequired('请输入岗位')])
+    salary = IntegerField('就职薪水（按月份）', validators=[DataRequired('请输入薪水')])
+    submit = SubmitField('提交修改')
+
+
+class EditStudyForm(FlaskForm):
+    college_name = StringField('录取学校', validators=[DataRequired('请输入录取学校')])
+    college_type = StringField('学校类型', validators=[DataRequired('请输入学校类型')])
     submit = SubmitField('提交修改')
 
 

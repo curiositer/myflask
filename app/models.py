@@ -17,6 +17,7 @@ class User(UserMixin, db.Model):
     user_id = db.Column(db.Integer, primary_key=True, unique=True)
     username = db.Column(db.String(64), index=True)
     email = db.Column(db.String(120), unique=True)
+    tel_num = db.Column(db.Integer)
     password_hash = db.Column(db.String(128))
     type = db.Column(db.String(10), default='student')
     # posts = db.relationship('Post', backref='author', lazy='dynamic')
@@ -62,9 +63,12 @@ class Student(User):
     __tablename__ = 'student'
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
     stu_class = db.Column(db.String(30))
-    tel_num = db.Column(db.String(30))
-    work_name = db.Column(db.String(30))
-    work_type = db.Column(db.String(30))
+    company_name = db.Column(db.String(30))
+    company_type = db.Column(db.String(30))
+    job = db.Column(db.String(30))
+    salary = db.Column(db.Integer)
+    college_name = db.Column(db.String(30))
+    college_type = db.Column(db.String(30))
 
     __mapper_args__ = {
         'polymorphic_identity': 'student',
