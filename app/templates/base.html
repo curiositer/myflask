@@ -23,7 +23,9 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav"> {#导航栏左侧显示#}
 {#                    <li><a href="{{ url_for('index') }}"></a></li>#}
+                    {% if current_user.is_anonymous %}
                     <li><a href="{{ url_for('user', username=current_user.username) }}">个人信息</a></li>
+                    {% endif %}
 
 {#                    <li>左侧</li>#}
                 </ul>
