@@ -201,12 +201,13 @@ def contest_list():
 def add_contest():
     form = AddContestForm()
     if form.validate_on_submit():
-        contest = Contest(contest_name=form.name.data, contest_type=form.type.data, contest_time=form.time.data,
+        date = form.time.data.strftime('%Y-%m-%d')
+        contest = Contest(contest_name=form.name.data, contest_type=form.type.data, contest_time=date,
                           details=form.details.data, level=form.level.data)
         # print(form.contest_time.data)
         # 获取上传文件的文件名;
         filename = form.file.data.filename
-        print(filename)
+        # print(filename)
         basedir = os.path.abspath(os.path.dirname(__file__))  # 获取当前项目的绝对路径
         file_dir = os.path.join(basedir, app.config['UPLOAD_FOLDER'], form.name.data)      # 存在以竞赛名的子文件夹中
         if not os.path.exists(file_dir):

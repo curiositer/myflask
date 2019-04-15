@@ -1,5 +1,10 @@
 {% extends 'bootstrap/base.html' %}
 
+{% block head %}
+    {{ super() }}
+    <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
+{% endblock %}
+
 {% block title %}
     {% if title %}
     {{ title }} - 竞赛管理系统
@@ -122,7 +127,16 @@
 
 {% block scripts %}
     {{ super() }}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/locales/bootstrap-datepicker.zh-CN.min.js"></script>
     <script>
+        $('#time').datepicker({
+            weekStart: 1,
+            autoclose: true,
+            daysOfWeekHighlighted: "0,6",
+            format: "yyyy-mm-dd",
+            language: "zh-CN"
+        });
         function request_agree(req_id){//同意申请
             if(confirm('确定审核通过吗？')){
                 $.post('/contest/agree', {
