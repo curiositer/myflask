@@ -8,6 +8,7 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from config import Config
+import dashboard
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -17,6 +18,7 @@ login = LoginManager(app)
 # mail = Mail(app)
 bootstrap = Bootstrap(app)
 login.login_view = 'login'
+# dashboard.bind(app)     # 访问/dashboard来查看检测情况
 
 if not app.debug:       # 记录日志
     if not os.path.exists('logs'):

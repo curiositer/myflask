@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SelectField, BooleanField,\
     SubmitField, DateField, FileField, TextAreaField, IntegerField
+from flask_admin.form import widgets
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 from flask_wtf.file import FileRequired, FileAllowed
 from app.models import User
@@ -107,11 +108,12 @@ class EditPassword(FlaskForm):
 class AddContestForm(FlaskForm):
     name = StringField('竞赛名', validators=[DataRequired()])
     type = StringField('竞赛类型', validators=[DataRequired()])
-    time = DateField('竞赛时间(请按照2010-1-1的格式输入)', validators=[DataRequired("请按照2010-1-1的格式输入")], format='%Y-%m-%d')
+    time = DateField('竞赛时间(请按照2010-1-1的格式输入)', validators=[DataRequired("请按照2010-1-1的格式输入")],
+                     format='%Y-%m-%d', widget=widgets.DatePickerWidget())
     details = StringField('竞赛描述', validators=[Length(min=0, max=150)])
     level = SelectField('竞赛等级', choices=[('校级', '校级'), ('市级', '市级'),
                                          ('省级', '省级'), ('国家级', '国家级'), ('国际级', '国际级')], coerce=str)
-    file = FileField('添加文件', validators=[FileAllowed(['pdf', 'doc'], "请上传pdf或doc文件")])
+    file = FileField('添加文件', validators=[FileAllowed(['pdf', 'doc', 'docx'], "请上传pdf或doc文件")])
     submit = SubmitField('添加竞赛')
 
 
