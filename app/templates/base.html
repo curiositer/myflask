@@ -42,8 +42,9 @@
                     <li><a href="{{ url_for('login') }}">登陆</a></li>
                     {% else %}
                         {% if current_user.type=='admin' %}   {#管理员功能#}
-                        <li><a href="{{ url_for('add_contest') }}">添加竞赛</a></li>
-                        <li><a href="{{ url_for('add_user') }}">添加用户</a></li>
+                            <li><a href="{{ url_for('add_user') }}">添加用户</a></li>
+                            <li><a href="{{ url_for('add_contest') }}">添加竞赛</a></li>
+
                     {% elif current_user.type=='student' %} {#学生功能#}
     {#                    <a href="{{ url_for('apply_contest') }}">申报竞赛</a>#}   {# 已添加到竞赛列表中 #}
 
@@ -51,9 +52,18 @@
 
                     {% endif %}
 
-                    <li><a href="{{ url_for('request_list') }}">申请列表</a></li>
-                    <li><a href="{{ url_for('contest_list') }}">竞赛列表</a></li>
                     <li><a href="{{ url_for('echarts', chart_type='contest') }}">统计图表</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            列表
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('request_list') }}">申请列表</a></li>
+                            <li><a href="{{ url_for('contest_list') }}">竞赛列表</a></li>
+                            <li><a href="{{ url_for('award_list') }}">获奖列表</a></li>
+                        </ul>
+                    </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             修改信息
