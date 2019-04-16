@@ -2,7 +2,7 @@ from flask import render_template
 import os
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, EditPassword, EditWorkForm, EditStudyForm,\
-    AddContestForm, ApplyContestForm, AddUserForm
+    AddContestForm, ApplyContestForm, AddUserForm, EditAwardForm
 from flask import render_template, flash, redirect, url_for, request, send_from_directory, make_response
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student
@@ -382,6 +382,41 @@ def disagree_request(request_id):
     return redirect(url_for('request_list'))
 
 
+@app.route('/award', methods=['GET', 'POST'])
+@login_required
+def award_list():
+    page = request.args.get('page', 1, type=int)
+    lists = Award.query.filter(). \
+        paginate(page, app.config['POSTS_PER_PAGE'], False)
+    # print(lists.items)
+    next_url = url_for('award_list', page=lists.next_num) \
+        if lists.has_next else None
+    prev_url = url_for('award_list', page=lists.prev_num) \
+        if lists.has_prev else None
+    return render_template("award_list.html", title='获奖列表',
+                           lists=lists.items, next_url=next_url, prev_url=prev_url)
+
+
+@app.route('/award/<award_id>', methods=['GET', 'POST'])
+@login_required
+def award_details(award_id):
+    award = Award.query.get(award_id)
+    if award.user_type == 0:      # 如果为个人申请
+        stu = Student.query.get(award.user_id)
+        team = None
+    else:                       # 如果为组队申请
+        team = Team.query.get(award.user_id)
+        stu = None
+    form = EditAwardForm()
+    if form.validate_on_submit():
+        award1 = Award.query.filter_by(award_id=award_id).first()
+        award1.grade = form.grade.data
+        db.session.commit()
+        flash('获奖录入成功!')
+    return render_template("award_details.html", form=form, title='申请详情',
+                           award=award, user_details=stu, team=team)
+
+
 @app.route("/echarts/<chart_type>")
 def echarts(chart_type):
     if chart_type == 'contest':
@@ -418,7 +453,7 @@ def contest_chart():
         join_count.append(count1)
         count2 = Award.query.join(  # 选出每一类的获奖人数
             Contest, (Award.contest_id == Contest.contest_id)).filter(
-            Contest.contest_type == types[0], Award.grade != '0').count()
+            Contest.contest_type == types[0], Award.grade != '0', Award.grade != '无').count()
         award_count.append(count2)
     bar.add("参赛人数", contest_types, join_count)
     bar.add("获奖人数", contest_types, award_count)
@@ -428,11 +463,13 @@ def contest_chart():
 
 def award_chart():
     bar = Bar("按获奖级别统计", "这里是副标题", height=600, width="100%")
-    award_types = Award.query.with_entities(Award.grade).filter(Award.grade != '0').distinct().all()
+    award_types = Award.query.with_entities(Award.grade).\
+        filter(Award.grade != '0', Award.grade != '无').distinct().all()
     award_count = []
     for types in award_types:  # types[0]即竞赛种类
         # print(types[0])
-        count1 = Award.query.filter(Award.grade == types[0]).count()        # 选出每一获奖级别的人数
+        count1 = Award.query.\
+            filter(Award.grade == types[0], Award.grade != '无').count()     # 选出每一获奖级别的人数
         award_count.append(count1)
     bar.add("获奖人数", award_types, award_count)
     # bar.use_theme('dark')   # 更换主题

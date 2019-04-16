@@ -3,18 +3,14 @@
 {% block app_content %}
     <h1>Hi, {{ current_user.username }}!</h1>
 
-    {% if current_user.type == 'student' %}
-        {#  如果为学生，因为只能查看自己的申请情况，故将个人参赛和组队参赛分开查看 #}
-    <div class="btn-group" role="group" aria-label="...">
-        <a class="btn btn-default" href="{{ url_for('request_list') }}" role="button">个人</a>
-        <a class="btn btn-default" href="{{ url_for('request_list_team') }}" role="button">组队</a>
-        <br><br>
-        <span style="color: red;">请先选择个人或组队</span>
-    </div>
-    {% endif %}
-
+{#    <div class="btn-group" role="group" aria-label="...">#}
+{#        <a class="btn btn-default" href="{{ url_for('award_list') }}" role="button">个人</a>#}
+{#        <a class="btn btn-default" href="{{ url_for('award_list_team') }}" role="button">组队</a>#}
+{#        <br><br>#}
+{#        <span style="color: red;">请先选择个人或组队</span>#}
+{#    </div>#}
     <table class="table table-hover">
-        <caption>申请列表</caption>
+        <caption>获奖列表</caption>
         <tr>
             <th>竞赛名</th>
             <th>竞赛时间</th>
@@ -22,7 +18,7 @@
             <th>竞赛等级</th>
             <th>指导教师</th>
             <th>个人(组队)</th>
-            <th>申请状态</th>
+            <th>所得奖项</th>
         </tr>
         {% for list in lists %}
             <tr valign="top">
@@ -36,8 +32,9 @@
                 {% else %}
                     <td>组队</td>
                 {% endif %}
-                {% if list.status==0 %}
-                    <td><a href="{{ url_for('request_details', request_id=list.request_id) }}">待审核(详情...)</a></td>
+
+                {% if list.grade=='0' %}
+                    <td><a href={{ url_for('award_details', award_id=list.award_id) }}>待录入(详情...)</a></td>
 {#                    {% if current_user.type == 'teacher' %}          {# 教师才能通过审核#}
 {#                        <form  action="" method="post">#}
 {#                        <td>#}
@@ -51,14 +48,9 @@
 {#                    {% else %}#}
 {#                        <td>待审核</td>#}
 {#                    {% endif %}#}
-                {% elif list.status==1 %}
-                    <td><span style="color: green;">已通过</span>
-                        <a href="{{ url_for('request_details', request_id=list.request_id) }}">(详情...)</a>
-                    </td>
-                {% elif list.status==2 %}
-                    <td><span style="color: red;">已拒绝</span>
-                        <a href="{{ url_for('request_details', request_id=list.request_id) }}">(详情...)</a>
-                    </td>
+                {% else %}
+                    <td><span style="color: red;">{{ list.grade }}</span>
+                        <a href={{ url_for('award_details', award_id=list.award_id) }}>(详情...)</a></td>
                 {% endif %}
             </tr>
         {% endfor %}

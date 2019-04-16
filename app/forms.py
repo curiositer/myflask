@@ -118,7 +118,7 @@ class AddContestForm(FlaskForm):
 
 
 class ApplyContestForm(FlaskForm):
-    teacher = StringField('指导教师', validators=[DataRequired()])
+    teacher = IntegerField('指导教师ID', validators=[DataRequired()])
     id1 = StringField('成员1（队长）学号', validators=[DataRequired()])
     name1 = StringField('成员1（队长）姓名', validators=[DataRequired()])
     team_name = StringField('队伍名（组队参加）')
@@ -134,3 +134,7 @@ class ApplyContestForm(FlaskForm):
     submit = SubmitField('确认申请')
 
 
+class EditAwardForm(FlaskForm):
+    grade = SelectField('获奖等级', choices=[('一等奖', '一等奖'), ('二等奖', '二等奖'),
+                                         ('三等奖', '三等奖'), ('优秀奖', '优秀奖'), ('无', '无')], coerce=str)
+    submit = SubmitField('提交修改')
