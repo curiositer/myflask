@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <div class="btn-group" role="group" aria-label="...">
+        <a class="btn btn-default" href="{{ url_for('echarts', chart_type='contest') }}" role="button">按竞赛种类统计</a>
+        <a class="btn btn-default" href="{{ url_for('echarts', chart_type='award') }}" role="button">按获奖级别统计</a>
+    </div>
+    {{ myechart|safe }}
+{#    <div id="{{ chart_id }}" style="width:{{ my_width }};height:{{ my_height }}px;"></div>#}
+{#    <script type="text/javascript">#}
+{#        window.onload = function() {#}
+{#			setTimeout(function() {#}
+{#				var myChart_{{ chart_id }} = echarts.init(document.getElementById('{{ chart_id }}'), null, {renderer: '{{ renderer}}'});#}
+{#				{{ custom_function }}#}
+{#                var option_{{ chart_id }} = {{ options | safe }};#}
+{#				myChart_{{ chart_id }}.setOption(option_{{ chart_id }});#}
+{#				window.onresize = function() {#}
+{#					myChart_{{ chart_id }}.resize();#}
+{#				};#}
+{#			}, 1000);#}
+{#		};#}
+{#    </script>#}
+{% endblock %}
