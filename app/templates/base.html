@@ -3,6 +3,9 @@
 {% block head %}
     {{ super() }}
     <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
+    {% for jsfile_name in script_list %}
+        <script src="{{ host }}/{{ jsfile_name }}.js"></script>
+    {% endfor %}
 {% endblock %}
 
 {% block title %}
@@ -47,8 +50,10 @@
                     {% elif current_user.type=='teacher' %} {#教师功能#}
 
                     {% endif %}
+
                     <li><a href="{{ url_for('request_list') }}">申请列表</a></li>
                     <li><a href="{{ url_for('contest_list') }}">竞赛列表</a></li>
+                    <li><a href="{{ url_for('echarts', chart_type='contest') }}">统计图表</a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             修改信息
@@ -129,7 +134,9 @@
     {{ super() }}
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/locales/bootstrap-datepicker.zh-CN.min.js"></script>
+
     <script>
+        //完成日期选择
         $('#time').datepicker({
             weekStart: 1,
             autoclose: true,

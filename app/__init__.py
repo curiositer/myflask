@@ -8,7 +8,6 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from config import Config
-import dashboard
 
 app = Flask(__name__)
 app.config.from_object(Config)
