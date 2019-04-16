@@ -419,10 +419,18 @@ def award_details(award_id):
 
 @app.route("/echarts/<chart_type>")
 def echarts(chart_type):
-    if chart_type == 'contest':
+    if chart_type == 'contest_bar':
         _bar = contest_chart()
-    elif chart_type == 'award':
+    elif chart_type == 'award_bar':
         _bar = award_chart()
+    elif chart_type == 'contest_pie':
+        _bar = contest_pie()
+    elif chart_type == 'award_pie':
+        _bar = award_pie()
+    # elif chart_type == 'award_type_bar':
+    #     _bar = award_type_bar()
+    # elif chart_type == 'award_type_pie':
+    #     _bar = award_type_pie()
     # javascript_snippet = TRANSLATOR.translate(_bar.options)     # TRANSLATOR即EChartsTranslator类
     return render_template(
         "echarts.html",
@@ -440,7 +448,7 @@ def echarts(chart_type):
 
 
 def contest_chart():
-    bar = Bar("按参赛种类统计", "这里是副标题", height=600, width="100%")
+    bar = Bar("参赛种类统计", "这里是副标题", height=500, width="100%")
     contest_types = Contest.query.with_entities(Contest.contest_type).distinct().all()
     print(contest_types)
     join_count = []
@@ -462,7 +470,7 @@ def contest_chart():
 
 
 def award_chart():
-    bar = Bar("按获奖级别统计", "这里是副标题", height=600, width="100%")
+    bar = Bar("获奖级别统计", "这里是副标题", height=500, width="100%")
     award_types = Award.query.with_entities(Award.grade).\
         filter(Award.grade != '0', Award.grade != '无').distinct().all()
     award_count = []
@@ -475,6 +483,45 @@ def award_chart():
     # bar.use_theme('dark')   # 更换主题
     return bar
 
+
+# def award_type_bar():
+#     bar = Bar("获奖情况统计", "这里是副标题", height=500, width="100%")
+
+
+def contest_pie():
+    pie = Pie("各种类竞赛参赛获奖比例", "左侧为参赛情况，右侧为获奖情况", title_pos='center', height=500, width="100%")
+
+    contest_types = Contest.query.with_entities(Contest.contest_type).distinct().all()
+    join_count = []
+    award_count = []
+    for types in contest_types:  # types[0]即竞赛种类
+        count1 = Award.query.join(  # 选出每一类的参赛人数
+            Contest, (Award.contest_id == Contest.contest_id)).filter(
+            Contest.contest_type == types[0]).count()
+        join_count.append(count1)
+        count2 = Award.query.join(  # 选出每一类的获奖人数
+            Contest, (Award.contest_id == Contest.contest_id)).filter(
+            Contest.contest_type == types[0], Award.grade != '0', Award.grade != '无').count()
+        award_count.append(count2)
+    pie.add("参赛情况", contest_types, join_count, is_label_show=True, center=[25,50])
+    pie.add("获奖情况", contest_types, award_count, is_label_show=True, center=[75,50])
+
+    return pie
+
+
+def award_pie():
+    pie = Pie("各奖项获奖比例", height=500, width="100%")
+    award_types = Award.query.with_entities(Award.grade).\
+        filter(Award.grade != '0', Award.grade != '无').distinct().all()
+    award_count = []
+    for types in award_types:  # types[0]即竞赛种类
+        # print(types[0])
+        count1 = Award.query.\
+            filter(Award.grade == types[0], Award.grade != '无').count()     # 选出每一获奖级别的人数
+        award_count.append(count1)
+    pie.add("", award_types, award_count, is_label_show=True)
+    # bar.use_theme('dark')   # 更换主题
+    return pie
 # @app.route('/echarts')
 # def my_echarts():
 #     s3d = scatter3d()
@@ -500,7 +547,7 @@ def award_chart():
 #         "#d73027",
 #         "#a50026",
 #     ]
-#     scatter3D = Scatter3D("3D scattering plot demo", width=1200, height=600)
+#     scatter3D = Scatter3D("3D scattering plot demo", width=1200, height=500)
 #     scatter3D.add("", data, is_visualmap=True, visual_range_color=range_color)
 #     return scatter3D
 #
@@ -515,5 +562,5 @@ def award_chart():
 # @app.route('/request/<team_id>/popup')
 # @login_required
 # def user_popup(team_id):
-#     team = Team.query.filter_by(team_id=team_id).first_or_404()
+#     team = Team.query.filter_by(team_id=tueam_id).first_or_404()
 #     return render_template('request_popup.html', team=team.parts)
