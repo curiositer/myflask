@@ -85,7 +85,8 @@ class EditProfileForm(FlaskForm):
 
 class EditWorkForm(FlaskForm):
     company_name = StringField('就业单位', validators=[DataRequired('请输入就业单位')])
-    company_type = StringField('单位类型', validators=[DataRequired('请输入就业类型')])
+    company_type = SelectField('单位类型', choices=[('国有企业', '国有企业'), ('央属企业', '央属企业'), ('公务员', '公务员'),
+                                                ('私有企业', '私有企业'), ('事业单位', '事业单位'), ('创业', '创业')], coerce=str)
     job = StringField('就职岗位', validators=[DataRequired('请输入岗位')])
     salary = IntegerField('就职薪水（按月份）', validators=[DataRequired('请输入薪水')])
     submit = SubmitField('提交修改')
@@ -93,7 +94,8 @@ class EditWorkForm(FlaskForm):
 
 class EditStudyForm(FlaskForm):
     college_name = StringField('录取学校', validators=[DataRequired('请输入录取学校')])
-    college_type = StringField('学校类型', validators=[DataRequired('请输入学校类型')])
+    college_type = SelectField('学校类型', choices=[('985高校', '985高校'), ('211高校', '211高校'),
+                                                ('普通高校', '普通高校')], coerce=str)
     submit = SubmitField('提交修改')
 
 
