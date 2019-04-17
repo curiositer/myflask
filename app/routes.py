@@ -8,7 +8,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student
 from datetime import datetime
 
-from pyecharts import Bar, Pie
+from pyecharts import Bar, Pie, Grid
 from pyecharts_javascripthon.api import TRANSLATOR
 
 
@@ -119,10 +119,16 @@ def edit_profile():
 @app.route('/user/edit/work', methods=['GET', 'POST'])
 @login_required
 def edit_work():
-    form = EditWorkForm()
     stu = Student.query.get(current_user.user_id)
-    if (not stu.company_name) and (not stu.college_name):
+    if stu.company_name:
+        exist = 'work'
+        form = EditWorkForm()
+    elif stu.college_name:
+        exist = 'study'
+        return redirect(url_for('edit_study'))
+    else:
         exist = 'no'
+        form = EditWorkForm()
         if form.validate_on_submit():
             stu.company_name = form.company_name.data
             stu.company_type = form.company_type.data
@@ -136,21 +142,22 @@ def edit_work():
             form.company_type.data = stu.company_type
             form.job.data = stu.job
             form.salary.data = stu.salary
-    else:
-        if stu.company_name:
-            exist = 'work'
-        elif stu.college_name:
-            exist = 'study'
+
     return render_template('normal_form.html', title='添加就业信息', form=form, exist=exist, student=stu)
 
 
 @app.route('/user/edit/study', methods=['GET', 'POST'])
 @login_required
 def edit_study():
-    form = EditStudyForm()
     stu = Student.query.get(current_user.user_id)
-    if (not stu.company_name) and (not stu.college_name):
+    if stu.company_name:
+        exist = 'work'
+    elif stu.college_name:
+        exist = 'study'
+        form = EditStudyForm()
+    else:
         exist = 'no'
+        form = EditStudyForm()
         if form.validate_on_submit():
             stu.college_name = form.college_name.data
             stu.college_type = form.college_type.data
@@ -160,11 +167,7 @@ def edit_study():
         elif request.method == 'GET':
             form.college_name.data = stu.college_name
             form.college_type.data = stu.college_type
-    else:
-        if stu.company_name:
-            exist = 'work'
-        elif stu.college_name:
-            exist = 'study'
+
     return render_template('normal_form.html', title='添加考研信息', form=form, exist=exist, student=stu)
 
 
@@ -489,8 +492,8 @@ def award_chart():
 
 
 def contest_pie():
-    pie = Pie("各种类竞赛参赛获奖比例", "左侧为参赛情况，右侧为获奖情况", title_pos='center', height=500, width="100%")
-
+    pie1 = Pie("获奖比例", title_pos='center', height=500, width="100%")
+    pie2 = Pie("参赛比例")
     contest_types = Contest.query.with_entities(Contest.contest_type).distinct().all()
     join_count = []
     award_count = []
@@ -503,10 +506,12 @@ def contest_pie():
             Contest, (Award.contest_id == Contest.contest_id)).filter(
             Contest.contest_type == types[0], Award.grade != '0', Award.grade != '无').count()
         award_count.append(count2)
-    pie.add("参赛情况", contest_types, join_count, is_label_show=True, center=[25,50])
-    pie.add("获奖情况", contest_types, award_count, is_label_show=True, center=[75,50])
-
-    return pie
+    pie1.add("参赛情况", contest_types, join_count, is_label_show=True, center=[25,50] ,legend_pos="20%")
+    pie2.add("获奖情况", contest_types, award_count, is_label_show=True, center=[75,50], legend_pos="80%")
+    gird = Grid(width=1200)
+    gird.add(pie1, grid_right="55%")
+    gird.add(pie2, grid_left="60%")
+    return gird
 
 
 def award_pie():
