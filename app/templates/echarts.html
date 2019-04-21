@@ -1,21 +1,88 @@
 {% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    <span style="color: darkred"><b>柱状图-></b></span>
-    <div class="btn-group" role="group" aria-label="...">
-        <a class="btn btn-default" href="{{ url_for('echarts', chart_type='contest_bar') }}" role="button">参赛情况-按竞赛种类</a>
-        <a class="btn btn-default" href="{{ url_for('echarts', chart_type='award_bar') }}" role="button">获奖情况-按获奖级别</a>
-{#        <a class="btn btn-default" href="{{ url_for('echarts', chart_type='award_type_bar') }}" role="button">获奖情况-按竞赛种类</a>#}
-    </div>
+    <span style="color: darkred"><b>统计类型-></b></span>
+        <a class="btn btn-primary" href="{{ url_for('echarts', chart_type='contest_bar') }}" role="button">竞赛种类</a>
+        <a class="btn btn-warning" href="{{ url_for('echarts', chart_type='award_bar') }}" role="button">获奖级别</a>
+{#        <a class="btn btn-info" href="{{ url_for('echarts', chart_type='major_bar') }}" role="button">竞赛时间</a>#}
+{#        <a class="btn btn-success" href="{{ url_for('echarts', chart_type='award_bar') }}" role="button">学生专业</a>#}
     <br>
-    <span style="color: midnightblue"><b>饼状图-></b></span>
-    <div class="btn-group" role="group" aria-label="...">
-        <a class="btn btn-default" href="{{ url_for('echarts', chart_type='contest_pie') }}" role="button">参赛情况-按竞赛种类</a>
-        <a class="btn btn-default" href="{{ url_for('echarts', chart_type='award_pie') }}" role="button">获奖情况-按获奖级别</a>
+        <span style="color: midnightblue"><b>图表类型-></b></span>
+        {% if title == '参赛（获奖）情况-按竞赛种类' %}
+            <a class="btn btn-success" href="{{ url_for('echarts', chart_type='contest_bar') }}" role="button">柱状图</a>
+            <a class="btn btn-danger" href="{{ url_for('echarts', chart_type='contest_pie') }}" role="button">饼状图</a>
+            <br><br>
+        {% elif title == '获奖情况-按获奖级别' %}
+            <a class="btn btn-success" href="{{ url_for('echarts', chart_type='award_bar') }}" role="button">柱状图</a>
+            <a class="btn btn-danger" href="{{ url_for('echarts', chart_type='award_pie') }}" role="button">饼状图</a>
+            <br><br>
+        {% elif title == '参赛（获奖）情况-按专业' %}
+            <a class="btn btn-success" href="{{ url_for('echarts', chart_type='major_bar') }}" role="button">柱状图</a>
+            <a class="btn btn-danger" href="{{ url_for('echarts', chart_type='award_pie') }}" role="button">饼状图</a>
+            <br><br>
+        {% elif title == '参赛（获奖）情况-按时间段' %}
+            <a class="btn btn-success" href="{{ url_for('echarts', chart_type='award_bar') }}" role="button">柱状图</a>
+            <a class="btn btn-danger" href="{{ url_for('echarts', chart_type='award_pie') }}" role="button">饼状图</a>
+            <br><br>
+
+        {% endif %}
+{#        <a class="btn btn-default" href="{{ url_for('echarts', chart_type='award_bar') }}" role="button">获奖情况-按获奖级别</a>#}
+{#        <a class="btn btn-default" href="{{ url_for('echarts', chart_type='award_type_bar') }}" role="button">获奖情况-按竞赛种类</a>#}
+
+
+{#    <span style="color: midnightblue"><b>饼状图-></b></span>#}
+{#    <div class="btn-group" role="group" aria-label="...">#}
+{#        <a class="btn btn-default" href="{{ url_for('echarts', chart_type='contest_pie') }}" role="button">参赛（获奖）情况-按竞赛种类</a>#}
+{#        <a class="btn btn-default" href="{{ url_for('echarts', chart_type='award_pie') }}" role="button">获奖情况-按获奖级别</a>#}
 {#        <a class="btn btn-default" href="{{ url_for('echarts', chart_type='award_type_pie') }}" role="button">获奖情况-按竞赛种类</a>#}
-    </div>
-    <br><br><br>
+{#    </div>#}
+    <form class="form-inline" method="POST">
+        <div class="form-group">
+            <label for="exampleInputName2">开始时间</label>
+            <input type="date" name="start" class="form-control" id="exampleInputName2" placeholder="请选择开始时间...">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputEmail2">结束时间</label>
+            <input type="date" name="end" class="form-control" id="exampleInputEmail2" placeholder="请选择结束时间...">
+        </div>
+        <input type="submit" class="btn btn-default" value="查询"/>
+    </form>
+    <br>
     {{ myechart|safe }}
+{#    <div id="main" style="width: 600px;height:400px;"></div>#}
+{#        <script type="text/javascript">#}
+{#        // 基于准备好的dom，初始化echarts实例#}
+{#        var myChart = echarts.init(document.getElementById('main'));#}
+{#        // 指定图表的配置项和数据#}
+        {#document.write('{{ title }}')#}
+{#        var option = {#}
+{#            title: {#}
+{#                text: '{{ title }}'#}
+{#            },#}
+{#            tooltip: {},#}
+{#            legend: {#}
+{#                data:['参赛情况', '获奖情况']#}
+{#            },#}
+{#            xAxis: {#}
+{#                data: {{ type|safe }}#}
+{#            },#}
+{#            yAxis: {},#}
+{#            series: [{#}
+{#                name: '参赛情况',#}
+{#                type: 'bar',#}
+{#                data: {{ contest }}#}
+{#            },#}
+{#            {#}
+{#                name: '获奖情况',#}
+{#                type: 'bar',#}
+{#                data: {{ award }}#}
+{#            }]#}
+{#        };#}
+{##}
+{#        // 使用刚指定的配置项和数据显示图表。#}
+{#        myChart.setOption(option);#}
+{#    </script>#}
 {#    <div id="{{ chart_id }}" style="width:{{ my_width }};height:{{ my_height }}px;"></div>#}
 {#    <script type="text/javascript">#}
 {#        window.onload = function() {#}

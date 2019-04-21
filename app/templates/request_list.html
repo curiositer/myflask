@@ -5,12 +5,10 @@
 
     {% if current_user.type == 'student' %}
         {#  如果为学生，因为只能查看自己的申请情况，故将个人参赛和组队参赛分开查看 #}
-    <div class="btn-group" role="group" aria-label="...">
-        <a class="btn btn-default" href="{{ url_for('request_list') }}" role="button">个人</a>
-        <a class="btn btn-default" href="{{ url_for('request_list_team') }}" role="button">组队</a>
+        <a class="btn btn-success" href="{{ url_for('request_list') }}" role="button">个人</a>
+        <a class="btn btn-danger" href="{{ url_for('request_list_team') }}" role="button">组队</a>
         <br><br>
         <span style="color: red;">请先选择个人或组队</span>
-    </div>
     {% endif %}
 
     <table class="table table-hover">

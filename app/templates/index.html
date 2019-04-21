@@ -1,11 +1,8 @@
 {% extends "base.html" %}   {#继承自base.html#}
 
 {% block app_content %}
-    <h1>Hi, {{ current_user.username }}!</h1>
-    <form action="" method="post">
-        <button  type="button" onclick="myFunction(this)" name="enable" id="{{counter}}"
-             class="btn btn-primary" > Enable </button>
-    </form>
+    <h1>{{ current_user.username }}，欢迎您！</h1>
+
 
 
 

@@ -6,6 +6,14 @@
     {% for jsfile_name in script_list %}
         <script src="{{ host }}/{{ jsfile_name }}.js"></script>
     {% endfor %}
+    <script src="static/js/echarts.js"></script>
+    <!-- 引入 echarts.js -->
+
+{% endblock %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{url_for('static', filename='css/css.css')}}">
 {% endblock %}
 
 {% block title %}
@@ -37,9 +45,9 @@
 
 {#                    <li>左侧</li>#}
                 </ul>
-                <ul class="nav navbar-nav navbar-right">    {#导航栏右侧显示#}
+                <ul class="nav navbar-right navbar-nav">    {#导航栏右侧显示#}
                     {% if current_user.is_anonymous %}
-                    <li><a href="{{ url_for('login') }}">登陆</a></li>
+                        <li><a href="{{ url_for('login') }}">登陆</a></li>
                     {% else %}
                         {% if current_user.type=='admin' %}   {#管理员功能#}
                             <li><a href="{{ url_for('add_user') }}">添加用户</a></li>
@@ -201,10 +209,5 @@
                 alert("修改出错");
             });
             }
-
-        $(function() {
-            $('#myTab a:last').tab('show');
-            // write start up code here
-        });
     </script>
 {% endblock %}
