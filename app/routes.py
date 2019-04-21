@@ -2,11 +2,11 @@ from flask import render_template
 import os
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, EditPassword, EditWorkForm, EditStudyForm,\
-    AddContestForm, ApplyContestForm, AddUserForm, EditAwardForm
-from flask import render_template, flash, redirect, url_for, request, send_from_directory, make_response
+    AddContestForm, ApplyContestForm, AddUserForm, EditAwardForm, EditCreateForm, EditTimeForm
+from flask import render_template, flash, redirect, url_for, request, send_from_directory, make_response, json
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student
-from datetime import datetime
+import datetime
 
 from pyecharts import Bar, Pie, Grid
 from pyecharts_javascripthon.api import TRANSLATOR
@@ -17,6 +17,12 @@ from pyecharts_javascripthon.api import TRANSLATOR
 @login_required
 def index():
     return render_template('index.html')
+
+
+@app.route('/bootstrap')
+@login_required
+def bootstrap():
+    return render_template('bootstrap.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -50,12 +56,12 @@ def add_user():
         id = int(form.user_id.data)
         if user_type == 'student':
             student = Student(user_id=id, username=form.username.data, email=form.email.data, type=form.type.data,
-                              stu_class=form.stu_class.data, tel_num=form.tel_num.data)
+                              major_in=form.major_in.data, tel_num=form.tel_num.data)
             student.set_password(form.password.data)
             db.session.add(student)
         elif user_type == 'teacher':
             teacher = Teacher(user_id=id, username=form.username.data, email=form.email.data, tel_num=form.tel_num.data,
-                              type=form.type.data,stu_class=form.stu_class.data,tea_type=form.tea_type.data)
+                              type=form.type.data, tea_type=form.tea_type.data)
             teacher.set_password(form.password.data)
             db.session.add(teacher)
         else:
@@ -78,7 +84,7 @@ def register():
         id = int(form.user_id.data)
         print(id)
         student = Student(user_id=id, username=form.username.data, email=form.email.data, type='student',
-                          stu_class=form.stu_class.data, tel_num=form.tel_num.data)
+                          major_in=form.major_in.data, tel_num=form.tel_num.data)
         student.set_password(form.password.data)
         print(student)
         db.session.add(student)
@@ -123,6 +129,9 @@ def edit_work():
     if stu.company_name:
         exist = 'work'
         form = EditWorkForm()
+    elif stu.create_type:
+        exist = 'create'
+        return redirect(url_for('edit_create'))
     elif stu.college_name:
         exist = 'study'
         return redirect(url_for('edit_study'))
@@ -143,7 +152,7 @@ def edit_work():
             form.job.data = stu.job
             form.salary.data = stu.salary
 
-    return render_template('normal_form.html', title='添加就业信息', form=form, exist=exist, student=stu)
+    return render_template('edit_work.html', title='添加就业信息', form=form, exist=exist, student=stu)
 
 
 @app.route('/user/edit/study', methods=['GET', 'POST'])
@@ -152,6 +161,8 @@ def edit_study():
     stu = Student.query.get(current_user.user_id)
     if stu.company_name:
         exist = 'work'
+    elif stu.create_type:
+        exist = 'create'
     elif stu.college_name:
         exist = 'study'
         form = EditStudyForm()
@@ -161,14 +172,43 @@ def edit_study():
         if form.validate_on_submit():
             stu.college_name = form.college_name.data
             stu.college_type = form.college_type.data
+            stu.after_major = form.after_major.data
             db.session.commit()
             flash('信息修改成功.')
             return redirect(url_for('edit_study'))
         elif request.method == 'GET':
             form.college_name.data = stu.college_name
             form.college_type.data = stu.college_type
+            form.after_major.data = stu.after_major
 
-    return render_template('normal_form.html', title='添加考研信息', form=form, exist=exist, student=stu)
+    return render_template('edit_work.html', title='添加考研信息', form=form, exist=exist, student=stu)
+
+
+@app.route('/user/edit/create', methods=['GET', 'POST'])
+@login_required
+def edit_create():
+    stu = Student.query.get(current_user.user_id)
+    if stu.company_name:
+        exist = 'work'
+    elif stu.college_name:
+        exist = 'study'
+    elif stu.create_type:
+        exist = 'create'
+        form = EditCreateForm()
+    else:
+        exist = 'no'
+        form = EditCreateForm()
+        if form.validate_on_submit():
+            stu.create_type = form.create_type.data
+            stu.create_job = form.create_job.data
+            db.session.commit()
+            flash('信息修改成功.')
+            return redirect(url_for('edit_create'))
+        elif request.method == 'GET':
+            form.create_type.data = stu.create_type
+            form.create_job.data = stu.create_job
+
+    return render_template('edit_work.html', title='添加创业信息', form=form, exist=exist, student=stu)
 
 
 @app.route('/user/edit/password', methods=['GET', 'POST'])
@@ -247,7 +287,7 @@ def apply_contest(contest_id):
     if form.validate_on_submit():
         if not form.name2.data:
             req = Request(user_id=form.id1.data,contest_id=contest_id,status=0,sup_teacher=form.teacher.data,
-                          notes=form.notes.data, add_time=datetime.now(), user_type=0)
+                          notes=form.notes.data, add_time=datetime.datetime.now(), user_type=0)
             db.session.add(req)
         else:
             team = Team(team_name=form.team_name.data)
@@ -271,7 +311,7 @@ def apply_contest(contest_id):
             db.session.add(team)
             # print(team.team_id)
             req = Request(user_id=team.team_id, contest_id=contest_id, status=0, sup_teacher=form.teacher.data,
-                          notes=form.notes.data, add_time=datetime.now(), user_type=1)
+                          notes=form.notes.data, add_time=datetime.datetime.now(), user_type=1)
             db.session.add(req)
         db.session.commit()
         flash('恭喜您，竞赛%s已申请成功!' % contest.contest_name)
@@ -420,26 +460,61 @@ def award_details(award_id):
                            award=award, user_details=stu, team=team)
 
 
-@app.route("/echarts/<chart_type>")
+@app.route("/echarts/<chart_type>", methods=['GET', 'POST'])
 def echarts(chart_type):
-    if chart_type == 'contest_bar':
-        _bar = contest_chart()
-    elif chart_type == 'award_bar':
-        _bar = award_chart()
-    elif chart_type == 'contest_pie':
-        _bar = contest_pie()
-    elif chart_type == 'award_pie':
-        _bar = award_pie()
+    end = datetime.date.today()
+    start = datetime.datetime(end.year, 1, 1)  # 默认时间为今年第一天到今天为止
+    print(type(end))        # <class 'datetime.date'>
+    form = EditTimeForm()
+    if request.method == 'POST':
+        start = request.form['start']
+        end = request.form['end']
+        # print(start)
+    # elif request.method == 'GET':
+    #     form.start.data = start
+    #     form.end.data = end
+    if chart_type == 'contest_bar':     # 竞赛种类-柱状图
+        _bar = contest_bar(start, end)
+        # type, contest, award = contest_bar()
+        title = '参赛（获奖）情况-按竞赛种类'
+    elif chart_type == 'award_bar':     # 获奖级别-柱状图
+        _bar = award_bar(start, end)
+        title = '获奖情况-按获奖级别'
+    elif chart_type == 'contest_pie':   # 竞赛种类-饼图
+        _bar = contest_pie(start, end)
+        title = '参赛（获奖）情况-按竞赛种类'
+    elif chart_type == 'award_pie':     # 获奖级别-饼图
+        _bar = award_pie(start, end)
+        title = '获奖情况-按获奖级别'
+    elif chart_type == 'major_bar':   # 专业-柱状图
+        _bar = major_bar(start, end)
+        title = '参赛（获奖）情况-按专业类型'
+    # elif chart_type == 'time_bar':     # 竞赛时间-柱状图
+
+        # _bar = time_bar(start, end)
+
+    # elif chart_type == 'major_pie':   # 专业-饼图
+    #     _bar = major_pie()
+    #     title = '参赛（获奖）情况-按专业类型'
+
     # elif chart_type == 'award_type_bar':
     #     _bar = award_type_bar()
     # elif chart_type == 'award_type_pie':
     #     _bar = award_type_pie()
     # javascript_snippet = TRANSLATOR.translate(_bar.options)     # TRANSLATOR即EChartsTranslator类
+    # print(title,type,contest,award)
     return render_template(
         "echarts.html",
+        title=title,
+        # type=type,
+        # contest=contest,
+        # award=award
+
+        form=form,
         myechart=_bar.render_embed(),
         host=app.config['REMOTE_HOST'],
         script_list=_bar.get_js_dependencies(),
+
         # chart_id=_bar.chart_id,
         # renderer=_bar.renderer,
         # my_width="100%",
@@ -450,39 +525,45 @@ def echarts(chart_type):
     )
 
 
-def contest_chart():
-    bar = Bar("参赛种类统计", "这里是副标题", height=500, width="100%")
+def contest_bar(start, end):
+    bar = Bar("参赛种类统计", height=500, width="100%")
     contest_types = Contest.query.with_entities(Contest.contest_type).distinct().all()
-    print(contest_types)
+    # print(contest_types)
     join_count = []
     award_count = []
+    type = []
     for types in contest_types:     # types[0]即竞赛种类
-        # print(types[0])
+        # print(types)
+        type.append(types[0])
         count1 = Award.query.join(  # 选出每一类的参赛人数
             Contest, (Award.contest_id == Contest.contest_id)).filter(
-            Contest.contest_type == types[0]).count()
+            Contest.contest_type == types[0], Contest.contest_time >= start, Contest.contest_time <= end).count()
         join_count.append(count1)
         count2 = Award.query.join(  # 选出每一类的获奖人数
             Contest, (Award.contest_id == Contest.contest_id)).filter(
-            Contest.contest_type == types[0], Award.grade != '0', Award.grade != '无').count()
+            Contest.contest_type == types[0], Contest.contest_time >= start, Contest.contest_time <= end,
+            Award.grade != '0', Award.grade != '无').count()
         award_count.append(count2)
-    bar.add("参赛人数", contest_types, join_count)
-    bar.add("获奖人数", contest_types, award_count)
+    # print(type)
+    bar.add("参赛人数", contest_types, join_count, legend_text_size=20, xaxis_label_textsize=20)
+    bar.add("获奖人数", contest_types, award_count, legend_text_size=20, xaxis_label_textsize=20)
     # bar.use_theme('dark')   # 更换主题
     return bar
+    # return type,join_count,award_count
 
 
-def award_chart():
-    bar = Bar("获奖级别统计", "这里是副标题", height=500, width="100%")
+def award_bar(start, end):
+    bar = Bar("获奖级别统计", height=500, width="100%")
     award_types = Award.query.with_entities(Award.grade).\
         filter(Award.grade != '0', Award.grade != '无').distinct().all()
     award_count = []
     for types in award_types:  # types[0]即竞赛种类
         # print(types[0])
-        count1 = Award.query.\
-            filter(Award.grade == types[0], Award.grade != '无').count()     # 选出每一获奖级别的人数
+        count1 = Award.query.join(Contest, (Contest.contest_id == Award.contest_id)).filter(
+            Contest.contest_time >= start, Contest.contest_time <= end,
+            Award.grade == types[0], Award.grade != '无').count()    # 选出每一获奖级别的人数
         award_count.append(count1)
-    bar.add("获奖人数", award_types, award_count)
+    bar.add("获奖人数", award_types, award_count, legend_text_size=20, label_text_size=20, xaxis_label_textsize=20)
     # bar.use_theme('dark')   # 更换主题
     return bar
 
@@ -491,7 +572,7 @@ def award_chart():
 #     bar = Bar("获奖情况统计", "这里是副标题", height=500, width="100%")
 
 
-def contest_pie():
+def contest_pie(start, end):
     pie1 = Pie("获奖比例", title_pos='center', height=500, width="100%")
     pie2 = Pie("参赛比例")
     contest_types = Contest.query.with_entities(Contest.contest_type).distinct().all()
@@ -500,43 +581,87 @@ def contest_pie():
     for types in contest_types:  # types[0]即竞赛种类
         count1 = Award.query.join(  # 选出每一类的参赛人数
             Contest, (Award.contest_id == Contest.contest_id)).filter(
-            Contest.contest_type == types[0]).count()
+            Contest.contest_type == types[0], Contest.contest_time >= start, Contest.contest_time <= end).count()
         join_count.append(count1)
         count2 = Award.query.join(  # 选出每一类的获奖人数
             Contest, (Award.contest_id == Contest.contest_id)).filter(
-            Contest.contest_type == types[0], Award.grade != '0', Award.grade != '无').count()
+            Contest.contest_type == types[0], Contest.contest_time >= start, Contest.contest_time <= end,
+            Award.grade != '0', Award.grade != '无').count()
         award_count.append(count2)
-    pie1.add("参赛情况", contest_types, join_count, is_label_show=True, center=[25,50] ,legend_pos="20%")
-    pie2.add("获奖情况", contest_types, award_count, is_label_show=True, center=[75,50], legend_pos="80%")
+    pie1.add("参赛情况", contest_types, join_count, is_label_show=True, center=[25,60] ,legend_pos="20%", label_text_size=20)
+    pie2.add("获奖情况", contest_types, award_count, is_label_show=True, center=[75,60], legend_pos="80%", label_text_size=20)
     gird = Grid(width=1200)
     gird.add(pie1, grid_right="55%")
     gird.add(pie2, grid_left="60%")
     return gird
 
 
-def award_pie():
+def award_pie(start, end):
     pie = Pie("各奖项获奖比例", height=500, width="100%")
     award_types = Award.query.with_entities(Award.grade).\
         filter(Award.grade != '0', Award.grade != '无').distinct().all()
     award_count = []
     for types in award_types:  # types[0]即竞赛种类
         # print(types[0])
-        count1 = Award.query.\
-            filter(Award.grade == types[0], Award.grade != '无').count()     # 选出每一获奖级别的人数
+        count1 = Award.query.join(Contest, (Contest.contest_id == Award.contest_id)).filter(
+            Contest.contest_time >= start, Contest.contest_time <= end,
+            Award.grade == types[0], Award.grade != '无').count()     # 选出每一获奖级别的人数
         award_count.append(count1)
-    pie.add("", award_types, award_count, is_label_show=True)
+    pie.add("", award_types, award_count, is_label_show=True, label_text_size=20)
     # bar.use_theme('dark')   # 更换主题
     return pie
-# @app.route('/echarts')
-# def my_echarts():
-#     s3d = scatter3d()
-#     return render_template(
-#         "echarts.html",
-#         myechart=s3d.render_embed(),
-#         host=app.config['REMOTE_HOST'],
-#         script_list=s3d.get_js_dependencies(),
-#     )
-#
+
+
+def major_bar():
+    bar = Bar("专业类型统计", height=500, width="100%")
+    major_types = ['机械工程', '软件工程', '工业工程', '自动化', '电子信息工程', '汽车服务工程']
+
+    join_count = []
+    award_count = []
+    for types in major_types:  # types即专业种类
+        count11 = Award.query.join(Student, (Student.user_id == Award.user_id)).\
+            filter(Student.major_in == types, Award.user_type == 0).count()
+        print(count11)
+        # count12 = Award.query.join(Team, (Team.team_id == Award.user_id)).\
+        #     filter(Team.parts.major_in == types, Award.user_type == 1).count()
+        # print(str(count12))
+        # count1 = Award.query.join(  # 选出每一类的参赛人数
+        #     Contest, (Award.contest_id == Contest.contest_id)).filter(
+        #     Contest.contest_type == types).count()
+        # join_count.append(count1)
+        # count2 = Award.query.join(  # 选出每一类的获奖人数
+        #     Contest, (Award.contest_id == Contest.contest_id)).filter(
+        #     Contest.contest_type == types, Award.grade != '0', Award.grade != '无').count()
+        # award_count.append(count2)
+    # bar.add("参赛人数", contest_types, join_count)
+    # bar.add("获奖人数", contest_types, award_count)
+    # bar.use_theme('dark')   # 更换主题
+    return bar
+
+
+def time_bar(start, end):
+
+    count1 = Award.query.join(  # 选出每一类的参赛人数
+        Contest, (Award.contest_id == Contest.contest_id)).filter(
+        Contest.contest_time >= start, Contest.contest_time < end ).count()
+    join_count.append(count1)
+    count2 = Award.query.join(  # 选出每一类的获奖人数
+        Contest, (Award.contest_id == Contest.contest_id)).filter(
+        Contest.contest_time >= start, Contest.contest_time < end, Award.grade != '0', Award.grade != '无').count()
+    award_count.append(count2)
+
+
+
+@app.route('/chart')
+def my_echarts():
+    type = ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
+    data = [5, 20, 36, 10, 10, 20]
+    data2 = [15, 5, 7, 3, 5, 15]
+    title = 'dslalflk'
+    return render_template(
+        "add_user.html", type_data=type, title=title, data=data, data2=data2
+    )
+
 #
 # def scatter3d():
 #     data = [generate_3d_random_point() for _ in range(80)]

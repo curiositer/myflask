@@ -15,9 +15,9 @@ from datetime import datetime
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
     user_id = db.Column(db.Integer, primary_key=True, unique=True)
-    username = db.Column(db.String(64), index=True)
+    username = db.Column(db.String(64), index=True, nullable=True)
     email = db.Column(db.String(120), unique=True)
-    tel_num = db.Column(db.Integer)
+    tel_num = db.Column(db.String(20))
     password_hash = db.Column(db.String(128))
     type = db.Column(db.String(10), default='student')
     # posts = db.relationship('Post', backref='author', lazy='dynamic')
@@ -62,13 +62,16 @@ team_student = db.Table('team_student',
 class Student(User):
     __tablename__ = 'student'
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
-    stu_class = db.Column(db.String(30))
+    major_in = db.Column(db.String(30))
     company_name = db.Column(db.String(30))
-    company_type = db.Column(db.String(30))
-    job = db.Column(db.String(30))
+    company_type = db.Column(db.String(30))     # 公司级别（类型）
+    job = db.Column(db.String(30))   # 在公司中所担任的职务
     salary = db.Column(db.Integer)
     college_name = db.Column(db.String(30))
+    after_major = db.Column(db.String(30))     # 考研专业
     college_type = db.Column(db.String(30))
+    create_type = db.Column(db.String(30))  # 创业公司类型
+    create_job = db.Column(db.String(30))   # 在公司中所担任的职务
 
     __mapper_args__ = {
         'polymorphic_identity': 'student',
@@ -87,7 +90,6 @@ class Team(db.Model):
 class Teacher(User):
     __tablename__ = 'teacher'
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
-    stu_class = db.Column(db.String(30))
     tea_type = db.Column(db.Integer, default=0)
 
     __mapper_args__ = {
@@ -135,7 +137,7 @@ class Contest(db.Model):
 class Request(db.Model):
     __tablename__ = 'request'
     request_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, nullable=False)
     user_type = db.Column(db.Integer, nullable=False)
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
     sup_teacher = db.Column(db.Integer, db.ForeignKey('user.user_id'))
@@ -153,7 +155,7 @@ class Request(db.Model):
 class Award(db.Model):
     __tablename__ = 'award'
     award_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, nullable=False)
     user_type = db.Column(db.Integer, nullable=False)
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
     sup_teacher = db.Column(db.Integer, db.ForeignKey('user.user_id'))

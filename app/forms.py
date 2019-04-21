@@ -17,10 +17,10 @@ class LoginForm(FlaskForm):
 class AddUserForm(FlaskForm):
     type = SelectField('用户类型', choices=[('admin', '管理员'), ('student', '学生'), ('teacher', '教师')], coerce=str)
     username = StringField('姓名', validators=[DataRequired('请输入姓名')])
-    user_id = StringField('学号', validators=[DataRequired('请输入学号')])
+    user_id = StringField('学号（工号）', validators=[DataRequired('请输入学号')])
     email = StringField('邮箱', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
     tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话')])
-    stu_class = StringField('班级(学生、教师填写)')
+    stu_class = StringField('专业(学生填写)')
     tea_type = SelectField('教师类型（仅教师填写）',
                            choices=[(-1, '请选择...'), (0, '普通教师'), (1, '管理教师')], coerce=int)
     password = PasswordField('密码', validators=[DataRequired('请输入密码')])
@@ -49,7 +49,8 @@ class RegistrationForm(FlaskForm):
     user_id = StringField('学号', validators=[DataRequired('请输入学号')])
     email = StringField('邮箱', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
     tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话')])
-    stu_class = StringField('班级')
+    major_in = StringField('专业', choices=[('机械工程', '机械工程'), ('软件工程', '软件工程'), ('工业工程', '工业工程'),
+                                                ('自动化', '自动化'), ('电子信息工程', '电子信息工程'), ('汽车服务工程', '汽车服务工程')], coerce=str)
     password = PasswordField('密码', validators=[DataRequired('请输入密码')])
     password2 = PasswordField(
         '确认密码', validators=[DataRequired(), EqualTo('password', message='请确认两次输入密码是否一致')])
@@ -96,6 +97,13 @@ class EditStudyForm(FlaskForm):
     college_name = StringField('录取学校', validators=[DataRequired('请输入录取学校')])
     college_type = SelectField('学校类型', choices=[('985高校', '985高校'), ('211高校', '211高校'),
                                                 ('普通高校', '普通高校')], coerce=str)
+    after_major = StringField('录取专业（请填写专业全称）', validators=[DataRequired('请输入录取专业')])
+    submit = SubmitField('提交修改')
+
+
+class EditCreateForm(FlaskForm):
+    create_type = StringField('创业公司经营类型', validators=[DataRequired('请输入类型')])
+    create_job = StringField('公司中担任的职务', validators=[DataRequired('请输入职务')])
     submit = SubmitField('提交修改')
 
 
@@ -109,8 +117,8 @@ class EditPassword(FlaskForm):
 
 class AddContestForm(FlaskForm):
     name = StringField('竞赛名', validators=[DataRequired()])
-    type = StringField('竞赛类型', validators=[DataRequired()])
-    time = DateField('竞赛时间(请按照2010-1-1的格式输入)', validators=[DataRequired("请按照2010-1-1的格式输入")],
+    type = StringField('竞赛类型（科技、人文、体育、理科、综合）', validators=[DataRequired()])
+    time = DateField('竞赛时间', validators=[DataRequired("请按照2010-1-1的格式输入")],
                      format='%Y-%m-%d', widget=widgets.DatePickerWidget())
     details = StringField('竞赛描述', validators=[Length(min=0, max=150)])
     level = SelectField('竞赛等级', choices=[('校级', '校级'), ('市级', '市级'),
@@ -140,3 +148,11 @@ class EditAwardForm(FlaskForm):
     grade = SelectField('获奖等级', choices=[('一等奖', '一等奖'), ('二等奖', '二等奖'),
                                          ('三等奖', '三等奖'), ('优秀奖', '优秀奖'), ('无', '无')], coerce=str)
     submit = SubmitField('提交修改')
+
+
+class EditTimeForm(FlaskForm):
+    start = DateField('开始时间', validators=[DataRequired("请按照2010-1-1的格式输入")],
+                      format='%Y-%m-%d', widget=widgets.DatePickerWidget())
+    end = DateField('结束时间', validators=[DataRequired("请按照2010-1-1的格式输入")],
+                    format='%Y-%m-%d', widget=widgets.DatePickerWidget())
+    submit = SubmitField('查询')
