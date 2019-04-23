@@ -7,6 +7,7 @@
         <script src="{{ host }}/{{ jsfile_name }}.js"></script>
     {% endfor %}
     <script src="static/js/echarts.js"></script>
+
     <!-- 引入 echarts.js -->
 
 {% endblock %}
@@ -25,7 +26,8 @@
 {% endblock %}
 
 {% block navbar %}
-    <nav class="navbar navbar-default">
+    <img style="position:relative;left:200px;" src="{{ url_for('static', filename='image/logo_03.jpg') }}" alt="logo">
+    <nav class="navbar mynavbar">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -47,12 +49,12 @@
                 </ul>
                 <ul class="nav navbar-right navbar-nav">    {#导航栏右侧显示#}
                     {% if current_user.is_anonymous %}
-                        <li><a href="{{ url_for('login') }}">登陆</a></li>
+                        <li class="login"><a href="{{ url_for('login') }}">登陆</a></li>
                     {% else %}
                         {% if current_user.type=='admin' %}   {#管理员功能#}
                             <li><a href="{{ url_for('add_user') }}">添加用户</a></li>
                             <li><a href="{{ url_for('add_contest') }}">添加竞赛</a></li>
-
+                            <li><a href="{{ url_for('add_notice') }}">添加公告</a></li>
                     {% elif current_user.type=='student' %} {#学生功能#}
     {#                    <a href="{{ url_for('apply_contest') }}">申报竞赛</a>#}   {# 已添加到竞赛列表中 #}
 
@@ -60,7 +62,8 @@
 
                     {% endif %}
 
-                    <li><a href="{{ url_for('echarts', chart_type='contest_bar') }}">统计图表</a></li>
+                        <li><a href="{{ url_for('echarts', chart_type='contest_bar') }}">统计图表</a></li>
+                        <li><a href="{{ url_for('relate', type='contest') }}">相关性分析</a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             列表
@@ -70,6 +73,7 @@
                             <li><a href="{{ url_for('request_list') }}">申请列表</a></li>
                             <li><a href="{{ url_for('contest_list') }}">竞赛列表</a></li>
                             <li><a href="{{ url_for('award_list') }}">获奖列表</a></li>
+                            <li><a href="{{ url_for('notice_list') }}">公告列表</a></li>
                         </ul>
                     </li>
                     <li class="dropdown">
@@ -95,49 +99,15 @@
     </nav>
 {% endblock %}
 
-{#    <body>#}
-{#        <div>#}
-{#            菜单:#}
-{#            <a href="{{ url_for('index') }}">主页</a>#}
-{#            {% if current_user.is_anonymous %}#}
-{#                <a href="{{ url_for('login') }}">登陆</a>#}
-{#            {% else %}#}
-{#                {% if current_user.type==0 %}   {#管理员功能#}
-{#                    <a href="{{ url_for('add_contest') }}">添加竞赛</a>#}
-{#                    <a href="{{ url_for('add_user') }}">添加用户</a>#}
-{#                {% elif current_user.type==1 %} {#学生功能#}
-{#                    <a href="{{ url_for('apply_contest') }}">申报竞赛</a>#}
-{##}
-{#                {% elif current_user.type==2 %} {#教师功能#}
-{#                    <a href="{{ url_for('request_list') }}">申请列表</a>#}
-{#                {% endif %}#}
-{#                <a href="{{ url_for('user', username=current_user.username) }}">个人信息</a>#}
-{#                <a href="{{ url_for('contest_list') }}">竞赛列表</a>#}
-{#                <a href="{{ url_for('contest') }}">参赛情况</a>#}
-{#                <a href="{{ url_for('logout') }}">注销</a>#}
-{##}
-{#            {% endif %}#}
-{#        </div>#}
-{#        <hr>#}
-{#        {% with messages = get_flashed_messages() %}#}
-{#        {% if messages %}#}
-{#        <ul>#}
-{#            {% for message in messages %}#}
-{#            <li>{{ message }}</li>#}
-{#            {% endfor %}#}
-{#        </ul>#}
-{#        {% endif %}#}
-{#        {% endwith %}#}
-{#        {% block content %}{% endblock %}#}
-{#    </body>#}
-
 {% block content %}
-    <div class="container">
-       {% with messages = get_flashed_messages() %}     {# 显示警示信息#}
+    <body>
+    <div class="container main_container">
+        {% with messages = get_flashed_messages() %}     {# 显示警示信息#}
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-info" role="alert">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>{{ message }}
+{#                <div class="alert alert-error" role="alert">#}
+                <div class="alert alert-error" role="alert">
+                    {{ message }}<button type="button" class="close" data-dismiss="alert">&times;</button>
                 </div>
             {% endfor %}
         {% endif %}
@@ -146,6 +116,7 @@
         {# 其他的模板应该用block app_content来继承#}
         {% block app_content %}{% endblock %}
     </div>
+    <body>
 {% endblock %}
 
 {% block scripts %}

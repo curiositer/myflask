@@ -67,6 +67,21 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('该邮箱已被使用！')
 
 
+class EditNoticeForm(FlaskForm):
+    title = StringField('标题', validators=[DataRequired('请输入标题')])
+    text = TextAreaField('正文', validators=[DataRequired('请输入正文')])
+    file1 = FileField("相关文件(请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg')",
+                     validators=[FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'],
+                                             "请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'")])
+    file2 = FileField("相关文件",
+                     validators=[FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'],
+                                             "请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'")])
+    file3 = FileField("相关文件",
+                     validators=[FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'],
+                                             "请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'")])
+    submit = SubmitField('发布')
+
+
 class EditProfileForm(FlaskForm):
     email = StringField('电子邮箱', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
     tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话')])

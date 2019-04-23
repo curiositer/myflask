@@ -2,21 +2,30 @@ from flask import render_template
 import os
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, EditPassword, EditWorkForm, EditStudyForm,\
-    AddContestForm, ApplyContestForm, AddUserForm, EditAwardForm, EditCreateForm, EditTimeForm
+    AddContestForm, ApplyContestForm, AddUserForm, EditAwardForm, EditCreateForm, EditTimeForm, EditNoticeForm
 from flask import render_template, flash, redirect, url_for, request, send_from_directory, make_response, json
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student
+from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student, Notice
 import datetime
 
-from pyecharts import Bar, Pie, Grid
+from pyecharts import Bar, Pie, Grid, Page, Scatter, Line, configure        # 用于画图表
 from pyecharts_javascripthon.api import TRANSLATOR
+configure(global_theme='roma')         # 规定pycharts的主题roma chalk halloween essos
+
+import numpy as np      # 用于计算相关性
+from scipy.stats import pearsonr
+
+from sqlalchemy import func     # 为在query中使用func.count()
 
 
 @app.route('/')
 @app.route('/index')
 @login_required
 def index():
-    return render_template('index.html')
+    lists = Notice.query.limit(10).all()
+    # print(lists)
+    # print(lists[0].title)
+    return render_template('index.html', title='主页', lists=lists)
 
 
 @app.route('/bootstrap')
@@ -86,12 +95,112 @@ def register():
         student = Student(user_id=id, username=form.username.data, email=form.email.data, type='student',
                           major_in=form.major_in.data, tel_num=form.tel_num.data)
         student.set_password(form.password.data)
-        print(student)
+        # print(student)
         db.session.add(student)
         db.session.commit()
         flash('恭喜您，学生用户%s已注册成功!' % form.username.data)
         return redirect(url_for('login'))
     return render_template('normal_form.html', title='注册', form=form)
+
+
+@app.route('/notice/add', methods=['GET', 'POST'])
+@login_required
+def add_notice():
+    form = EditNoticeForm()
+    if form.validate_on_submit():
+        filename1, filename2, filename3 = None, None, None
+        if form.file1.data:
+            filename1 = form.file1.data.filename
+        print(filename1)
+        if form.file2.data:
+            filename2 = form.file2.data.filename
+        if form.file3.data:
+            filename3 = form.file3.data.filename
+        notice = Notice(title=form.title.data, text=form.text.data, filename1=filename1, filename2=filename2,
+                        filename3=filename3, time=datetime.datetime.today().date())
+        db.session.add(notice)
+        db.session.flush()
+        # print(form.file1.data)
+        # print(filename)
+        basedir = os.path.abspath(os.path.dirname(__file__))  # 获取当前项目的绝对路径
+        file_dir = os.path.join(basedir, app.config['NOTICE_FOLDER'], str(notice.id))  # 存在以竞赛名的子文件夹中
+        if not os.path.exists(file_dir):
+            os.makedirs(file_dir)  # 文件夹不存在就创建
+        if form.file1.data:
+            form.file1.data.save(os.path.join(file_dir, filename1))  # 将上传的文件保存到服务器;
+        if form.file2.data:
+            form.file2.data.save(os.path.join(file_dir, filename2))
+        if form.file3.data:
+            form.file3.data.save(os.path.join(file_dir, filename3))
+        db.session.commit()
+        flash('公告添加成功.')
+        return redirect(url_for('index'))
+
+    return render_template('edit_notice.html', title='添加公告', form=form)
+
+
+@app.route('/notice/edit/<id>', methods=['GET', 'POST'])
+@login_required
+def edit_notice(id):
+    form = EditNoticeForm()
+    notice = Notice.query.get(id)
+    if form.validate_on_submit():
+        notice.title = form.title.data
+        notice.text = form.text.data
+        db.session.commit()
+        flash("公告修改成功！")
+        return notice_details(id)
+    elif request.method == 'GET':
+        form.title.data = notice.title
+        form.text.data = notice.text
+    return render_template('normal_form.html', title='编辑公告', form=form)
+
+
+@app.route('/notice/delete/<id>', methods=['GET', 'POST'])
+@login_required
+def delete_notice(id):
+    notice = Notice.query.get(id)
+    db.session.delete(notice)
+    db.session.commit()
+    flash('删除成功！')
+    return notice_list()
+
+
+@app.route('/notice')
+@login_required
+def notice_list():
+    page = request.args.get('page', 1, type=int)
+    lists = Notice.query.filter().paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('notice_list', page=lists.next_num) \
+        if lists.has_next else None
+    prev_url = url_for('notice_list', page=lists.prev_num) \
+        if lists.has_prev else None
+    return render_template("notice_list.html", title='公告列表',
+                           lists=lists.items, next_url=next_url, prev_url=prev_url)
+
+
+@app.route('/notice/<id>', methods=['GET', 'POST'])
+@login_required
+def notice_details(id):
+    notice = Notice.query.get(id)
+    # print(notice.text)
+    return render_template("notice_details.html", list=notice)
+    # db.session.delete(notice)
+    # db.session.commit()
+    # flash('删除成功！')
+
+
+@app.route("/notice/download/<id>/<filename>")
+def notice_downloader(id, filename):
+    dirpath = os.path.join(app.root_path, 'notice', id)  #
+    # print(contest_name)
+    file_name = filename
+    # print(file_name)
+    # return redirect(url_for('index'))
+    response = make_response(send_from_directory(dirpath, file_name, as_attachment=True) )  # as_attachment=True 一定要写，不然会变成打开，而不是下载
+    response.headers["Content-Disposition"] = "attachment; filename={}".format(file_name.encode().decode('latin-1'))
+    return response
 
 
 @app.route('/user/<username>')
@@ -230,6 +339,7 @@ def edit_password():
 
 
 @app.route('/contest')
+@login_required
 def contest_list():
     page = request.args.get('page', 1, type=int)
     lists = Contest.query.filter().paginate(
@@ -460,11 +570,103 @@ def award_details(award_id):
                            award=award, user_details=stu, team=team)
 
 
+def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相应的皮尔逊系数
+    '''
+    将字典类型转换为两个数组，并计算相应的皮尔逊系数
+    :param dict1: 原字典
+    :return: pear,x,y
+    '''
+    x,y = [],[]     # 每个学生对应的参赛情况和就业情况
+    # for key,value in dict1.items():
+    #     x.append(key)
+    #     y.append(value)
+    for record in dict1:
+        x.append(record[0])
+        y.append(record[1])
+    # print(x)
+    # print(y)
+    xnp = np.array(x)
+    ynp = np.array(y)
+    pear,p2 = pearsonr(xnp,ynp)
+    # print(pear)
+    return format(pear, '.3f'),x,y  # 保留三位小数
+
+
+@app.route("/relate/<type>")
+def relate(type):
+    page = Page()
+    if type == 'contest':
+        title = '参加比赛次数'
+        c_w,c_s = contest_work()
+        scatter = Scatter("参赛-就业")
+        pear1, x, y = dict_to_numpy(c_w)
+        scatter.add("参赛-就业", x, y, xaxis_name='参赛次数', yaxis_name='就职薪水', xaxis_name_pos='end', yaxis_name_pos='start')
+        # pear2, x, y = dict_to_numpy(c_s)
+        # scatter.add("参赛-考研", x, y)
+        page.add_chart(scatter, name='contest_work/study')
+
+        # cs = contest_study()
+        # page.add_chart(cw, name='contest_work')
+        # cc = contest_create()
+        # page.add_chart(cw, name='contest_work')
+    # else:
+    #     title = '获奖情况相关性分析'
+    #     aw = award_work()
+    #     page.add_chart(cw, name='contest_work')
+    #     as1 = award_study()
+    #     page.add_chart(cw, name='contest_work')
+    #     ac = award_create()
+    #     page.add_chart(cw, name='contest_work')
+    return render_template("relate.html", title=title, pear1=pear1, configure=configure,
+                           myechart=page.render_embed(), host=app.config['REMOTE_HOST'],
+                           script_list=page.get_js_dependencies())
+
+
+def contest_work():
+    # students = Award.query.filter(Award.user_type==0).group_by(Award.user_id).all()
+    # print(students)
+    ss = db.session.query(Award.user_id, func.count(Award.user_id)).filter(Award.user_type == 0).group_by(
+        Award.user_id).all()        # 获取个人的参赛记录
+    dict1 = {}
+    for s in ss:
+        # print(s[0], s[1])
+        dict1[s[0]] = s[1]
+    ss1 = db.session.query(Award.user_id, team_student.c.user_id, func.count(team_student.c.user_id)). \
+        join(team_student, (team_student.c.team_id == Award.user_id)). \
+        filter(Award.user_type == 1).group_by(team_student.c.user_id).all()     # 获取组队的参赛记录
+    # print(ss1)
+    dict2 = {}
+    for s in ss1:
+        # print(s[1],':',s[2])
+        dict2[s[1]] = s[2]
+    for key, value in dict2.items():    # 将同一学生的个人、组队情况统一起来，放入dict1中，格式为{id:count}
+        if key in dict1:
+            dict1[key] += value
+        else:
+            dict1[key] = value
+    # print(dict1)
+
+    c_w, c_s ,c_c = [],[],[]
+    for key, value in dict1.items():       # key为id，value为参赛次数
+        stu = Student.query.get(key)
+        # print(stu.salary,stu.college_type)
+        if stu.company_name:    # 如果该学生为就业，则添加其薪水为一条记录
+            c_w.append((value, stu.salary))
+        elif stu.college_name:
+            c_s.append((value, stu.college_type))
+    # print(c_w,c_s)
+    # c_w.sort()     # 结果为该类型[(1, 4000), (2, 7000), (3, 10000), (4, 9000), (5, 6000), (6, 8000)]
+    # c_s.sort()
+    # print(c_w,c_s)
+
+    return c_w,c_s
+
+
 @app.route("/echarts/<chart_type>", methods=['GET', 'POST'])
 def echarts(chart_type):
     end = datetime.date.today()
-    start = datetime.datetime(end.year, 1, 1)  # 默认时间为今年第一天到今天为止
-    print(type(end))        # <class 'datetime.date'>
+    start = datetime.datetime(2017, 1, 1)  # 默认时间为今年第一天到今天为止
+    # print(type(end))        # <class 'datetime.date'>
     form = EditTimeForm()
     if request.method == 'POST':
         start = request.form['start']
@@ -555,7 +757,7 @@ def contest_bar(start, end):
 def award_bar(start, end):
     bar = Bar("获奖级别统计", height=500, width="100%")
     award_types = Award.query.with_entities(Award.grade).\
-        filter(Award.grade != '0', Award.grade != '无').distinct().all()
+        filter(Award.grade != '0', Award.grade != '无').order_by(Award.grade).distinct().all()
     award_count = []
     for types in award_types:  # types[0]即竞赛种类
         # print(types[0])
@@ -563,6 +765,7 @@ def award_bar(start, end):
             Contest.contest_time >= start, Contest.contest_time <= end,
             Award.grade == types[0], Award.grade != '无').count()    # 选出每一获奖级别的人数
         award_count.append(count1)
+
     bar.add("获奖人数", award_types, award_count, legend_text_size=20, label_text_size=20, xaxis_label_textsize=20)
     # bar.use_theme('dark')   # 更换主题
     return bar
@@ -573,7 +776,7 @@ def award_bar(start, end):
 
 
 def contest_pie(start, end):
-    pie1 = Pie("获奖比例", title_pos='center', height=500, width="100%")
+    pie1 = Pie("获奖比例", title_pos='center')
     pie2 = Pie("参赛比例")
     contest_types = Contest.query.with_entities(Contest.contest_type).distinct().all()
     join_count = []
@@ -589,6 +792,7 @@ def contest_pie(start, end):
             Award.grade != '0', Award.grade != '无').count()
         award_count.append(count2)
     pie1.add("参赛情况", contest_types, join_count, is_label_show=True, center=[25,60] ,legend_pos="20%", label_text_size=20)
+    # pie1.use_theme("shine")
     pie2.add("获奖情况", contest_types, award_count, is_label_show=True, center=[75,60], legend_pos="80%", label_text_size=20)
     gird = Grid(width=1200)
     gird.add(pie1, grid_right="55%")
@@ -608,6 +812,7 @@ def award_pie(start, end):
             Award.grade == types[0], Award.grade != '无').count()     # 选出每一获奖级别的人数
         award_count.append(count1)
     pie.add("", award_types, award_count, is_label_show=True, label_text_size=20)
+
     # bar.use_theme('dark')   # 更换主题
     return pie
 
@@ -639,28 +844,28 @@ def major_bar():
     return bar
 
 
-def time_bar(start, end):
+# def time_bar(start, end):
+#
+#     count1 = Award.query.join(  # 选出每一类的参赛人数
+#         Contest, (Award.contest_id == Contest.contest_id)).filter(
+#         Contest.contest_time >= start, Contest.contest_time < end ).count()
+#     join_count.append(count1)
+#     count2 = Award.query.join(  # 选出每一类的获奖人数
+#         Contest, (Award.contest_id == Contest.contest_id)).filter(
+#         Contest.contest_time >= start, Contest.contest_time < end, Award.grade != '0', Award.grade != '无').count()
+#     award_count.append(count2)
 
-    count1 = Award.query.join(  # 选出每一类的参赛人数
-        Contest, (Award.contest_id == Contest.contest_id)).filter(
-        Contest.contest_time >= start, Contest.contest_time < end ).count()
-    join_count.append(count1)
-    count2 = Award.query.join(  # 选出每一类的获奖人数
-        Contest, (Award.contest_id == Contest.contest_id)).filter(
-        Contest.contest_time >= start, Contest.contest_time < end, Award.grade != '0', Award.grade != '无').count()
-    award_count.append(count2)
 
-
-
-@app.route('/chart')
-def my_echarts():
-    type = ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
-    data = [5, 20, 36, 10, 10, 20]
-    data2 = [15, 5, 7, 3, 5, 15]
-    title = 'dslalflk'
-    return render_template(
-        "add_user.html", type_data=type, title=title, data=data, data2=data2
-    )
+#
+# @app.route('/chart')
+# def my_echarts():
+#     type = ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
+#     data = [5, 20, 36, 10, 10, 20]
+#     data2 = [15, 5, 7, 3, 5, 15]
+#     title = 'dslalflk'
+#     return render_template(
+#         "add_user.html", type_data=type, title=title, data=data, data2=data2
+#     )
 
 #
 # def scatter3d():
