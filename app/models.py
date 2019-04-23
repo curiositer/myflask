@@ -53,6 +53,17 @@ class User(UserMixin, db.Model):
         return teacher.tea_type
 
 
+class Notice(db.Model):
+    __tablename__ = 'notice'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(50))
+    text = db.Column(db.Text)
+    filename1 = db.Column(db.String(100))
+    filename2 = db.Column(db.String(100))
+    filename3 = db.Column(db.String(100))
+    time = db.Column(db.Date)
+
+
 team_student = db.Table('team_student',
     db.Column('user_id', db.Integer, db.ForeignKey('student.user_id'), primary_key=True),
     db.Column('team_id', db.Integer, db.ForeignKey('team.team_id'), primary_key=True)

@@ -1,5 +1,5 @@
 from app import app, db
-from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student
+from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student, Notice
 import random
 
 # 添加数据专用
@@ -91,10 +91,11 @@ def add_request(type,count):
     :param count: 要添加多少条申请信息
     :return:
     '''
+
     for i in range(count):
         contest_id = random.randint(1, 29)
-
         teacher = random.randint(200, 220)
+        times = randomtimes('2017-01-01', '2019-05-01')
         id1 = random.randint(101, 110)
         id2 = random.randint(111, 120)
         id3 = random.randint(121, 130)
@@ -145,8 +146,8 @@ def add_request(type,count):
     db.session.commit()
 
 
-def agree_request():
-    for i in range(40, 49):
+def agree_request(start, end):
+    for i in range(start, end):
         print(i)
         request_id = i
         req1 = Request.query.get(request_id)
@@ -159,8 +160,8 @@ def agree_request():
     db.session.commit()
 
 
-def award_in():
-    ids = range(28 , 34)
+def award_in(start, end):
+    ids = range(start, end)
     types = ['优秀奖', '一等奖', '二等奖', '三等奖', '无']
     for id in ids:
         type = random.choice(types)
@@ -169,10 +170,131 @@ def award_in():
     db.session.commit()
 
 
+
+import xlrd
+
+def get_data(filename, sheetnum):       # 获取企业列表，及对应的类型
+    dir_case = 'C:\\Users\\MRZhao\\Desktop\\' + filename + '.xlsx'
+    data = xlrd.open_workbook(dir_case)
+    table = data.sheets()[sheetnum]
+    nor = table.nrows
+    nol = table.ncols
+    # print(nor)
+    dict = {}
+    for i in range(nor):
+        title = table.cell_value(i, 0)
+        value = table.cell_value(i, 1)
+        dict[title] = value
+    return dict
+
+
+def work_in(start, end):
+    ids = range(start, end)
+    company = get_data('list', 0)
+    # print(type(company))
+    for id in ids:
+        # print(list(company))
+        name = random.choice(list(company.keys()))
+        type = company[name]
+        # print(name)
+        # print(name,":",type)
+        awd = Student.query.get(id)
+        awd.company_name = name
+        awd.company_type = type
+        awd.salary = random.randrange(4000,12000,1000)
+    db.session.commit()
+
+
+def add_notice(count):
+    notice1 = Notice.query.order_by(Notice.id.desc()).first()
+    start = int(notice1.id)
+
+    for i in range(start, start+count):
+        title = 'notice' + str(i)
+        text = ''.join(random.sample(
+            ['z', 'y', 'x', 'w', 'v', 'u', 't', 's', 'r', 'q', 'p', 'o', 'n', 'm', 'l', 'k', 'j', 'i', 'h', 'g',
+             'f', 'e', 'd', 'c', 'b', 'a', ' ', ','], 20))
+        print(text)
+        times = randomtimes('2017-01-01', '2019-05-01')
+        notice = Notice(title=title,text=text,time=times)
+        db.session.add(notice)
+    db.session.commit()
+
+# from pyecharts import Scatter
+#
+# v1 = [10, 10, 20, 30, 40, 50, 60]
+# v2 = [10, 10, 20, 30, 40, 50, 60]
+# scatter = Scatter("散点图示例")
+# scatter.add("A", v1, v2)
+# scatter.add("B", v1[::-1], v2)
+# scatter.render()
+# work_in(104,110)
+
+add_notice(10)
 # add_contest(10,30)
 # add_teacher(200, 230)
-# add_request(2, 5)
-# agree_request()
-# award_in()
+# add_request(1, 50)
+# agree_request(75, 130)
+# award_in(52,106)
 
-
+# import numpy as np
+# from scipy.stats import pearsonr
+# # import random
+# #
+# x = [1, 5,2,0,4,2]
+# y = [4000,8000,3000,8000,6000,5000]
+# # y = ['211','958','211','普通','211','211']
+# xnp = np.array(x)
+# ynp = np.array(y)
+# print(pearsonr(x,y)[0])
+#
+# result = {0: 1.1181753789488595, 1: 0.5566080288678394, 2: 0.4718269778030734, 3: 0.48716683119447185, 4: 1.0, 5: 0.1395076201641266, 6: 0.20941558441558442}
+#
+# x,y = [],[]
+# for key,value in result.items():
+#     x.append(key)
+#     y.append(value)
+# xnp = np.array(x)
+# ynp = np.array(y)
+# print(pearsonr(x,y))
+# names = ['id','data']
+# formats = ['f8','f8']
+# dtype = dict(names = names, formats=formats)
+# array = np.array(result.items(), dtype=dtype)
+# print(repr(array))
+# np.random.seed(0)
+# size=300
+# x=np.random.normal(0,1,size)
+# print("Lower noise",pearsonr(x,x+np.random.normal(0,1,size)))
+# print("Higher noise",pearsonr(x,x+np.random.normal(0,10,size)))
+# from sqlalchemy import func
+# # students = Award.query().filter(Award.user_type==0).group_by(Award.user_id).all()
+# # students1 = Award.query().filter(Award.user_type==0).group_by(Award.user_id).count()
+# ss = db.session.query(Award.user_id, func.count(Award.user_id)).filter(Award.user_type==0).group_by(Award.user_id).all()
+# dict1 = {}
+# for s in ss:
+#     print(s[0],s[1])
+#     dict1[s[0]] = s[1]
+# # count1 = Award.query.join(  # 选出每一类的参赛人数
+# #             Contest, (Award.contest_id == Contest.contest_id)).filter(
+# #             Contest.contest_type == types[0], Contest.contest_time >= start, Contest.contest_time <= end).count()
+# ss1 = db.session.query(Award.user_id, team_student.c.user_id, func.count(team_student.c.user_id)).\
+#     join(team_student, (team_student.c.team_id == Award.user_id)).\
+#     filter(Award.user_type==1).group_by(team_student.c.user_id).all()
+#
+# print(ss1)
+# dict2 = {}
+# for s in ss1:
+#     # print(s[1],':',s[2])
+#     dict2[s[1]] = s[2]
+# for key, value in dict2.items():
+#     if key in dict1:
+#         dict1[key] += value
+#     else:
+#         dict1[key] = value
+# print(dict1)
+# print(str(ss))
+# for s1,s2 in zip(ss1,ss2):
+#     print(':',s2)
+    # dict1[s[0]] = s[1]
+# print(dict1)
