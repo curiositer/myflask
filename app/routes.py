@@ -592,11 +592,12 @@ def cut_piece(num):
 
 
 def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相应的皮尔逊系数
-    '''
+    """
     将字典类型转换为两个数组，并计算相应的皮尔逊系数
+    data为分段后的数据，data2为未分段的原始数据
     :param dict1: 原字典
-    :return: pear,x,y
-    '''
+    :return: pear,data,data2
+    """
     x,y = [],[]     # 每个学生对应的参赛情况和就业情况
     # for key,value in dict1.items():
     #     x.append(key)
@@ -632,25 +633,86 @@ def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相�
             data.append(data1)
     print(data)
 
+    lists = []
+    data2 = []
+    for record in dict1:
+        piece1 = record[1]
+        each = record[0], piece1
+        each = list(each)
+        data1 = record[0], piece1, 1
+        data1 = list(data1)
+        # print('data;',data)
+        if each in lists:
+            for item in data2:
+                if item[0] == record[0] and item[1] == record[1]:
+                    # print('item',item)
+                    item[2] = item[2] + 1
+        else:
+            lists.append(each)
+            data2.append(data1)
+    print(data2)
     # print(pear)
-    return format(pear, '.3f'), data  # 保留三位小数
+    return format(pear, '.3f'), data, data2  # 保留三位小数
 
 
 @app.route("/relate/<type>")
 def relate(type):
-    # page = Page()
+    page = Page()
     if type == 'contest':
         title = '参加比赛次数'
         c_w,c_s = relate_work('contest')
-        # scatter = Scatter("参赛-就业")
-        pear1, data = dict_to_numpy(c_w)
+        scatter = Scatter("参赛-就业")
+        pear1, piece, data = dict_to_numpy(c_w)     # piece为分段后的数据，data为未分段的原始数据
         # scatter.add("参赛-就业", x, y, xaxis_name='参赛次数', yaxis_name='就职薪水', xaxis_name_pos='end',
         #             yaxis_name_pos='start', tooltip_trigger='axis', tooltip_formatter='{b1}{b2} {c}{1,2,3}')
         # page.add_chart(scatter, name='参赛-就业')
-        # pear2, x, y = dict_to_numpy(c_s)
-        # scatter.add("参赛-考研", x, y)
 
+        x_lst = [v[0] for v in data]
+        y_lst = [v[1] for v in data]
+        extra_data = [v[2] for v in data]
+        scatter.add(
+            "参赛-就业", x_lst, y_lst,
+            xaxis_name='参赛次数',
+            yaxis_name='就职薪水',
+            xaxis_name_pos='end',
+            yaxis_name_pos='start',
+            extra_data=extra_data,
+            tooltip_formatter='参赛次数,薪水区间,人数\n{c}',
+            is_visualmap=True,
+            visual_dimension=2,
+            visual_orient="horizontal",
+            visual_range_size=[6, 200],
+            visual_type="size",
+            visual_range=[0, 100],
+            visual_text_color="#000",
+        )
+        page.add_chart(scatter, name='参赛-就业')
 
+        pear2, piece2, data2 = dict_to_numpy(c_s)
+        x_2st = [v[0] for v in data2]
+        y_2st = [v[1] for v in data2]
+        extra_data2 = [v[2] for v in data2]
+        scatter2 = Scatter("参赛-考研\n(类型[1,2,3]分别对应为[985,211,普通高校])")
+
+        scatter2.add(
+            "参赛-考研", x_2st, y_2st,
+            xaxis_name='参赛次数',
+            yaxis_name='学校类型',
+            xaxis_name_pos='end',
+            yaxis_name_pos='start',
+            yaxis_max=3,
+            yaxis_force_interval=1,
+            extra_data=extra_data2,
+            tooltip_formatter='参赛次数,学校类型,人数\n{c}',
+            is_visualmap=True,
+            visual_dimension=2,
+            visual_orient="horizontal",
+            visual_range_size=[6, 200],
+            visual_type="size",
+            visual_range=[0, 100],
+            visual_text_color="#000",
+        )
+        page.add_chart(scatter2, name='参赛-考研')
         # cs = contest_study()
         # page.add_chart(cw, name='contest_work')
         # cc = contest_create()
@@ -659,12 +721,65 @@ def relate(type):
         title = '获奖次数'
         a_w, a_s = relate_work('award')
         # scatter = Scatter("获奖-就业")
-        pear1, data = dict_to_numpy(a_w)
+        pear1, piece, data = dict_to_numpy(a_w)
         # scatter.add("获奖-就业", x, y, xaxis_name='获奖次数', yaxis_name='就职薪水', xaxis_name_pos='end', yaxis_name_pos='start')
         # page.add_chart(scatter, name='获奖-就业')
         # pear2, x, y = dict_to_numpy(a_s)r
         # scatter.add("获奖-考研", x, y)
+        title = '获得奖项次数'
+        c_w,c_s = relate_work('award')
+        scatter = Scatter("获奖-就业")
+        pear1, piece, data = dict_to_numpy(c_w)     # piece为分段后的数据，data为未分段的原始数据
+        # scatter.add("获奖-就业", x, y, xaxis_name='获奖次数', yaxis_name='就职薪水', xaxis_name_pos='end',
+        #             yaxis_name_pos='start', tooltip_trigger='axis', tooltip_formatter='{b1}{b2} {c}{1,2,3}')
+        # page.add_chart(scatter, name='获奖-就业')
 
+        x_lst = [v[0] for v in data]
+        y_lst = [v[1] for v in data]
+        extra_data = [v[2] for v in data]
+        scatter.add(
+            "获奖-就业", x_lst, y_lst,
+            xaxis_name='获奖次数',
+            yaxis_name='就职薪水',
+            xaxis_name_pos='end',
+            yaxis_name_pos='start',
+            extra_data=extra_data,
+            tooltip_formatter='获奖次数,薪水区间,人数\n{c}',
+            is_visualmap=True,
+            visual_dimension=2,
+            visual_orient="horizontal",
+            visual_range_size=[6, 200],
+            visual_type="size",
+            visual_range=[0, 100],
+            visual_text_color="#000",
+        )
+        page.add_chart(scatter, name='获奖-就业')
+
+        pear2, piece2, data2 = dict_to_numpy(c_s)
+        x_2st = [v[0] for v in data2]
+        y_2st = [v[1] for v in data2]
+        extra_data2 = [v[2] for v in data2]
+        scatter2 = Scatter("获奖-考研\n(类型[1,2,3]分别对应为[985,211,普通高校])")
+
+        scatter2.add(
+            "获奖-考研", x_2st, y_2st,
+            xaxis_name='获奖次数',
+            yaxis_name='学校类型',
+            xaxis_name_pos='end',
+            yaxis_name_pos='start',
+            yaxis_max=3,
+            yaxis_force_interval=1,
+            extra_data=extra_data2,
+            tooltip_formatter='获奖次数,学校类型,人数\n{c}',
+            is_visualmap=True,
+            visual_dimension=2,
+            visual_orient="horizontal",
+            visual_range_size=[6, 200],
+            visual_type="size",
+            visual_range=[0, 100],
+            visual_text_color="#000",
+        )
+        page.add_chart(scatter2, name='获奖-考研')
     # else:
     #     title = '获奖情况相关性分析'
     #     aw = award_work()
@@ -673,8 +788,11 @@ def relate(type):
     #     page.add_chart(cw, name='contest_work')
     #     ac = award_create()
     #     page.add_chart(cw, name='contest_work')
-    return render_template("relate.html", title=title, pear1=pear1, data=data,
-                           x_list=range(0,10), y_list=[0,4000,6000,8000,10000])
+    return render_template("relate.html", title=title, pear1=pear1, configure=configure,
+                           myechart=page.render_embed(), host=app.config['REMOTE_HOST'],
+                           script_list=page.get_js_dependencies(),
+                           data=piece, x_list=range(0,10), y_list=[0,4000,6000,8000,10000],
+                           pear2=pear2, data2=data2, x_list2=range(0,10), y_list2=[1,2,3])
 
 
 def relate_work(type):
@@ -719,7 +837,13 @@ def relate_work(type):
         if stu.company_name:    # 如果该学生为就业，则添加其薪水为一条记录
             c_w.append((value, stu.salary))
         elif stu.college_name:
-            c_s.append((value, stu.college_type))
+            types = stu.college_type
+            if types == '985高校':
+                c_s.append((value, 3))
+            elif types == '211高校':
+                c_s.append((value, 2))
+            elif types == '普通高校':
+                c_s.append((value, 1))
     # print(c_w,c_s)
     # c_w.sort()     # 结果为该类型[(1, 4000), (2, 7000), (3, 10000), (4, 9000), (5, 6000), (6, 8000)]
     # c_s.sort()
