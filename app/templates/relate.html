@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <span style="color: darkred"><b>关联分析类型-></b></span>
+        <a class="btn btn-primary" href="{{ url_for('relate', type='contest') }}" role="button">参赛情况</a>
+        <a class="btn btn-warning" href="{{ url_for('relate', type='award') }}" role="button">获奖情况</a>
+        <div class="alert alert-success" role="alert">{{ title }}-就业相关性系数为:{{ pear1 }}</div>
+
+    {{ myechart|safe }}
+
+{% endblock %}
