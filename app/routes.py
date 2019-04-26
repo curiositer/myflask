@@ -612,7 +612,7 @@ def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相�
     # print(data)
 
     # print(pear)
-    return format(pear, '.3f'),x,y  # 保留三位小数
+    return format(pear, '.3f'),data  # 保留三位小数
 
 
 @app.route("/relate/<type>")
@@ -622,9 +622,28 @@ def relate(type):
         title = '参加比赛次数'
         c_w,c_s = relate_work('contest')
         scatter = Scatter("参赛-就业")
-        pear1, x, y = dict_to_numpy(c_w)
-        scatter.add("参赛-就业", x, y, xaxis_name='参赛次数', yaxis_name='就职薪水', xaxis_name_pos='end',
-                    yaxis_name_pos='start', tooltip_trigger='axis', tooltip_formatter='{b1}{b2} {c}{1,2,3}')
+        pear1, data = dict_to_numpy(c_w)
+        x_lst = [v[0] for v in data]
+        y_lst = [v[1] for v in data]
+        extra_data = [v[2] for v in data]
+        scatter.add(
+            "参赛-就业", x_lst, y_lst,
+            xaxis_name='参赛次数',
+            yaxis_name='就职薪水',
+            xaxis_name_pos='end',
+            yaxis_name_pos='start',
+            extra_data=extra_data,
+            tooltip_formatter='参赛次数,就职薪水,人数\n{c}',
+            is_visualmap=True,
+            visual_dimension=2,
+            visual_orient="horizontal",
+            visual_range_size=[6,200],
+            visual_type="size",
+            visual_range=[0, 100],
+            visual_text_color="#000",
+        )
+        # scatter.add("参赛-就业", x_lst, y_lst, xaxis_name='参赛次数', yaxis_name='就职薪水', xaxis_name_pos='end',
+        #             yaxis_name_pos='start', tooltip_trigger='axis', tooltip_formatter='{b1}{b2} {c}{1,2,3}')
         page.add_chart(scatter, name='参赛-就业')
         # pear2, x, y = dict_to_numpy(c_s)
         # scatter.add("参赛-考研", x, y)
