@@ -4,9 +4,33 @@
     <span style="color: darkred"><b>关联分析类型-></b></span>
         <a class="btn btn-primary" href="{{ url_for('relate', type='contest') }}" role="button">参赛情况</a>
         <a class="btn btn-warning" href="{{ url_for('relate', type='award') }}" role="button">获奖情况</a>
-        <div class="alert alert-success" role="alert">{{ title }}-就业相关性系数为:{{ pear1 }}</div>
+
+        <div class="alert alert-success" role="alert">
+            {% if pear1 == 'nan' %}
+                {{ title }}-就业数据不足，无法分析
+            {% else %}
+                {{ title }}-就业相关性系数为:{{ pear1 }}
+            {% endif %}
+        </div>
+        <div class="alert alert-success" role="alert">
+            {% if pear2 == 'nan' %}
+                {{ title }}-考研数据不足，无法分析
+            {% else %}
+                {{ title }}-考研相关性系数为:{{ pear2 }}
+            {% endif %}
+        </div>
+    {{ myechart|safe }}<br>
+
+    <blockquote>
+        <p>就业薪水分为5段，4000以下、4000-6000、6000-8000、8000-10000、10000以上</p>
+{#        <p>每一点代表该段的最低值，#}
+{#            <span style="color: red">例如6000即代表薪水在6000-8000之间，0代表薪水小于4000元，具体详情见下方表格</span>#}
+{#        </p>#}
+    </blockquote>
+
     <table class="table-bordered">
-    <caption class="text-center">每一格代表符合条件的人数</caption>
+        <caption class="text-center"><span style="color: red">(参赛-就业)</span>
+            每一单元格代表符合条件的人数</caption>
 {#        <td class="first" colspan="2"><span class="title1">产品</span><br><span class="title2">报道量</span><br><span class="title3">地区</span></td>#}
         <tr>
             <td height="41" style="background-color: #f2f2f2; padding: 0.0px;">
@@ -47,8 +71,50 @@
         </tr>
         {% endfor %}
 
+    </table>   {#  参赛-就业表#}
+    <br>
+    <table class="table-bordered">
+        <caption class="text-center"><span style="color: red">(参赛-考研)</span>
+            每一单元格代表符合条件的人数</caption>
+{#        <td class="first" colspan="2"><span class="title1">产品</span><br><span class="title2">报道量</span><br><span class="title3">地区</span></td>#}
+        <tr>
+            <td height="41" style="background-color: #f2f2f2; padding: 0.0px;">
+            <div class="out">
+                <em class="tr">学校类型</em>
+                {% if title == '参加比赛次数' %}
+                    <em class="lb">参赛次数</em>
+                    {% else %}
+                    <em class="lb">获奖次数</em>
+                {% endif %}
 
-    </table>
-{#    {{ myechart|safe }}#}
+            </div>
+            </td>
+            <th width="24%" class="text-center">普通高校</th>
+            <th width="24%" class="text-center">211高校</th>
+            <th width="24%" class="text-center">985高校</th>
 
+        </tr>
+        {% for x in x_list2 %}
+        <tr>
+            <th class="text-center">{{ x }}</th>
+            {% for y in y_list2 %}
+                <td class="text-center">
+                {% with vars = [0] %}    {# 变量值只能在for外面生效，故借助字典实现赋值 #}
+                    {% for datum in data2 %}
+{#                        {{ datum[0] }}#}
+                        {% if datum[0]==x and datum[1]==y %}
+                            {% do vars.append(vars.pop()+datum[2]) %}
+{#                            {{ vars.foo }}#}
+                        {% endif %}
+
+                    {% endfor %}
+                {{ vars[0] }}
+                {% endwith %}
+                </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+
+    </table>   {#  参赛-考研表#}
+    <br>
 {% endblock %}
