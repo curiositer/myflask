@@ -5,7 +5,50 @@
         <a class="btn btn-primary" href="{{ url_for('relate', type='contest') }}" role="button">参赛情况</a>
         <a class="btn btn-warning" href="{{ url_for('relate', type='award') }}" role="button">获奖情况</a>
         <div class="alert alert-success" role="alert">{{ title }}-就业相关性系数为:{{ pear1 }}</div>
+    <table class="table-bordered">
+    <caption class="text-center">每一格代表符合条件的人数</caption>
+{#        <td class="first" colspan="2"><span class="title1">产品</span><br><span class="title2">报道量</span><br><span class="title3">地区</span></td>#}
+        <tr>
+            <td height="41" style="background-color: #f2f2f2; padding: 0.0px;">
+            <div class="out">
+                <em class="tr">就职薪水</em>
+                {% if title == '参加比赛次数' %}
+                    <em class="lb">参赛次数</em>
+                    {% else %}
+                    <em class="lb">获奖次数</em>
+                {% endif %}
 
-    {{ myechart|safe }}
+            </div>
+            </td>
+            <th>4000元以下</th>
+            <th>4000元-6000元</th>
+            <th>6000元-8000元</th>
+            <th>8000元-10000元</th>
+            <th>10000元以上</th>
+        </tr>
+        {% for x in x_list %}
+        <tr>
+            <th class="text-center">{{ x }}</th>
+            {% for y in y_list %}
+                <td class="text-center">
+                {% with vars = [0] %}    {# 变量值只能在for外面生效，故借助字典实现赋值 #}
+                    {% for datum in data %}
+{#                        {{ datum[0] }}#}
+                        {% if datum[0]==x and datum[1]==y %}
+                            {% do vars.append(vars.pop()+datum[2]) %}
+{#                            {{ vars.foo }}#}
+                        {% endif %}
+
+                    {% endfor %}
+                {{ vars[0] }}
+                {% endwith %}
+                </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+
+
+    </table>
+{#    {{ myechart|safe }}#}
 
 {% endblock %}

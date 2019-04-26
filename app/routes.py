@@ -571,6 +571,26 @@ def award_details(award_id):
                            award=award, user_details=stu, team=team)
 
 
+def cut_piece(num):
+    """
+    将数据分段记录，返回的是所属数据段
+    :param num:
+    :return:
+    """
+    piece = 0
+    if num in range(0, 3999):
+        piece = 0
+    elif num in range(4000, 5999):
+        piece = 4000
+    elif num in range(6000, 7999):
+        piece = 6000
+    elif num in range(8000, 10000):
+        piece = 8000
+    elif num > 10000:
+        piece = 10000
+    return piece
+
+
 def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相应的皮尔逊系数
     '''
     将字典类型转换为两个数组，并计算相应的皮尔逊系数
@@ -584,8 +604,10 @@ def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相�
     for record in dict1:
         x.append(record[0])
         y.append(record[1])
-    print(x)
-    print(y)
+        # data = cut_piece(record[1])
+        # piece.append(data)
+    # print(x)
+    # print(y)
     xnp = np.array(x)
     ynp = np.array(y)
     pear,p2 = pearsonr(xnp,ynp)
@@ -593,12 +615,11 @@ def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相�
     # data1 = dict1[0][0],dict1[0][1],1
     lists = []
     data = []
-    # data.append(data1)
-    # print(data)
     for record in dict1:
-        each = record[0],record[1]
+        piece1 = cut_piece(record[1])
+        each = record[0],piece1
         each = list(each)
-        data1 = record[0],record[1],1
+        data1 = record[0],piece1,1
         data1 = list(data1)
         # print('data;',data)
         if each in lists:
@@ -609,23 +630,23 @@ def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相�
         else:
             lists.append(each)
             data.append(data1)
-    # print(data)
+    print(data)
 
     # print(pear)
-    return format(pear, '.3f'),x,y  # 保留三位小数
+    return format(pear, '.3f'), data  # 保留三位小数
 
 
 @app.route("/relate/<type>")
 def relate(type):
-    page = Page()
+    # page = Page()
     if type == 'contest':
         title = '参加比赛次数'
         c_w,c_s = relate_work('contest')
-        scatter = Scatter("参赛-就业")
-        pear1, x, y = dict_to_numpy(c_w)
-        scatter.add("参赛-就业", x, y, xaxis_name='参赛次数', yaxis_name='就职薪水', xaxis_name_pos='end',
-                    yaxis_name_pos='start', tooltip_trigger='axis', tooltip_formatter='{b1}{b2} {c}{1,2,3}')
-        page.add_chart(scatter, name='参赛-就业')
+        # scatter = Scatter("参赛-就业")
+        pear1, data = dict_to_numpy(c_w)
+        # scatter.add("参赛-就业", x, y, xaxis_name='参赛次数', yaxis_name='就职薪水', xaxis_name_pos='end',
+        #             yaxis_name_pos='start', tooltip_trigger='axis', tooltip_formatter='{b1}{b2} {c}{1,2,3}')
+        # page.add_chart(scatter, name='参赛-就业')
         # pear2, x, y = dict_to_numpy(c_s)
         # scatter.add("参赛-考研", x, y)
 
@@ -637,10 +658,10 @@ def relate(type):
     elif type == 'award':
         title = '获奖次数'
         a_w, a_s = relate_work('award')
-        scatter = Scatter("获奖-就业")
-        pear1, x, y = dict_to_numpy(a_w)
-        scatter.add("获奖-就业", x, y, xaxis_name='获奖次数', yaxis_name='就职薪水', xaxis_name_pos='end', yaxis_name_pos='start')
-        page.add_chart(scatter, name='获奖-就业')
+        # scatter = Scatter("获奖-就业")
+        pear1, data = dict_to_numpy(a_w)
+        # scatter.add("获奖-就业", x, y, xaxis_name='获奖次数', yaxis_name='就职薪水', xaxis_name_pos='end', yaxis_name_pos='start')
+        # page.add_chart(scatter, name='获奖-就业')
         # pear2, x, y = dict_to_numpy(a_s)r
         # scatter.add("获奖-考研", x, y)
 
@@ -652,9 +673,8 @@ def relate(type):
     #     page.add_chart(cw, name='contest_work')
     #     ac = award_create()
     #     page.add_chart(cw, name='contest_work')
-    return render_template("relate.html", title=title, pear1=pear1, configure=configure,
-                           myechart=page.render_embed(), host=app.config['REMOTE_HOST'],
-                           script_list=page.get_js_dependencies())
+    return render_template("relate.html", title=title, pear1=pear1, data=data,
+                           x_list=range(0,10), y_list=[0,4000,6000,8000,10000])
 
 
 def relate_work(type):
