@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block navbar %}
-    <img style="position:relative;left:200px;" src="{{ url_for('static', filename='image/logo_03.jpg') }}" alt="logo">
+    <img style="position:relative;left:200px;" src="{{ url_for('static', filename='image/buu_logo2.png') }}" alt="logo">
     <nav class="navbar mynavbar">
         <div class="container">
             <div class="navbar-header">
@@ -41,9 +41,9 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav"> {#导航栏左侧显示#}
 {#                    <li><a href="{{ url_for('index') }}"></a></li>#}
-                    {% if not current_user.is_anonymous %}
-                    <li><a href="{{ url_for('user', username=current_user.username) }}">个人信息</a></li>
-                    {% endif %}
+{#                    {% if not current_user.is_anonymous %}#}
+{#                    <li><a href="{{ url_for('user', username=current_user.username) }}">个人信息</a></li>#}
+{#                    {% endif %}#}
 
 {#                    <li>左侧</li>#}
                 </ul>
@@ -71,7 +71,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a href="{{ url_for('request_list') }}">申请列表</a></li>
-                            <li><a href="{{ url_for('contest_list') }}">竞赛列表</a></li>
+                            <li><a href="{{ url_for('contest_list') }}">竞赛列表及申请</a></li>
                             <li><a href="{{ url_for('award_list') }}">获奖列表</a></li>
                             <li><a href="{{ url_for('notice_list') }}">公告列表</a></li>
                         </ul>
@@ -100,13 +100,13 @@
 {% endblock %}
 
 {% block content %}
-    <body>
+    <body background="{{ url_for('static', filename='image/log_background.jpg') }}">
     <div class="container main_container">
         {% with messages = get_flashed_messages() %}     {# 显示警示信息#}
         {% if messages %}
             {% for message in messages %}
 {#                <div class="alert alert-error" role="alert">#}
-                <div class="alert alert-error" role="alert">
+                <div class="alert alert-success" role="alert">
                     {{ message }}<button type="button" class="close" data-dismiss="alert">&times;</button>
                 </div>
             {% endfor %}

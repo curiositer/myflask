@@ -10,7 +10,7 @@ import datetime
 
 from pyecharts import Bar, Pie, Grid, Page, Scatter, Line, configure        # 用于画图表
 from pyecharts_javascripthon.api import TRANSLATOR
-configure(global_theme='roma')         # 规定pycharts的主题roma chalk halloween essos
+configure(global_theme='dark')         # 规定pycharts的主题roma chalk halloween essos
 
 import numpy as np      # 用于计算相关性
 from scipy.stats import pearsonr
@@ -22,10 +22,11 @@ from sqlalchemy import func     # 为在query中使用func.count()
 @app.route('/index')
 @login_required
 def index():
-    lists = Notice.query.limit(10).all()
+    notice = Notice.query.limit(10).all()
+    contest = Contest.query.limit(4).all()
     # print(lists)
     # print(lists[0].title)
-    return render_template('index.html', title='主页', lists=lists)
+    return render_template('index.html', title='主页', lists=notice, lists2=contest)
 
 
 @app.route('/bootstrap')
@@ -348,7 +349,7 @@ def contest_list():
         if lists.has_next else None
     prev_url = url_for('contest_list', page=lists.prev_num) \
         if lists.has_prev else None
-    return render_template("contest.html", title='竞赛列表',
+    return render_template("contest_list.html", title='竞赛列表',
                            lists=lists.items, next_url=next_url, prev_url=prev_url)
 
 
@@ -583,11 +584,33 @@ def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相�
     for record in dict1:
         x.append(record[0])
         y.append(record[1])
-    # print(x)
-    # print(y)
+    print(x)
+    print(y)
     xnp = np.array(x)
     ynp = np.array(y)
     pear,p2 = pearsonr(xnp,ynp)
+    # print(dict1[0])
+    # data1 = dict1[0][0],dict1[0][1],1
+    lists = []
+    data = []
+    # data.append(data1)
+    # print(data)
+    for record in dict1:
+        each = record[0],record[1]
+        each = list(each)
+        data1 = record[0],record[1],1
+        data1 = list(data1)
+        # print('data;',data)
+        if each in lists:
+            for item in data:
+                if item[0] == record[0] and item[1] == record[1]:
+                    # print('item',item)
+                    item[2] = item[2]+1
+        else:
+            lists.append(each)
+            data.append(data1)
+    # print(data)
+
     # print(pear)
     return format(pear, '.3f'),x,y  # 保留三位小数
 
@@ -597,18 +620,30 @@ def relate(type):
     page = Page()
     if type == 'contest':
         title = '参加比赛次数'
-        c_w,c_s = contest_work()
+        c_w,c_s = relate_work('contest')
         scatter = Scatter("参赛-就业")
         pear1, x, y = dict_to_numpy(c_w)
-        scatter.add("参赛-就业", x, y, xaxis_name='参赛次数', yaxis_name='就职薪水', xaxis_name_pos='end', yaxis_name_pos='start')
+        scatter.add("参赛-就业", x, y, xaxis_name='参赛次数', yaxis_name='就职薪水', xaxis_name_pos='end',
+                    yaxis_name_pos='start', tooltip_trigger='axis', tooltip_formatter='{b1}{b2} {c}{1,2,3}')
+        page.add_chart(scatter, name='参赛-就业')
         # pear2, x, y = dict_to_numpy(c_s)
         # scatter.add("参赛-考研", x, y)
-        page.add_chart(scatter, name='contest_work/study')
+
 
         # cs = contest_study()
         # page.add_chart(cw, name='contest_work')
         # cc = contest_create()
         # page.add_chart(cw, name='contest_work')
+    elif type == 'award':
+        title = '获奖次数'
+        a_w, a_s = relate_work('award')
+        scatter = Scatter("获奖-就业")
+        pear1, x, y = dict_to_numpy(a_w)
+        scatter.add("获奖-就业", x, y, xaxis_name='获奖次数', yaxis_name='就职薪水', xaxis_name_pos='end', yaxis_name_pos='start')
+        page.add_chart(scatter, name='获奖-就业')
+        # pear2, x, y = dict_to_numpy(a_s)r
+        # scatter.add("获奖-考研", x, y)
+
     # else:
     #     title = '获奖情况相关性分析'
     #     aw = award_work()
@@ -622,18 +657,29 @@ def relate(type):
                            script_list=page.get_js_dependencies())
 
 
-def contest_work():
+def relate_work(type):
     # students = Award.query.filter(Award.user_type==0).group_by(Award.user_id).all()
     # print(students)
-    ss = db.session.query(Award.user_id, func.count(Award.user_id)).filter(Award.user_type == 0).group_by(
-        Award.user_id).all()        # 获取个人的参赛记录
+    if type == 'contest':
+        ss = db.session.query(Award.user_id, func.count(Award.user_id)).filter(Award.user_type == 0).group_by(
+            Award.user_id).all()        # 获取个人的参赛记录
+    elif type == 'award':
+        ss = db.session.query(Award.user_id, func.count(Award.user_id)).\
+            filter(Award.user_type == 0, Award.grade != '0', Award.grade != '无').group_by(
+            Award.user_id).all()  # 获取个人的获奖记录
     dict1 = {}
     for s in ss:
         # print(s[0], s[1])
         dict1[s[0]] = s[1]
-    ss1 = db.session.query(Award.user_id, team_student.c.user_id, func.count(team_student.c.user_id)). \
-        join(team_student, (team_student.c.team_id == Award.user_id)). \
-        filter(Award.user_type == 1).group_by(team_student.c.user_id).all()     # 获取组队的参赛记录
+    if type == 'contest':
+        ss1 = db.session.query(Award.user_id, team_student.c.user_id, func.count(team_student.c.user_id)). \
+            join(team_student, (team_student.c.team_id == Award.user_id)). \
+            filter(Award.user_type == 1).group_by(team_student.c.user_id).all()     # 获取组队的参赛记录
+    elif type == 'award':
+        ss1 = db.session.query(Award.user_id, team_student.c.user_id, func.count(team_student.c.user_id)). \
+            join(team_student, (team_student.c.team_id == Award.user_id)). \
+            filter(Award.user_type == 1, Award.grade != '0', Award.grade != '无').\
+            group_by(team_student.c.user_id).all()  # 获取组队的获奖记录
     # print(ss1)
     dict2 = {}
     for s in ss1:

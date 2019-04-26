@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-    <h1>Hi, {{ current_user.username }}!</h1>
+    <h1>{{ title }}</h1>
 
 {#    <div class="btn-group" role="group" aria-label="...">#}
 {#        <a class="btn btn-default" href="{{ url_for('award_list') }}" role="button">个人</a>#}
@@ -10,7 +10,7 @@
 {#        <span style="color: red;">请先选择个人或组队</span>#}
 {#    </div>#}
     <table class="table table-hover">
-        <caption>获奖列表</caption>
+{#        <caption>获奖列表</caption>#}
         <tr>
             <th>竞赛名</th>
             <th>竞赛时间</th>

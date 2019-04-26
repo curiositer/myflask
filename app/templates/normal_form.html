@@ -2,8 +2,16 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    <h1>{{ title }}</h1><br>
-
+    <h1>{{ title }}</h1>
+    {% if title == '编辑资料' %}
+        {% if current_user.type=='admin' %}
+            <h4>用户类型：管理员</h4>
+        {% elif current_user.type=='student' %}
+            <h4>用户类型：学生</h4>
+        {% elif current_user.type=='teacher' %}
+            <h4>用户类型：教师</h4>
+        {% endif %}
+    {% endif %}
     <div class="row">
         <div class="col-md-4">
             {{ wtf.quick_form(form) }}

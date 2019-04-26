@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-    <h1>Hi, {{ current_user.username }}!</h1>
+    <h1>{{ title }}</h1>
 {#    {% if form %}#}
 {#    <form action="" method="post">#}
 {#        {{ form.hidden_tag() }}#}
@@ -16,7 +16,7 @@
 {#    </form>#}
 {#    {% endif %}#}
     <table class="table table-hover">
-        <caption>竞赛列表</caption>
+{#        <caption>竞赛列表</caption>#}
         <tr>
             <th>竞赛名</th>
             <th>竞赛时间</th>
@@ -29,7 +29,18 @@
             {% endif %}
         </tr>
         {% for list in lists %}
-            {% include '_list.html' %}
+            <tr>
+                <td>{{ field.label }}</td>
+                <td>{{ field(**kwargs) }}</td>
+                <td>{% if field.errors %}
+                <ul class=errors>
+                {% for error in field.errors %}
+                  <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+                </ul>
+                {% endif %}
+                </td>
+            </tr>
         {% endfor %}
     </table>
     <nav aria-label="...">

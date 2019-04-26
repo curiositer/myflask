@@ -2,7 +2,7 @@
 
 {% block app_content %}
     <table>
-        <tr>
+        <caption>
             {% if user.type=='admin' %}
                 <td>用户类型：管理员</td>
             {% elif user.type=='student' %}
@@ -10,15 +10,17 @@
             {% elif user.type=='teacher' %}
                 <td>用户类型：教师</td>
             {% endif %}
-        </tr>
+        </caption>
+        <br>
         <tr valign="top">
             <td><img src="{{ user.avatar(128) }}"></td>
-            <td><h1>姓名: {{ user.username }}</h1>
-                {% if user == current_user %}
-                    <p><a href="{{ url_for('edit_profile') }}">修改个人信息</a></p>
-                {% endif %}
-            </td>
+
+            <td><h1>姓名: {{ user.username }}</h1></td>
+
         </tr>
+    <tr>
+
+    </tr>
     </table>
     <hr>
 {#    {% for post in posts %}#}
