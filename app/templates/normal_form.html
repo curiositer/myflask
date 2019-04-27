@@ -20,6 +20,9 @@
 
     {% if title == '登陆' %}
         <br>
+        <p>
+        <b>忘记密码？<a href="{{ url_for('reset_password_request') }}">点击重置密码</a></b>
+        </p>
         <b><p>新的用户？<a href="{{ url_for('register') }}">点击注册</a></p></b>
     {% endif %}
 {% endblock %}

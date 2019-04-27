@@ -1,0 +1,169 @@
+#logo1{
+	background-position: -50px -82px;
+}
+
+/*body{*/
+	/*background:	linear-gradient(to right , #c7fbd9, #d6f1e4);*/
+/*}*/
+
+caption{
+	background-color: #fff;
+}
+table{/*.main_container or table*/
+	background-color: #fff;
+}
+h4{
+	color: red;
+}
+blockquote{
+	background-color: #fff;
+}
+.alert-error{
+	background-color: rgb(247, 203, 203);
+}
+/*.alert-success{*/
+	/*background-color: green;*/
+/*}*/
+
+/* 实现长文本按原格式显示*/
+pre{
+white-space:pre-wrap;
+white-space:-moz-pre-wrap;
+white-space:-o-pre-wrap;
+word-wrap:break-word;
+}
+
+/* nav */
+.login {
+	width:80px;
+	background:#e58100;
+	line-height:40px;
+	text-align:center;
+}
+.login a {
+	color:#fff;
+} 
+.login:hover {
+	color: #fff;
+	background: #fff;
+  }
+  
+.mynavbar {
+	background-color: #071a6d;
+	border-color: #080808;
+  }
+  .mynavbar .navbar-brand {
+	color: #fff;
+  }
+  .mynavbar .navbar-brand:hover,
+  .mynavbar .navbar-brand:focus {
+	color: #e58100;
+	background-color: transparent;
+  }
+  .mynavbar .navbar-text {
+	color: #fff;
+  }
+  .mynavbar .navbar-nav > li > a {
+	color: #fff;
+  }
+  .mynavbar .navbar-nav > li > a:hover,
+  .mynavbar .navbar-nav > li > a:focus {
+	border-bottom:2px solid #e58100;
+	color: #e58100;
+	background-color: transparent;
+  }
+  .mynavbar .navbar-nav > .active > a,
+  .mynavbar .navbar-nav > .active > a:hover,
+  .mynavbar .navbar-nav > .active > a:focus {
+	
+	/* height: 36px; */
+	color: #fff;
+	background-color: #080808; 
+  }
+  .mynavbar .navbar-nav > .disabled > a,
+  .mynavbar .navbar-nav > .disabled > a:hover,
+  .mynavbar .navbar-nav > .disabled > a:focus {
+	color: #444;
+	background-color: transparent;
+  }
+  .mynavbar .navbar-toggle {
+	border-color: #333;
+  }
+  .mynavbar .navbar-toggle:hover,
+  .mynavbar .navbar-toggle:focus {
+	background-color: #333;
+  }
+  .mynavbar .navbar-toggle .icon-bar {
+	background-color: #fff;
+  }
+  .mynavbar .navbar-collapse,
+  .mynavbar .navbar-form {
+	border-color: #101010;
+  }
+  .mynavbar .navbar-nav > .open > a,
+  .mynavbar .navbar-nav > .open > a:hover,
+  .mynavbar .navbar-nav > .open > a:focus {
+	color: #fff;
+	background-color: #080808;
+  }
+  @media (max-width: 767px) {
+	.mynavbar .navbar-nav .open .dropdown-menu > .dropdown-header {
+	  border-color: #080808;
+	}
+	.mynavbar .navbar-nav .open .dropdown-menu .divider {
+	  background-color: #080808;
+	}
+	.mynavbar .navbar-nav .open .dropdown-menu > li > a {
+	  color: #9d9d9d;
+	}
+	.mynavbar .navbar-nav .open .dropdown-menu > li > a:hover,
+	.mynavbar .navbar-nav .open .dropdown-menu > li > a:focus {
+	  color: #fff;
+	  background-color: transparent;
+	}
+	.mynavbar .navbar-nav .open .dropdown-menu > .active > a,
+	.mynavbar .navbar-nav .open .dropdown-menu > .active > a:hover,
+	.mynavbar .navbar-nav .open .dropdown-menu > .active > a:focus {
+	  color: #fff;
+	  background-color: #080808;
+	}
+	.mynavbar .navbar-nav .open .dropdown-menu > .disabled > a,
+	.mynavbar .navbar-nav .open .dropdown-menu > .disabled > a:hover,
+	.mynavbar .navbar-nav .open .dropdown-menu > .disabled > a:focus {
+	  color: #444;
+	  background-color: transparent;
+	}
+  }
+  .mynavbar .navbar-link {
+	color: #9d9d9d;
+  }
+  .mynavbar .navbar-link:hover {
+	color: #fff;
+  }
+  .mynavbar .btn-link {
+	color: #9d9d9d;
+  }
+  .mynavbar .btn-link:hover,
+  .mynavbar .btn-link:focus {
+	color: #fff;
+  }
+  .mynavbar .btn-link[disabled]:hover,
+  fieldset[disabled] .mynavbar .btn-link:hover,
+  .mynavbar .btn-link[disabled]:focus,
+  fieldset[disabled] .mynavbar .btn-link:focus {
+	color: #444;
+  }
+  
+/* end nav*/
+
+/*模拟对角线*/
+.out{
+	border-top:60px #D6D3D6 solid;/*上边框宽度等于表格第一行行高*/
+	width:0px;/*让容器宽度为0*/
+	height:0px;/*让容器高度为0*/
+	border-left:180px #BDBABD solid;/*左边框宽度等于表格第一行第一格宽度*/
+	position:relative;/*让里面的两个子容器绝对定位*/
+}
+.tr{font-style:normal;display:block;position:absolute;top:-45px;left:-60px;}
+.lb{font-style:normal;display:block;position:absolute;top:-25px;left:-140px;}
+
