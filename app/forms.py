@@ -20,7 +20,8 @@ class AddUserForm(FlaskForm):
     user_id = StringField('学号（工号）', validators=[DataRequired('请输入学号')])
     email = StringField('邮箱', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
     tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话')])
-    stu_class = StringField('专业(学生填写)')
+    major_in = SelectField('专业', choices=[('机械工程', '机械工程'), ('软件工程', '软件工程'), ('工业工程', '工业工程'),
+                                          ('自动化', '自动化'), ('电子信息工程', '电子信息工程'), ('汽车服务工程', '汽车服务工程')], coerce=str)
     tea_type = SelectField('教师类型（仅教师填写）',
                            choices=[(-1, '请选择...'), (0, '普通教师'), (1, '管理教师')], coerce=int)
     password = PasswordField('密码', validators=[DataRequired('请输入密码')])
@@ -49,7 +50,7 @@ class RegistrationForm(FlaskForm):
     user_id = StringField('学号', validators=[DataRequired('请输入学号')])
     email = StringField('邮箱', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
     tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话')])
-    major_in = StringField('专业', choices=[('机械工程', '机械工程'), ('软件工程', '软件工程'), ('工业工程', '工业工程'),
+    major_in = SelectField('专业', choices=[('机械工程', '机械工程'), ('软件工程', '软件工程'), ('工业工程', '工业工程'),
                                                 ('自动化', '自动化'), ('电子信息工程', '电子信息工程'), ('汽车服务工程', '汽车服务工程')], coerce=str)
     password = PasswordField('密码', validators=[DataRequired('请输入密码')])
     password2 = PasswordField(
@@ -65,6 +66,19 @@ class RegistrationForm(FlaskForm):
         email_list = User.query.filter_by(email=email.data).first()
         if email_list is not None:
             raise ValidationError('该邮箱已被使用！')
+
+
+class ResetPasswordRequestForm(FlaskForm):
+    id = IntegerField('学号/工号', validators=[DataRequired()])
+    email = StringField('邮箱', validators=[DataRequired(), Email("请输入正确的邮箱格式")])
+    submit = SubmitField('重置密码')
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('密码', validators=[DataRequired()])
+    password2 = PasswordField(
+        '确认密码', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('确定重置密码')
 
 
 class EditNoticeForm(FlaskForm):

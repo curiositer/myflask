@@ -1,8 +1,10 @@
-from app import db, login
+from app import db, login, app
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from hashlib import md5
 
+import jwt                  # 用于重置密码
+from time import time
 
 # @login.user_loader
 # def load_user(id):
@@ -51,6 +53,20 @@ class User(UserMixin, db.Model):
         teacher = Teacher.query.get(self.user_id)
         # print(teacher.tea_type)
         return teacher.tea_type
+
+    def get_reset_password_token(self, expires_in=600):   # 获取重置密码的令牌，expires_in=600即设置令牌有效时间为10分钟
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, app.config['SECRET_KEY'],        # 验证令牌，通过则返回给用户id，否则返回none
+                            algorithms=['HS256'])['reset_password']
+        except:
+            return
+        return User.query.get(id)
 
 
 class Notice(db.Model):
