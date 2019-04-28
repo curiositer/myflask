@@ -25,6 +25,16 @@
             <td>{{ request.add_time }}</td>
         </tr>
         <tr>
+            <th>申请状态</th>
+            {% if request.status==0 %}
+                    <td>待审核</td>
+                {% elif request.status==1 %}
+                    <td><span style="color: green;">已通过</span></td>
+                {% elif request.status==2 %}
+                    <td><span style="color: red;">已拒绝</span></td>
+                {% endif %}
+        </tr>
+        <tr>
             <th>备注</th>
             <td>{{ request.notes }}</td>
         </tr>

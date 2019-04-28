@@ -14,24 +14,30 @@
 {#        str = {{ list.text }}.replace(/↵/g,"<br/>");#}
 {#    </script>#}
     <p><PRE>{{ list.text }}</PRE></p>
-    <blockquote>文件下载</blockquote>
-    <ul>
-        {% if list.filename1 %}
-        <li>
-            <a href="{{ url_for('notice_downloader', id=list.id, filename=list.filename1) }}">{{ list.filename1 }}</a>
-        </li>
-        {% endif %}
-        {% if list.filename2 %}
-        <li>
-            <a href="{{ url_for('notice_downloader', id=list.id, filename=list.filename2) }}">{{ list.filename2 }}</a>
-        </li>
-        {% endif %}
-        {% if list.filename3 %}
-        <li>
-            <a href="{{ url_for('notice_downloader', id=list.id, filename=list.filename3) }}">{{ list.filename3 }}</a>
-        </li>
-        {% endif %}
-    </ul>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><h4>文件下载</h4></div>
+        <div class="panel-body">
+        <ul>
+            {% if list.filename1 %}
+            <li>
+                <a href="{{ url_for('notice_downloader', id=list.id, filename=list.filename1) }}">{{ list.filename1 }}</a>
+            </li>
+            {% endif %}
+            {% if list.filename2 %}
+            <li>
+                <a href="{{ url_for('notice_downloader', id=list.id, filename=list.filename2) }}">{{ list.filename2 }}</a>
+            </li>
+            {% endif %}
+            {% if list.filename3 %}
+            <li>
+                <a href="{{ url_for('notice_downloader', id=list.id, filename=list.filename3) }}">{{ list.filename3 }}</a>
+            </li>
+            {% endif %}
+        </ul>
+        </div>
+    </div>
+
 
 
 {#    {% for ps in list.text %}#}

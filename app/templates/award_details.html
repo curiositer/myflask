@@ -2,7 +2,10 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    <h1>竞赛详情--奖项录入</h1>
+    <h1>获奖详情
+        {% if ((current_user.type == 'admin') or (current_user.type == 'teacher' and current_user.get_teacher_type()==1))
+        and award.grade=='0' %}--奖项录入{% endif %}
+    </h1>
     <table class="table table-hover table-bordered">
 {#        <caption>申请详情</caption>#}
         <tr>
