@@ -18,18 +18,28 @@
     <table class="table table-hover">
 {#        <caption>竞赛列表</caption>#}
         <tr>
-            <th>竞赛名</th>
-            <th>竞赛时间</th>
-            <th>竞赛类型</th>
-            <th>竞赛等级</th>
-            <th>竞赛描述</th>
-            <th>文件下载</th>
+            <th width="10%">竞赛名</th>
+            <th width="10%">竞赛时间</th>
+            <th width="10%">竞赛类型</th>
+            <th width="10%">竞赛等级</th>
+            <th width="20%">竞赛描述</th>
+            <th width="10%">文件下载</th>
             {% if current_user.type=='student' %}
-                <th>申报该竞赛</th>
+                <th width="6%">申报该竞赛</th>
             {% endif %}
         </tr>
         {% for list in lists %}
-            {% include '_list.html' %}
+            <tr valign="top">
+                <td>{{ list.contest_name }}</td>
+                <td>{{ list.contest_time }}</td>
+                <td>{{ list.contest_type }}</td>
+                <td>{{ list.level }}</td>
+                <td>{{ list.details }}</td>
+                <td><a href="{{ url_for('downloader', contest_name=list.contest_name) }}">文件下载</a> </td>
+                {% if current_user.type== 'student' %}
+                    <td class="text-center"><a href="{{ url_for('apply_contest',contest_id=list.contest_id) }}">申请</a></td>
+                {% endif %}
+            </tr>
         {% endfor %}
     </table>
     <nav aria-label="...">
