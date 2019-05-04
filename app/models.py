@@ -149,6 +149,12 @@ def receive_mapper_configured(mapper, class_):
 #     }
 
 
+class Contest_type(db.Model):
+    __tablename__ = 'contest_type'
+    contest_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    contest_type = db.Column(db.String(20))
+
+
 class Contest(db.Model):
     __tablename__ = 'contest'
     contest_id = db.Column(db.Integer, primary_key=True, autoincrement=True)

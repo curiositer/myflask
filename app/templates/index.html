@@ -2,6 +2,29 @@
 
 {% block app_content %}
     <div class="row">
+        <div class="col-md-4">
+            <h3>您好，{{ current_user.username }}</h3>
+        </div>
+    <div class="col-md-offset-4">
+    <blockquote class="blockquote-reverse">
+        &nbsp;&nbsp;&nbsp;常用功能:
+        <a class="btn btn-success" href="{{ url_for('contest_list') }}" role="button">
+            {% if current_user.type == 'student' %}竞赛申请
+            {% else %}竞赛列表
+            {% endif %}
+        </a>
+        <a class="btn btn-danger" href="{{ url_for('award_list') }}" role="button">获奖列表</a>
+        <a class="btn btn-primary" href="{{ url_for('notice_list') }}" role="button">公告列表</a>
+        {% if current_user.type == 'student' %}
+            <a class="btn btn-warning" href="{{ url_for('edit_work') }}" role="button">添加就业信息</a>
+        {% else %}
+            <a class="btn btn-warning" href="{{ url_for('request_list') }}" role="button">申请信息审核</a>
+        {% endif %}
+
+    </blockquote>
+    </div>
+    </div>
+    <div class="row">
         <div class="col-md-8">
         <div class="panel panel-danger">
             <div class="panel-heading">通知公告
@@ -56,13 +79,22 @@
 
         </div>
     </div>
-    <div class="row">
-        &nbsp;&nbsp;&nbsp;常用功能:
-        <a class="btn btn-success" href="{{ url_for('contest_list') }}" role="button">竞赛申请</a>
-        <a class="btn btn-danger" href="{{ url_for('award_list') }}" role="button">获奖列表</a>
-        <a class="btn btn-primary" href="{{ url_for('notice_list') }}" role="button">公告列表</a>
-        <a class="btn btn-warning" href="{{ url_for('edit_work') }}" role="button">录入就业信息</a>
-    </div>
+{#    <div class="row">#}
+{#        &nbsp;&nbsp;&nbsp;常用功能:#}
+{#        <a class="btn btn-success" href="{{ url_for('contest_list') }}" role="button">#}
+{#            {% if current_user.type == 'student' %}竞赛申请#}
+{#            {% else %}竞赛列表#}
+{#            {% endif %}#}
+{#        </a>#}
+{#        <a class="btn btn-danger" href="{{ url_for('award_list') }}" role="button">获奖列表</a>#}
+{#        <a class="btn btn-primary" href="{{ url_for('notice_list') }}" role="button">公告列表</a>#}
+{#        {% if current_user.type == 'student' %}#}
+{#            <a class="btn btn-warning" href="{{ url_for('edit_work') }}" role="button">修改就业信息</a>#}
+{#        {% else %}#}
+{#            <a class="btn btn-warning" href="{{ url_for('request_list') }}" role="button">审核申请</a>#}
+{#        {% endif %}#}
+{##}
+{#    </div>#}
 {#    <div class="row">#}
 
 {#        <div class="col-md-4 ">#}
