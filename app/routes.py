@@ -3,22 +3,20 @@ import os
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, EditPassword, EditWorkForm, EditStudyForm,\
     AddContestForm, ApplyContestForm, AddUserForm, EditAwardForm, EditCreateForm, EditTimeForm, EditNoticeForm, \
-    ResetPasswordRequestForm, ResetPasswordForm
+    ResetPasswordRequestForm, ResetPasswordForm, AddContestTypeForm
 from flask import render_template, flash, redirect, url_for, request, send_from_directory, make_response, json
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student, Notice
+from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student, Notice, Contest_type
 import datetime
 
 from pyecharts import Bar, Pie, Grid, Page, Scatter, Line, configure        # 用于画图表
 from pyecharts_javascripthon.api import TRANSLATOR
-configure(global_theme='dark')         # 规定pycharts的主题roma chalk halloween essos
-
 import numpy as np      # 用于计算相关性
 from scipy.stats import pearsonr
-
 from sqlalchemy import func     # 为在query中使用func.count()
-
 from app.email import send_password_reset_email     # 用于重置密码
+# import shutil   # 用于删除文件及文件夹
+configure(global_theme='dark')         # 规定pycharts的主题roma chalk halloween essos
 
 
 @app.route('/')
@@ -88,7 +86,7 @@ def reset_password(token):
         db.session.commit()
         flash('恭喜您，重置密码成功！')
         return redirect(url_for('login'))
-    return render_template('normal_form.html', form=form)
+    return render_template('normal_form.html', title='重置密码', form=form)
 
 
 @app.route('/add_user', methods=['GET', 'POST'])
@@ -196,16 +194,19 @@ def edit_notice(id):
 def delete_notice(id):
     notice = Notice.query.get(id)
     db.session.delete(notice)
+    # dirpath = os.path.join(app.root_path, app.config['NOTICE_FOLDER'], id)  # 获得文件路径
+    # if os.path.exists(dirpath):
+    #     shutil.rmtree('要清空的文件夹名')      # 删除相关文件及文件夹
     db.session.commit()
     flash('删除成功！')
-    return notice_list()
+    return redirect(url_for('notice_list'))
 
 
 @app.route('/notice')
 @login_required
 def notice_list():
     page = request.args.get('page', 1, type=int)
-    lists = Notice.query.filter().paginate(
+    lists = Notice.query.filter().order_by(Notice.time.desc()).paginate(
         page, app.config['POSTS_PER_PAGE'], False)
     next_url = url_for('notice_list', page=lists.next_num) \
         if lists.has_next else None
@@ -219,22 +220,14 @@ def notice_list():
 @login_required
 def notice_details(id):
     notice = Notice.query.get(id)
-    # print(notice.text)
     return render_template("notice_details.html", list=notice)
-    # db.session.delete(notice)
-    # db.session.commit()
-    # flash('删除成功！')
 
 
 @app.route("/notice/download/<id>/<filename>")
 def notice_downloader(id, filename):
-    dirpath = os.path.join(app.root_path, 'notice', id)  #
-    # print(contest_name)
-    file_name = filename
-    # print(file_name)
-    # return redirect(url_for('index'))
-    response = make_response(send_from_directory(dirpath, file_name, as_attachment=True) )  # as_attachment=True 一定要写，不然会变成打开，而不是下载
-    response.headers["Content-Disposition"] = "attachment; filename={}".format(file_name.encode().decode('latin-1'))
+    dirpath = os.path.join(app.root_path, app.config['NOTICE_FOLDER'], id)  # 获得文件路径
+    response = make_response(send_from_directory(dirpath, filename, as_attachment=True) )  # as_attachment=True 一定要写，不然会变成打开，而不是下载
+    response.headers["Content-Disposition"] = "attachment; filename={}".format(filename.encode().decode('latin-1'))
     return response
 
 
@@ -377,7 +370,7 @@ def edit_password():
 @login_required
 def contest_list():
     page = request.args.get('page', 1, type=int)
-    lists = Contest.query.filter().paginate(
+    lists = Contest.query.filter().order_by(Contest.contest_time.desc()).paginate(
         page, app.config['POSTS_PER_PAGE'], False)
     next_url = url_for('contest_list', page=lists.next_num) \
         if lists.has_next else None
@@ -413,7 +406,7 @@ def add_contest():
 
 @app.route("/download/<contest_name>")
 def downloader(contest_name):
-    dirpath = os.path.join(app.root_path, 'upload', contest_name)  #
+    dirpath = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], contest_name)  #
     # print(contest_name)
     file_name = os.listdir(dirpath)[0]
     # print(file_name)
@@ -430,7 +423,11 @@ def apply_contest(contest_id):
     form = ApplyContestForm()
     contest = Contest.query.filter(Contest.contest_id == contest_id).first()
     if form.validate_on_submit():
-        if not form.name2.data:
+        teacher = User.query.get(form.teacher.data)
+        if not teacher:
+            flash("此教师ID不存在！")
+            return redirect(url_for('apply_contest', contest_id=contest_id))
+        if not form.id2.data:
             req = Request(user_id=form.id1.data,contest_id=contest_id,status=0,sup_teacher=form.teacher.data,
                           notes=form.notes.data, add_time=datetime.datetime.now(), user_type=0)
             db.session.add(req)
@@ -442,6 +439,7 @@ def apply_contest(contest_id):
             if id:
                 team.parts.append(Student.query.get(id))
             id = form.id2.data
+            print(id)
             if id:
                 team.parts.append(Student.query.get(id))
             id = form.id3.data
@@ -476,20 +474,20 @@ def request_list():
     #     lists = Request.query.filter().\
     #         paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取所有学生申请信息
     if current_user.type == 'student':          # 如果为学生，将个人参赛和组队参赛分开查看e
-        lists = Request.query.filter_by(user_id=current_user.user_id, user_type=0)\
+        lists = Request.query.filter_by(user_id=current_user.user_id, user_type=0).order_by(Request.add_time.desc())\
             .paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取自己个人的申请信息
         #
 
     elif current_user.type == 'admin':
-        lists = Request.query.filter().\
+        lists = Request.query.filter().order_by(Request.add_time.desc()).\
             paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取所有学生申请信息
     else:
         tea_type = current_user.get_teacher_type()
         if tea_type == 0:       # 普通教师
-            lists = Request.query.filter_by(sup_teacher=current_user.user_id). \
+            lists = Request.query.filter_by(sup_teacher=current_user.user_id).order_by(Request.add_time.desc()). \
                 paginate(page, app.config['POSTS_PER_PAGE'], False)  # 选取自己带队学生申请信息
         else:                   # 管理层教师
-            lists = Request.query.filter(). \
+            lists = Request.query.filter().order_by(Request.add_time.desc()). \
                 paginate(page, app.config['POSTS_PER_PAGE'], False)  # 选取所有学生申请信息
     next_url = url_for('request_list', page=lists.next_num) \
         if lists.has_next else None
@@ -507,7 +505,7 @@ def request_list_team():        # 如果为学生，将个人参赛和组队参�
     page = request.args.get('page', 1, type=int)
     lists = Request.query.join(  # 选出组队参加中所有与自己相关的记录
         team_student, (team_student.c.team_id == Request.user_id)).filter(
-        Request.user_type == 1, team_student.c.user_id == current_user.user_id). \
+        Request.user_type == 1, team_student.c.user_id == current_user.user_id).order_by(Request.add_time.desc()). \
         paginate(page, app.config['POSTS_PER_PAGE'], False)
     # print(lists.items)
     next_url = url_for('request_list_team', page=lists.next_num) \
@@ -574,7 +572,8 @@ def disagree_request(request_id):
 @login_required
 def award_list():
     page = request.args.get('page', 1, type=int)
-    lists = Award.query.filter(). \
+    lists = Award.query.join(Contest, (Contest.contest_id==Award.contest_id)).\
+        order_by(Contest.contest_time.desc()).filter(). \
         paginate(page, app.config['POSTS_PER_PAGE'], False)
     # print(lists.items)
     next_url = url_for('award_list', page=lists.next_num) \
@@ -889,7 +888,7 @@ def relate_work(type):
 @app.route("/echarts/<chart_type>", methods=['GET', 'POST'])
 def echarts(chart_type):
     end = datetime.date.today()
-    start = datetime.datetime(2017, 1, 1)  # 默认时间为今年第一天到今天为止
+    start = datetime.datetime(end.year, 1, 1)  # 默认时间为今年第一天到今天为止
     # print(type(end))        # <class 'datetime.date'>
     form = EditTimeForm()
     if request.method == 'POST':

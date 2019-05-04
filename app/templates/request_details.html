@@ -36,7 +36,11 @@
         </tr>
         <tr>
             <th>备注</th>
-            <td>{{ request.notes }}</td>
+            {% if not request.notes %}
+                <td>无</td>
+            {% else %}
+                <td>{{ request.notes }}</td>
+            {% endif %}
         </tr>
         <tr>
             <th>指导教师</th>

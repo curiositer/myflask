@@ -4,7 +4,7 @@ from wtforms import StringField, PasswordField, SelectField, BooleanField,\
 from flask_admin.form import widgets
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 from flask_wtf.file import FileRequired, FileAllowed
-from app.models import User
+from app.models import User, Contest_type
 
 
 class LoginForm(FlaskForm):
@@ -16,10 +16,10 @@ class LoginForm(FlaskForm):
 
 class AddUserForm(FlaskForm):
     type = SelectField('用户类型', choices=[('admin', '管理员'), ('student', '学生'), ('teacher', '教师')], coerce=str)
-    username = StringField('姓名', validators=[DataRequired('请输入姓名')])
+    username = StringField('姓名', validators=[DataRequired('请输入姓名'), Length(max=64, message="填写内容过长")])
     user_id = StringField('学号（工号）', validators=[DataRequired('请输入学号')])
-    email = StringField('邮箱', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
-    tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话')])
+    email = StringField('邮箱（邮箱作为找回密码的唯一凭证，请认真填写）', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
+    tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话'), Length(max=11, message="填写内容过长")])
     major_in = SelectField('专业', choices=[('机械工程', '机械工程'), ('软件工程', '软件工程'), ('工业工程', '工业工程'),
                                           ('自动化', '自动化'), ('电子信息工程', '电子信息工程'), ('汽车服务工程', '汽车服务工程')], coerce=str)
     tea_type = SelectField('教师类型（仅教师填写）',
@@ -48,7 +48,7 @@ class AddUserForm(FlaskForm):
 class RegistrationForm(FlaskForm):
     username = StringField('姓名', validators=[DataRequired('请输入姓名')])
     user_id = StringField('学号', validators=[DataRequired('请输入学号')])
-    email = StringField('邮箱', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
+    email = StringField('邮箱（邮箱作为找回密码的唯一凭证，请认真填写）', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
     tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话')])
     major_in = SelectField('专业', choices=[('机械工程', '机械工程'), ('软件工程', '软件工程'), ('工业工程', '工业工程'),
                                                 ('自动化', '自动化'), ('电子信息工程', '电子信息工程'), ('汽车服务工程', '汽车服务工程')], coerce=str)
@@ -97,8 +97,8 @@ class EditNoticeForm(FlaskForm):
 
 
 class EditProfileForm(FlaskForm):
-    email = StringField('电子邮箱', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
-    tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话')])
+    email = StringField('电子邮箱（邮箱作为找回密码的唯一凭证，请认真填写）', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
+    tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话'), Length(min=11, max=11, message="请输入11位手机号")])
     # about_me = TextAreaField('About me', validators=[Length(min=0, max=140)])
     submit = SubmitField('提交修改')
 
@@ -116,7 +116,7 @@ class EditProfileForm(FlaskForm):
 class EditWorkForm(FlaskForm):
     company_name = StringField('就业单位', validators=[DataRequired('请输入就业单位')])
     company_type = SelectField('单位类型', choices=[('国有企业', '国有企业'), ('央属企业', '央属企业'), ('公务员', '公务员'),
-                                                ('私有企业', '私有企业'), ('事业单位', '事业单位'), ('创业', '创业')], coerce=str)
+                                                ('私有企业', '私有企业'), ('事业单位', '事业单位')], coerce=str)
     job = StringField('就职岗位', validators=[DataRequired('请输入岗位')])
     salary = IntegerField('就职薪水（按月份）', validators=[DataRequired('请输入薪水')])
     submit = SubmitField('提交修改')
@@ -146,30 +146,40 @@ class EditPassword(FlaskForm):
 
 class AddContestForm(FlaskForm):
     name = StringField('竞赛名', validators=[DataRequired()])
-    type = StringField('竞赛类型（科技、人文、体育、理科、综合）', validators=[DataRequired()])
+    type = SelectField('竞赛类型(可以通过上面链接添加更多)', validators=[DataRequired("请选择竞赛类型")], coerce=str)
+    # type = StringField('竞赛类型（机器人、无人驾驶、人文、体育、理科、综合）', validators=[DataRequired()])
     time = DateField('竞赛时间', validators=[DataRequired("请按照2010-1-1的格式输入")],
                      format='%Y-%m-%d', widget=widgets.DatePickerWidget())
-    details = StringField('竞赛描述', validators=[Length(min=0, max=150)])
+    details = StringField('竞赛描述（不超过150字节）', validators=[Length(max=150, message="填写内容过长")])
     level = SelectField('竞赛等级', choices=[('校级', '校级'), ('市级', '市级'),
                                          ('省级', '省级'), ('国家级', '国家级'), ('国际级', '国际级')], coerce=str)
-    file = FileField('添加文件', validators=[FileAllowed(['pdf', 'doc', 'docx'], "请上传pdf或doc文件")])
+    file = FileField('添加文件（如果需要添加更多附件，可以利用公告实现）', validators=[FileAllowed(['pdf', 'doc', 'docx'], "请上传pdf或doc文件")])
     submit = SubmitField('添加竞赛')
+
+    def __init__(self, *args, **kwargs):            # 通过加载contest_type表中的数据来完成选项的加载
+        super(AddContestForm, self).__init__(*args, **kwargs)
+        self.type.choices = [(v.contest_type, v.contest_type) for v in Contest_type.query.all()]
+
+
+class AddContestTypeForm(FlaskForm):
+    type = StringField('竞赛类型', validators=[DataRequired()])
+    submit = SubmitField('添加竞赛类型')
 
 
 class ApplyContestForm(FlaskForm):
-    teacher = IntegerField('指导教师ID', validators=[DataRequired()])
+    teacher = IntegerField('指导教师ID', validators=[DataRequired("此教师ID不存在")])
     id1 = StringField('成员1（队长）学号', validators=[DataRequired()])
     name1 = StringField('成员1（队长）姓名', validators=[DataRequired()])
     team_name = StringField('队伍名（组队参加）')
-    id2 = StringField('成员2学号')
-    name2 = StringField('成员2姓名')
-    id3 = StringField('成员3学号')
-    name3 = StringField('成员3姓名')
-    id4 = StringField('成员4学号')
-    name4 = StringField('成员4姓名')
-    id5 = StringField('成员5学号')
-    name5 = StringField('成员5姓名')
-    notes = TextAreaField('备注', validators=[Length(min=0, max=150)])
+    id2 = IntegerField('成员2学号')
+    # name2 = StringField('成员2姓名')
+    id3 = IntegerField('成员3学号')
+    # name3 = StringField('成员3姓名')
+    id4 = IntegerField('成员4学号')
+    # name4 = StringField('成员4姓名')
+    id5 = IntegerField('成员5学号')
+    # name5 = StringField('成员5姓名')
+    notes = TextAreaField('备注', validators=[Length(min=0, max=150, message="填写内容过长")])
     submit = SubmitField('确认申请')
 
 

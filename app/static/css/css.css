@@ -15,9 +15,9 @@ table{/*.main_container or table*/
 h4{
 	color: red;
 }
-blockquote{
-	background-color: #fff;
-}
+/*blockquote{*/
+	/*background-color: #fff;*/
+/*}*/
 .alert-error{
 	background-color: rgb(247, 203, 203);
 }
