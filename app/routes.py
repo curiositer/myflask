@@ -89,9 +89,11 @@ def reset_password(token):
     return render_template('normal_form.html', title='重置密码', form=form)
 
 
-@app.route('/add_user', methods=['GET', 'POST'])
+@app.route('/user/add', methods=['GET', 'POST'])
 @login_required
 def add_user():
+    if current_user.type != 'admin':
+        return render_template('404.html'), 404
     form = AddUserForm()
     if form.validate_on_submit():
         user_type = form.type.data
@@ -139,6 +141,8 @@ def register():
 @app.route('/notice/add', methods=['GET', 'POST'])
 @login_required
 def add_notice():
+    if current_user.type != 'admin':
+        return render_template('404.html'), 404
     form = EditNoticeForm()
     if form.validate_on_submit():
         filename1, filename2, filename3 = None, None, None
@@ -175,6 +179,8 @@ def add_notice():
 @app.route('/notice/edit/<id>', methods=['GET', 'POST'])
 @login_required
 def edit_notice(id):
+    if current_user.type != 'admin':
+        return render_template('404.html'), 404
     form = EditNoticeForm()
     notice = Notice.query.get(id)
     if form.validate_on_submit():
@@ -192,6 +198,8 @@ def edit_notice(id):
 @app.route('/notice/delete/<id>', methods=['GET', 'POST'])
 @login_required
 def delete_notice(id):
+    if current_user.type != 'admin':
+        return render_template('404.html'), 404
     notice = Notice.query.get(id)
     db.session.delete(notice)
     # dirpath = os.path.join(app.root_path, app.config['NOTICE_FOLDER'], id)  # 获得文件路径
@@ -224,6 +232,7 @@ def notice_details(id):
 
 
 @app.route("/notice/download/<id>/<filename>")
+@login_required
 def notice_downloader(id, filename):
     dirpath = os.path.join(app.root_path, app.config['NOTICE_FOLDER'], id)  # 获得文件路径
     response = make_response(send_from_directory(dirpath, filename, as_attachment=True) )  # as_attachment=True 一定要写，不然会变成打开，而不是下载
@@ -245,7 +254,7 @@ def user(username):
 @app.route('/user/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    form = EditProfileForm(current_user.email)
+    form = EditProfileForm()
     if form.validate_on_submit():
         current_user.email = form.email.data
         current_user.tel_num = form.tel_num.data
@@ -262,6 +271,8 @@ def edit_profile():
 @app.route('/user/edit/work', methods=['GET', 'POST'])
 @login_required
 def edit_work():
+    if current_user.type != 'student':
+        return render_template('404.html'), 404
     stu = Student.query.get(current_user.user_id)
     if stu.company_name:
         exist = 'work'
@@ -295,6 +306,8 @@ def edit_work():
 @app.route('/user/edit/study', methods=['GET', 'POST'])
 @login_required
 def edit_study():
+    if current_user.type != 'student':
+        return render_template('404.html'), 404
     stu = Student.query.get(current_user.user_id)
     if stu.company_name:
         exist = 'work'
@@ -324,6 +337,8 @@ def edit_study():
 @app.route('/user/edit/create', methods=['GET', 'POST'])
 @login_required
 def edit_create():
+    if current_user.type != 'student':
+        return render_template('404.html'), 404
     stu = Student.query.get(current_user.user_id)
     if stu.company_name:
         exist = 'work'
@@ -383,6 +398,8 @@ def contest_list():
 @app.route('/contest/add', methods=['GET', 'POST'])
 @login_required
 def add_contest():
+    if current_user.type != 'admin':
+        return render_template('404.html'), 404
     form = AddContestForm()
     if form.validate_on_submit():
         date = form.time.data.strftime('%Y-%m-%d')
@@ -405,6 +422,7 @@ def add_contest():
 
 
 @app.route("/download/<contest_name>")
+@login_required
 def downloader(contest_name):
     dirpath = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], contest_name)  #
     # print(contest_name)
@@ -419,9 +437,9 @@ def downloader(contest_name):
 @app.route('/contest/apply/<contest_id>', methods=['GET', 'POST'])
 @login_required
 def apply_contest(contest_id):
-    # print(type(contest_name))
+    if current_user.type != 'student':
+        return render_template('404.html'), 404
     form = ApplyContestForm()
-    # form.version.raw_data = None
     contest = Contest.query.filter(Contest.contest_id == contest_id).first()
     if form.validate_on_submit():
         try:  # 查看指导教师是否存在
@@ -537,6 +555,8 @@ def request_list():
 @app.route('/request/team', methods=['GET', 'POST'])
 @login_required
 def request_list_team():        # 如果为学生，将个人参赛和组队参赛分开查看
+    if current_user.type != 'student':
+        return render_template('404.html'), 404
     page = request.args.get('page', 1, type=int)
     lists = Request.query.join(  # 选出组队参加中所有与自己相关的记录
         team_student, (team_student.c.team_id == Request.user_id)).filter(
@@ -565,24 +585,37 @@ def request_details(request_id):
 
 
 # 最开始的ajax，采用JavaScript实现在当前界面做申请，后认为不合适改为跳转为另一界面显示其详细信息
-@app.route('/contest/if_agree', methods=['POST'])
-@login_required
-def if_agree_request():
-    req_id = request.form['req']
-    status = request.form['agree_status']       # 利用ajax的post请求获取表单数据
-    req1 = Request.query.filter_by(request_id=req_id).first()
+# @app.route('/contest/if_agree', methods=['POST'])
+# @login_required
+# def if_agree_request():
+#     req_id = request.form['req']
+#     status = request.form['agree_status']       # 利用ajax的post请求获取表单数据
+#     req1 = Request.query.filter_by(request_id=req_id).first()
+#
+#     if status == 'true':
+#         req1.status = 1
+#     else:
+#         req1.status = 2
+#     db.session.commit()
+#     return redirect('/contest/request_list')
 
-    if status == 'true':
-        req1.status = 1
-    else:
-        req1.status = 2
-    db.session.commit()
-    return redirect('/contest/request_list')
+
+def if_request_admin():             # 判断是否是有权限对学生申请信息进行更改的用户
+    if current_user.type == 'admin':
+        return True
+    elif current_user.type == 'teacher':
+        if current_user.get_teacher_type() == 1:
+            return True
+    return False
 
 
 @app.route('/request/agree/<request_id>', methods=['GET', 'POST'])
 @login_required
 def agree_request(request_id):
+    a = if_request_admin()
+    print(a)
+    if not if_request_admin():
+        return render_template('404.html'), 404
     req1 = Request.query.filter_by(request_id=request_id).first()
     req1.status = 1
     award = Award(user_id=req1.user_id, user_type=req1.user_type, contest_id=req1.contest_id,
@@ -596,6 +629,8 @@ def agree_request(request_id):
 @app.route('/request/disagree/<request_id>', methods=['GET', 'POST'])
 @login_required
 def disagree_request(request_id):
+    if not if_request_admin():
+        return render_template('404.html'), 404
     req1 = Request.query.filter_by(request_id=request_id).first()
     req1.status = 2
     db.session.commit()
@@ -724,6 +759,7 @@ def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相�
 
 
 @app.route("/relate/<type>")
+@login_required
 def relate(type):
     page = Page()
     if type == 'contest':
@@ -921,6 +957,7 @@ def relate_work(type):
 
 
 @app.route("/echarts/<chart_type>", methods=['GET', 'POST'])
+@login_required
 def echarts(chart_type):
     end = datetime.date.today()
     start = datetime.datetime(end.year, 1, 1)  # 默认时间为今年第一天到今天为止

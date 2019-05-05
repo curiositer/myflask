@@ -11,7 +11,7 @@
         {% elif current_user.type=='teacher' %}
             <h4>用户类型：教师</h4>
         {% endif %}
-        <h3>姓名：{{ current_user.username }}</h3>
+        <h3>学号：{{ current_user.user_id }} &nbsp;&nbsp;&nbsp;姓名：{{ current_user.username }}</h3>
     {% elif title == '添加竞赛' %}
         <a class="btn btn-danger" href="{{ url_for('add_contest_type') }}" role="button">添加竞赛类型</a>
     {% endif %}

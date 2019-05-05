@@ -82,7 +82,7 @@ class ResetPasswordForm(FlaskForm):
 
 
 class EditNoticeForm(FlaskForm):
-    title = StringField('标题', validators=[DataRequired('请输入标题')])
+    title = StringField('标题', validators=[DataRequired('请输入标题'), Length(max=50, message="标题长度需小于50字符")])
     text = TextAreaField('正文', validators=[DataRequired('请输入正文')])
     file1 = FileField("相关文件(请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg')",
                      validators=[FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'],
@@ -97,14 +97,15 @@ class EditNoticeForm(FlaskForm):
 
 
 class EditProfileForm(FlaskForm):
-    email = StringField('电子邮箱（邮箱作为找回密码的唯一凭证，请认真填写）', validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式')])
+    email = StringField('电子邮箱（邮箱作为找回密码的唯一凭证，请认真填写）',
+                        validators=[DataRequired('请输入邮箱'), Email('请输入正确邮箱格式'), Length(max=120, message="长度需小于120字符")])
     tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话'), Length(min=11, max=11, message="请输入11位手机号")])
     # about_me = TextAreaField('About me', validators=[Length(min=0, max=140)])
     submit = SubmitField('提交修改')
-
-    def __init__(self, original_email, *args, **kwargs):
-        super(EditProfileForm, self).__init__(*args, **kwargs)
-        self.original_email = original_email
+    #
+    # def __init__(self, original_email, *args, **kwargs):
+    #     super(EditProfileForm, self).__init__(*args, **kwargs)
+    #     self.original_email = original_email
 
     def validate_email(self, email):
         if email.data != self.original_email:
@@ -114,25 +115,25 @@ class EditProfileForm(FlaskForm):
 
 
 class EditWorkForm(FlaskForm):
-    company_name = StringField('就业单位', validators=[DataRequired('请输入就业单位')])
+    company_name = StringField('就业单位', validators=[DataRequired('请输入就业单位'), Length(max=30, message="长度需小于30字符")])
     company_type = SelectField('单位类型', choices=[('国有企业', '国有企业'), ('央属企业', '央属企业'), ('公务员', '公务员'),
                                                 ('私有企业', '私有企业'), ('事业单位', '事业单位')], coerce=str)
-    job = StringField('就职岗位', validators=[DataRequired('请输入岗位')])
+    job = StringField('就职岗位', validators=[DataRequired('请输入岗位'), Length(max=30, message="长度需小于30字符")])
     salary = IntegerField('就职薪水（按月份）', validators=[DataRequired('请输入薪水')])
     submit = SubmitField('提交修改')
 
 
 class EditStudyForm(FlaskForm):
-    college_name = StringField('录取学校', validators=[DataRequired('请输入录取学校')])
+    college_name = StringField('录取学校', validators=[DataRequired('请输入录取学校'), Length(max=30, message="长度需小于30字符")])
     college_type = SelectField('学校类型', choices=[('985高校', '985高校'), ('211高校', '211高校'),
                                                 ('普通高校', '普通高校')], coerce=str)
-    after_major = StringField('录取专业（请填写专业全称）', validators=[DataRequired('请输入录取专业')])
+    after_major = StringField('录取专业（请填写专业全称）', validators=[DataRequired('请输入录取专业'), Length(max=30, message="长度需小于30字符")])
     submit = SubmitField('提交修改')
 
 
 class EditCreateForm(FlaskForm):
-    create_type = StringField('创业公司经营类型', validators=[DataRequired('请输入类型')])
-    create_job = StringField('公司中担任的职务', validators=[DataRequired('请输入职务')])
+    create_type = StringField('创业公司经营类型', validators=[DataRequired('请输入类型'), Length(max=30, message="长度需小于30字符")])
+    create_job = StringField('公司中担任的职务', validators=[DataRequired('请输入职务'), Length(max=30, message="长度需小于30字符")])
     submit = SubmitField('提交修改')
 
 
@@ -145,12 +146,12 @@ class EditPassword(FlaskForm):
 
 
 class AddContestForm(FlaskForm):
-    name = StringField('竞赛名', validators=[DataRequired()])
+    name = StringField('竞赛名', validators=[DataRequired(), Length(max=20, message="长度需小于20字符")])
     type = SelectField('竞赛类型(可以通过上面链接添加更多)', validators=[DataRequired("请选择竞赛类型")], coerce=str)
     # type = StringField('竞赛类型（机器人、无人驾驶、人文、体育、理科、综合）', validators=[DataRequired()])
     time = DateField('竞赛时间', validators=[DataRequired("请按照2010-1-1的格式输入")],
                      format='%Y-%m-%d', widget=widgets.DatePickerWidget())
-    details = StringField('竞赛描述（不超过150字节）', validators=[Length(max=150, message="填写内容过长")])
+    details = StringField('竞赛描述（不超过150字节）', validators=[Length(max=150, message="长度需小于150字符")])
     level = SelectField('竞赛等级', choices=[('校级', '校级'), ('市级', '市级'),
                                          ('省级', '省级'), ('国家级', '国家级'), ('国际级', '国际级')], coerce=str)
     file = FileField('添加文件（如果需要添加更多附件，可以利用公告实现）', validators=[FileAllowed(['pdf', 'doc', 'docx'], "请上传pdf或doc文件")])
@@ -162,7 +163,7 @@ class AddContestForm(FlaskForm):
 
 
 class AddContestTypeForm(FlaskForm):
-    type = StringField('竞赛类型', validators=[DataRequired()])
+    type = StringField('竞赛类型', validators=[DataRequired(), Length(max=20, message="长度需小于20字符")])
     submit = SubmitField('添加竞赛类型')
 
 
