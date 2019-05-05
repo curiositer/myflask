@@ -421,36 +421,71 @@ def downloader(contest_name):
 def apply_contest(contest_id):
     # print(type(contest_name))
     form = ApplyContestForm()
+    # form.version.raw_data = None
     contest = Contest.query.filter(Contest.contest_id == contest_id).first()
     if form.validate_on_submit():
-        teacher = User.query.get(form.teacher.data)
-        if not teacher:
-            flash("此教师ID不存在！")
+        try:  # 查看指导教师是否存在
+            tea1 = int(form.teacher.data)
+            teacher = User.query.get(tea1)
+        except ValueError:
+            flash("指导教师的ID不存在！")
             return redirect(url_for('apply_contest', contest_id=contest_id))
+
+        id1 = current_user.user_id      # 第一个人即自己，直接获取当前用户信息即可
         if not form.id2.data:
-            req = Request(user_id=form.id1.data,contest_id=contest_id,status=0,sup_teacher=form.teacher.data,
+            req = Request(user_id=id1,contest_id=contest_id,status=0,sup_teacher=tea1,
                           notes=form.notes.data, add_time=datetime.datetime.now(), user_type=0)
             db.session.add(req)
         else:
             team = Team(team_name=form.team_name.data)
 
             # student = Student.query.filter_by(user_id=)
-            id = form.id1.data
-            if id:
-                team.parts.append(Student.query.get(id))
+            id = id1
+            # if id:
+            #     stu1 = User.query.get(id)
+            #     if not stu1:
+            #         flash("学生1的ID不存在！")
+            #         return redirect(url_for('apply_contest', contest_id=contest_id))
+            team.parts.append(Student.query.get(id))
+
             id = form.id2.data
-            print(id)
             if id:
-                team.parts.append(Student.query.get(id))
+                try:                 # 查看该ID是否存在
+                    id = int(form.id2.data)
+                    stu2 = User.query.get(id)
+                    team.parts.append(Student.query.get(id))
+                except ValueError:
+                    flash("学生2的ID不存在！")
+                    return redirect(url_for('apply_contest', contest_id=contest_id))
+
             id = form.id3.data
             if id:
-                team.parts.append(Student.query.get(id))
+                try:                 # 查看该ID是否存在
+                    id = int(form.id3.data)
+                    stu2 = User.query.get(id)
+                    team.parts.append(Student.query.get(id))
+                except ValueError:
+                    flash("学生3的ID不存在！")
+                    return redirect(url_for('apply_contest', contest_id=contest_id))
+
             id = form.id4.data
             if id:
-                team.parts.append(Student.query.get(id))
+                try:  # 查看该ID是否存在
+                    id = int(form.id4.data)
+                    stu2 = User.query.get(id)
+                    team.parts.append(Student.query.get(id))
+                except ValueError:
+                    flash("学生4的ID不存在！")
+                    return redirect(url_for('apply_contest', contest_id=contest_id))
             id = form.id5.data
             if id:
-                team.parts.append(Student.query.get(id))
+                try:  # 查看该ID是否存在
+                    id = int(form.id5.data)
+                    stu2 = User.query.get(id)
+                    team.parts.append(Student.query.get(id))
+                except ValueError:
+                    flash("学生5的ID不存在！")
+                    return redirect(url_for('apply_contest', contest_id=contest_id))
             db.session.add(team)
             # print(team.team_id)
             req = Request(user_id=team.team_id, contest_id=contest_id, status=0, sup_teacher=form.teacher.data,
@@ -459,9 +494,9 @@ def apply_contest(contest_id):
         db.session.commit()
         flash('恭喜您，竞赛%s已申请成功!' % contest.contest_name)
         return redirect(url_for('request_list'))
-    elif request.method == 'GET':
-        form.id1.data = current_user.id
-        form.name1.data = current_user.username
+    # elif request.method == 'GET':
+    #     form.id1.data = current_user.id
+    #     form.name1.data = current_user.username
     return render_template('apply_contest.html', title='申请竞赛', form=form, contest=contest)
 
 
@@ -580,7 +615,7 @@ def award_list():
         if lists.has_next else None
     prev_url = url_for('award_list', page=lists.prev_num) \
         if lists.has_prev else None
-    return render_template("award_list.html", title='获奖列表',
+    return render_template("award_list.html", title='参赛/获奖列表',
                            lists=lists.items, next_url=next_url, prev_url=prev_url)
 
 
@@ -911,9 +946,9 @@ def echarts(chart_type):
     elif chart_type == 'award_pie':     # 获奖级别-饼图
         _bar = award_pie(start, end)
         title = '获奖情况-按获奖级别'
-    elif chart_type == 'major_bar':   # 专业-柱状图
-        _bar = major_bar(start, end)
-        title = '参赛（获奖）情况-按专业类型'
+    # elif chart_type == 'major_bar':   # 专业-柱状图
+    #     _bar = major_bar(start, end)
+    #     title = '参赛（获奖）情况-按专业类型'
     # elif chart_type == 'time_bar':     # 竞赛时间-柱状图
 
         # _bar = time_bar(start, end)
@@ -970,8 +1005,8 @@ def contest_bar(start, end):
             Award.grade != '0', Award.grade != '无').count()
         award_count.append(count2)
     # print(type)
-    bar.add("参赛人数", contest_types, join_count, legend_text_size=20, xaxis_label_textsize=20)
-    bar.add("获奖人数", contest_types, award_count, legend_text_size=20, xaxis_label_textsize=20)
+    bar.add("参赛人数", contest_types, join_count, legend_text_size=20, xaxis_label_textsize=20, yaxis_force_interval=1)
+    bar.add("获奖人数", contest_types, award_count, legend_text_size=20, xaxis_label_textsize=20, yaxis_force_interval=1)
     # bar.use_theme('dark')   # 更换主题
     return bar
     # return type,join_count,award_count
@@ -989,7 +1024,8 @@ def award_bar(start, end):
             Award.grade == types[0], Award.grade != '无').count()    # 选出每一获奖级别的人数
         award_count.append(count1)
 
-    bar.add("获奖人数", award_types, award_count, legend_text_size=20, label_text_size=20, xaxis_label_textsize=20)
+    bar.add("获奖人数", award_types, award_count,
+            legend_text_size=20, label_text_size=20, xaxis_label_textsize=20, yaxis_force_interval=1)
     # bar.use_theme('dark')   # 更换主题
     return bar
 
@@ -1040,31 +1076,31 @@ def award_pie(start, end):
     return pie
 
 
-def major_bar():
-    bar = Bar("专业类型统计", height=500, width="100%")
-    major_types = ['机械工程', '软件工程', '工业工程', '自动化', '电子信息工程', '汽车服务工程']
-
-    join_count = []
-    award_count = []
-    for types in major_types:  # types即专业种类
-        count11 = Award.query.join(Student, (Student.user_id == Award.user_id)).\
-            filter(Student.major_in == types, Award.user_type == 0).count()
-        print(count11)
-        # count12 = Award.query.join(Team, (Team.team_id == Award.user_id)).\
-        #     filter(Team.parts.major_in == types, Award.user_type == 1).count()
-        # print(str(count12))
-        # count1 = Award.query.join(  # 选出每一类的参赛人数
-        #     Contest, (Award.contest_id == Contest.contest_id)).filter(
-        #     Contest.contest_type == types).count()
-        # join_count.append(count1)
-        # count2 = Award.query.join(  # 选出每一类的获奖人数
-        #     Contest, (Award.contest_id == Contest.contest_id)).filter(
-        #     Contest.contest_type == types, Award.grade != '0', Award.grade != '无').count()
-        # award_count.append(count2)
-    # bar.add("参赛人数", contest_types, join_count)
-    # bar.add("获奖人数", contest_types, award_count)
-    # bar.use_theme('dark')   # 更换主题
-    return bar
+# def major_bar():
+#     bar = Bar("专业类型统计", height=500, width="100%")
+#     major_types = ['机械工程', '软件工程', '工业工程', '自动化', '电子信息工程', '汽车服务工程']
+#
+#     join_count = []
+#     award_count = []
+#     for types in major_types:  # types即专业种类
+#         count11 = Award.query.join(Student, (Student.user_id == Award.user_id)).\
+#             filter(Student.major_in == types, Award.user_type == 0).count()
+#         print(count11)
+#         # count12 = Award.query.join(Team, (Team.team_id == Award.user_id)).\
+#         #     filter(Team.parts.major_in == types, Award.user_type == 1).count()
+#         # print(str(count12))
+#         # count1 = Award.query.join(  # 选出每一类的参赛人数
+#         #     Contest, (Award.contest_id == Contest.contest_id)).filter(
+#         #     Contest.contest_type == types).count()
+#         # join_count.append(count1)
+#         # count2 = Award.query.join(  # 选出每一类的获奖人数
+#         #     Contest, (Award.contest_id == Contest.contest_id)).filter(
+#         #     Contest.contest_type == types, Award.grade != '0', Award.grade != '无').count()
+#         # award_count.append(count2)
+#     # bar.add("参赛人数", contest_types, join_count)
+#     # bar.add("获奖人数", contest_types, award_count)
+#     # bar.use_theme('dark')   # 更换主题
+#     return bar
 
 
 # def time_bar(start, end):

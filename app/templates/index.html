@@ -13,7 +13,7 @@
             {% else %}竞赛列表
             {% endif %}
         </a>
-        <a class="btn btn-danger" href="{{ url_for('award_list') }}" role="button">获奖列表</a>
+        <a class="btn btn-danger" href="{{ url_for('award_list') }}" role="button">参赛/获奖列表</a>
         <a class="btn btn-primary" href="{{ url_for('notice_list') }}" role="button">公告列表</a>
         {% if current_user.type == 'student' %}
             <a class="btn btn-warning" href="{{ url_for('edit_work') }}" role="button">添加就业信息</a>
@@ -73,9 +73,9 @@
             </div>
 
             </div>
-            <a href="#">
+{#            <a href="#">#}
                 <img src="{{ url_for('static', filename='image/building.png') }}" alt="综合实验楼">
-            </a>
+{#            </a>#}
 
         </div>
     </div>
