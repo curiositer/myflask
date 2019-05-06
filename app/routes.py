@@ -612,8 +612,6 @@ def if_request_admin():             # 判断是否是有权限对学生申请信
 @app.route('/request/agree/<request_id>', methods=['GET', 'POST'])
 @login_required
 def agree_request(request_id):
-    a = if_request_admin()
-    print(a)
     if not if_request_admin():
         return render_template('404.html'), 404
     req1 = Request.query.filter_by(request_id=request_id).first()
