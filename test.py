@@ -174,11 +174,11 @@ def award_in(start, end):
 import xlrd
 
 def get_data(filename, sheetnum):       # 获取企业列表，及对应的类型
-    dir_case = 'C:\\Users\\MRZhao\\Desktop\\' + filename + '.xlsx'
+    dir_case = 'app/file/' + filename + '.xlsx'
     data = xlrd.open_workbook(dir_case)
-    table = data.sheets()[sheetnum]
-    nor = table.nrows
-    nol = table.ncols
+    table = data.sheets()[sheetnum]         # 读取第一个工作簿
+    nor = table.nrows       # 获取总行数
+    # nol = table.ncols
     # print(nor)
     dict = {}
     for i in range(nor):
@@ -191,17 +191,89 @@ def get_data(filename, sheetnum):       # 获取企业列表，及对应的类�
 def work_in(start, end):
     ids = range(start, end)
     company = get_data('list', 0)
-    # print(type(company))
     for id in ids:
         # print(list(company))
         name = random.choice(list(company.keys()))
         type = company[name]
-        # print(name)
-        # print(name,":",type)
         awd = Student.query.get(id)
         awd.company_name = name
         awd.company_type = type
         awd.salary = random.randrange(4000,12000,1000)
+    db.session.commit()
+
+
+import requests
+from lxml import etree
+def get_university():           # 利用爬虫从研招网上获取学校信息，保存到表格中
+    url = "https://yz.chsi.com.cn/sch/?start={}"
+
+    lists = []
+    for i in range(44):
+        cur_url = url.format(i * 20)
+        html = requests.get(cur_url).text
+        xpath_parser = etree.HTML(html)
+        univer = xpath_parser.xpath("//table[@class='ch-table']//tr/td[1]/a/text()")
+        for i in range(len(univer)):
+            univer[i] = univer[i].strip()
+            lists.append(univer[i])
+    # print(lists)
+
+    output = open('C:\\Users\\MRZhao\\Desktop\\data.xls', 'w', encoding='gbk')
+    for i in range(len(lists)):
+        # for j in range(len(list1[i])):
+        output.write(str(lists[i]))  # write函数不能写int类型的参数，所以使用str()转化
+            # output.write('\t')  # 相当于Tab一下，换一个单元格
+        output.write('\n')  # 写完一行立马换行
+    output.close()
+
+    return lists
+
+
+def study_data():           # 获得所有有研究生招生的学校信息
+    dir_case = 'app/file/' + 'study.xlsx'
+    data = xlrd.open_workbook(dir_case)
+    table = data.sheets()[0]
+    nor = table.nrows
+    # list_none = get_university()
+    list_none, list_211, list_985 = [], [], []
+    for i in range(nor):
+        type_none = table.cell_value(i, 0)
+        type_211 = table.cell_value(i, 1)
+        type_985 = table.cell_value(i, 2)
+        list_none.append(type_none)
+        if type_211:
+            list_211.append(type_211)
+        if type_985:
+            list_985.append(type_985)
+
+    for item in list_none[::-1]:         # 需要倒序删除，要不连续元素无法正确删除;获得普通学校列表
+        if item in list_211:
+            list_none.remove(item)
+
+    for item in list_211[::-1]:         # 需要倒序删除，要不连续元素无法正确删除；获得211高校列表
+        if item in list_985:
+            list_211.remove(item)
+
+    dict1 = {}
+    for item in list_none:
+        dict1[item] = '普通高校'
+    for item in list_211:
+        dict1[item] = '211高校'
+    for item in list_985:
+        dict1[item] = '985高校'
+    # print(dict1)
+    return dict1
+
+
+def study_in(start, end):
+    ids = range(start, end)
+    univer = study_data()
+    for id in ids:
+        name = random.choice(list(univer.keys()))
+        type = univer[name]
+        stu = Student.query.get(id)
+        stu.college_name = name
+        stu.college_type = type
     db.session.commit()
 
 
@@ -219,6 +291,15 @@ def add_notice(count):
         notice = Notice(title=title,text=text,time=times)
         db.session.add(notice)
     db.session.commit()
+
+study_in(140, 149)
+# add_notice(10)
+# add_contest(10,30)
+# add_teacher(200, 230)
+# add_request(1, 50)
+# agree_request(75, 130)
+# award_in(52,106)
+# get_data('list', 0)
 
 from pyecharts import Scatter
 
@@ -240,53 +321,47 @@ from pyecharts import Scatter
 # work_in(104,110)
 
 
-data = [
-        [28604, 77, 17096869],
-        [31163, 77.4, 27662440],
-        [1516, 68, 1154605773],
-        [13670, 74.7, 10582082],
-        [28599, 75, 4986705],
-        [29476, 77.1, 56943299],
-        [31476, 75.4, 78958237],
-        [28666, 78.1, 254830],
-        [1777, 57.7, 870601776],
-        [29550, 79.1, 122249285],
-        [2076, 67.9, 20194354],
-        [12087, 72, 42972254],
-        [24021, 75.4, 3397534],
-        [43296, 76.8, 4240375],
-        [10088, 70.8, 38195258],
-        [19349, 69.6, 147568552],
-        [10670, 67.3, 53994605],
-        [26424, 75.7, 57110117],
-        [37062, 75.4, 252847810]
-    ]
+# data = [
+#         [28604, 77, 17096869],
+#         [31163, 77.4, 27662440],
+#         [1516, 68, 1154605773],
+#         [13670, 74.7, 10582082],
+#         [28599, 75, 4986705],
+#         [29476, 77.1, 56943299],
+#         [31476, 75.4, 78958237],
+#         [28666, 78.1, 254830],
+#         [1777, 57.7, 870601776],
+#         [29550, 79.1, 122249285],
+#         [2076, 67.9, 20194354],
+#         [12087, 72, 42972254],
+#         [24021, 75.4, 3397534],
+#         [43296, 76.8, 4240375],
+#         [10088, 70.8, 38195258],
+#         [19349, 69.6, 147568552],
+#         [10670, 67.3, 53994605],
+#         [26424, 75.7, 57110117],
+#         [37062, 75.4, 252847810]
+#     ]
+#
+# x_lst = [v[0] for v in data]
+# y_lst = [v[1] for v in data]
+# extra_data = [v[2] for v in data]
+# sc = Scatter()
+# sc.add(
+#     "scatter",
+#     x_lst,
+#     y_lst,
+#     extra_data=extra_data,
+#     tooltip_formatter='个数{c}',
+#     is_visualmap=True,
+#     visual_dimension=2,
+#     visual_orient="horizontal",
+#     visual_type="size",
+#     visual_range=[254830, 1154605773],
+#     visual_text_color="#000",
+# )
+# sc.render()
 
-x_lst = [v[0] for v in data]
-y_lst = [v[1] for v in data]
-extra_data = [v[2] for v in data]
-sc = Scatter()
-sc.add(
-    "scatter",
-    x_lst,
-    y_lst,
-    extra_data=extra_data,
-    tooltip_formatter='个数{c}',
-    is_visualmap=True,
-    visual_dimension=2,
-    visual_orient="horizontal",
-    visual_type="size",
-    visual_range=[254830, 1154605773],
-    visual_text_color="#000",
-)
-sc.render()
-
-# add_notice(10)
-# add_contest(10,30)
-# add_teacher(200, 230)
-# add_request(1, 50)
-# agree_request(75, 130)
-# award_in(52,106)
 
 # import numpy as np
 # from scipy.stats import pearsonr
