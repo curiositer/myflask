@@ -148,7 +148,7 @@ def add_notice():
         filename1, filename2, filename3 = None, None, None
         if form.file1.data:
             filename1 = form.file1.data.filename
-        print(filename1)
+        # print(filename1)
         if form.file2.data:
             filename2 = form.file2.data.filename
         if form.file3.data:
@@ -395,6 +395,24 @@ def contest_list():
                            lists=lists.items, next_url=next_url, prev_url=prev_url)
 
 
+@app.route('/contest/add/type', methods=['GET', 'POST'])
+@login_required
+def add_contest_type():
+    if current_user.type != 'admin':
+        return render_template('404.html'), 404
+    form = AddContestTypeForm()
+    new_type = form.type.data
+    if form.validate_on_submit():
+        old_type = Contest_type.query.filter_by(contest_type=new_type).first()
+        if old_type:
+            flash("该竞赛类型已存在！")
+            return redirect(url_for('add_contest_type'))
+        new = Contest_type(contest_type=new_type)
+        db.session.add(new)
+        db.session.commit()
+    return render_template("normal_form.html", title='添加竞赛类型', form=form)
+
+
 @app.route('/contest/add', methods=['GET', 'POST'])
 @login_required
 def add_contest():
@@ -470,8 +488,8 @@ def apply_contest(contest_id):
             if id:
                 try:                 # 查看该ID是否存在
                     id = int(form.id2.data)
-                    stu2 = User.query.get(id)
-                    team.parts.append(Student.query.get(id))
+                    stu2 = Student.query.get(id)
+                    team.parts.append(stu2)
                 except ValueError:
                     flash("学生2的ID不存在！")
                     return redirect(url_for('apply_contest', contest_id=contest_id))
@@ -480,8 +498,8 @@ def apply_contest(contest_id):
             if id:
                 try:                 # 查看该ID是否存在
                     id = int(form.id3.data)
-                    stu2 = User.query.get(id)
-                    team.parts.append(Student.query.get(id))
+                    stu3 = Student.query.get(id)
+                    team.parts.append(stu3)
                 except ValueError:
                     flash("学生3的ID不存在！")
                     return redirect(url_for('apply_contest', contest_id=contest_id))
@@ -490,8 +508,8 @@ def apply_contest(contest_id):
             if id:
                 try:  # 查看该ID是否存在
                     id = int(form.id4.data)
-                    stu2 = User.query.get(id)
-                    team.parts.append(Student.query.get(id))
+                    stu4 = Student.query.get(id)
+                    team.parts.append(stu4)
                 except ValueError:
                     flash("学生4的ID不存在！")
                     return redirect(url_for('apply_contest', contest_id=contest_id))
@@ -499,8 +517,8 @@ def apply_contest(contest_id):
             if id:
                 try:  # 查看该ID是否存在
                     id = int(form.id5.data)
-                    stu2 = User.query.get(id)
-                    team.parts.append(Student.query.get(id))
+                    stu5 = Student.query.get(id)
+                    team.parts.append(stu5)
                 except ValueError:
                     flash("学生5的ID不存在！")
                     return redirect(url_for('apply_contest', contest_id=contest_id))
@@ -765,9 +783,6 @@ def relate(type):
         c_w,c_s = relate_work('contest')
         scatter = Scatter("参赛-就业")
         pear1, piece, data = dict_to_numpy(c_w)     # piece为分段后的数据，data为未分段的原始数据
-        # scatter.add("参赛-就业", x, y, xaxis_name='参赛次数', yaxis_name='就职薪水', xaxis_name_pos='end',
-        #             yaxis_name_pos='start', tooltip_trigger='axis', tooltip_formatter='{b1}{b2} {c}{1,2,3}')
-        # page.add_chart(scatter, name='参赛-就业')
 
         x_lst = [v[0] for v in data]
         y_lst = [v[1] for v in data]
@@ -882,14 +897,6 @@ def relate(type):
             visual_text_color="#000",
         )
         page.add_chart(scatter2, name='获奖-考研')
-    # else:
-    #     title = '获奖情况相关性分析'
-    #     aw = award_work()
-    #     page.add_chart(cw, name='contest_work')
-    #     as1 = award_study()
-    #     page.add_chart(cw, name='contest_work')
-    #     ac = award_create()
-    #     page.add_chart(cw, name='contest_work')
     return render_template("relate.html", title=title, pear1=pear1, configure=configure,
                            myechart=page.render_embed(), host=app.config['REMOTE_HOST'],
                            script_list=page.get_js_dependencies(),
