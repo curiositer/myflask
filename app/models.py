@@ -18,27 +18,27 @@ class User(UserMixin, db.Model):
     __tablename__ = 'user'
     user_id = db.Column(db.Integer, primary_key=True, unique=True)
     username = db.Column(db.String(64), index=True, nullable=True)
-    email = db.Column(db.String(120), unique=True)
+    email = db.Column(db.String(120), unique=True, nullable=True)
     tel_num = db.Column(db.String(20))
-    password_hash = db.Column(db.String(128))
-    type = db.Column(db.String(10), default='student')
-    # posts = db.relationship('Post', backref='author', lazy='dynamic')
+    password_hash = db.Column(db.String(128), nullable=True)
+    type = db.Column(db.String(10), default='student', nullable=True)
+
     __mapper_args__ = {         # 表示继承
         # 'polymorphic_identity': 'user',
         'polymorphic_on': type
     }
 
-    @property       # 为适应login_user中字段id，进行转换
-    def id(self):
+    @property       # 将该方法作为其中的一个属性，只能用self.id来调用
+    def id(self):       # 为适应login_user中字段id，进行转换
         return self.user_id
 
     def __repr__(self):     # 格式化此模块输出
         return '<User {}>'.format(self.username)
 
-    def set_password(self, password):
+    def set_password(self, password):       # 获取密码对应的哈希值
         self.password_hash = generate_password_hash(password)
 
-    def check_password(self, password):
+    def check_password(self, password):     # 确定密码是否匹配
         """verify the password whether matched
         #         :return True:if matched
         #                 False:if not matched or hash isn't exist"""
@@ -59,10 +59,10 @@ class User(UserMixin, db.Model):
             {'reset_password': self.id, 'exp': time() + expires_in},
             app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
-    @staticmethod
-    def verify_reset_password_token(token):
+    @staticmethod       # 无需创建实例，可以直接使用
+    def verify_reset_password_token(token):     # 验证令牌，通过则返回给用户id，否则返回none
         try:
-            id = jwt.decode(token, app.config['SECRET_KEY'],        # 验证令牌，通过则返回给用户id，否则返回none
+            id = jwt.decode(token, app.config['SECRET_KEY'],
                             algorithms=['HS256'])['reset_password']
         except:
             return
@@ -117,7 +117,7 @@ class Team(db.Model):
 class Teacher(User):
     __tablename__ = 'teacher'
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
-    tea_type = db.Column(db.Integer, default=0)
+    tea_type = db.Column(db.Integer, default=0, nullable=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'teacher',
@@ -152,7 +152,7 @@ def receive_mapper_configured(mapper, class_):
 class Contest_type(db.Model):
     __tablename__ = 'contest_type'
     contest_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    contest_type = db.Column(db.String(20))
+    contest_type = db.Column(db.String(20), nullable=True)
 
 
 class Contest(db.Model):
@@ -168,14 +168,16 @@ class Contest(db.Model):
 
 
 class Request(db.Model):
-    __tablename__ = 'request'
+    __tablename__ = 'request'  # 在数据库中表名称
     request_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, nullable=False)
+    # 标识为一个属性（列），整型数据，默认长度为11，设置为主键、自动增加
+    user_id = db.Column(db.Integer, nullable=False)  # 设置非空
     user_type = db.Column(db.Integer, nullable=False)
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
     sup_teacher = db.Column(db.Integer, db.ForeignKey('user.user_id'))
-    add_time = db.Column(db.DateTime)
-    notes = db.Column(db.String(150))
+    # 设置为外键，对应主键为user表中user_id
+    add_time = db.Column(db.DateTime)  # 设置为日期-时间类型
+    notes = db.Column(db.String(150))  # 设置为可变字符串类型varchar，长度150
     status = db.Column(db.Integer, default=0)
 
     # applicant = db.relationship('User', backref=db.backref('requests'))   # 对于user_id申请人可能为用户或者队伍，故不能用外键
