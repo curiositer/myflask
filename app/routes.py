@@ -23,8 +23,8 @@ configure(global_theme='dark')         # 规定pycharts的主题roma chalk hallo
 @app.route('/index')
 @login_required
 def index():
-    notice = Notice.query.limit(10).all()
-    contest = Contest.query.limit(4).all()
+    notice = Notice.query.order_by(Notice.time.desc()).limit(10).all()
+    contest = Contest.query.order_by(Contest.contest_time.desc()).limit(4).all()
     # print(lists)
     # print(lists[0].title)
     return render_template('index.html', title='主页', lists=notice, lists2=contest)

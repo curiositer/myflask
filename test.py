@@ -1,21 +1,29 @@
+# coding=gbk
 from app import app, db
 from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student, Notice
 import random
 
-# æ·»åŠ æ•°æ®ä¸“ç”¨
+# Ìí¼ÓÊı¾İ×¨ÓÃ
+
+name_list = ['ÕÔÔó³¿', 'ÕÔ×ÓÍ©', 'ÕÔ½¨´¨', 'ÕÔçùÈñ', 'ÕÔ¼Òåû', 'ÕÔÓîç÷', 'ÕÔ¼ÑöÎ', 'ÕÔÓïÍ®', 'ÕÔ×Ïî£', 'ÕÔÌìç÷', 'ÕÔÜ²Ğù', 'ÕÔ×ÓöÎ', 'ÕÔ½÷Ñş', 'ÕÔÓñº­', 'ÕÔ¿¡³½', 'ÕÔ²´¾ı', 'ÕÔÎŞÃû', 'ÕÔÊéÑş', 'ÕÔÈôº­', 'ÕÔº­î£', 'ÕÔèïº­', 'ÕÔÓîº­', 'ÕÔº­¶÷', 'ÕÔÉØº­', 'ÕÔÓïº­', 'ÕÔ½Ü', 'ÕÔºÆº½', 'ÕÔÒïº­', 'ÕÔ¾¸Î¡', 'ÕÔ¿¬', 'ÕÔÅôŞÈ', 'ÕÔìã', 'ÕÔìãâı', 'ÕÔ×Óè¤', 'ÕÔ¿­Èğ', 'ÕÔÒİö­', 'ÕÔÕñ', 'ÕÔÕñé¸', 'ÕÔÕñêÑ', 'ÕÔÕñìÓ', 'ÕÔÕñè¯', 'ÕÔÕñİæ', 'ÕÔÀÖÉº', 'ÕÔ¾§æº', 'ÕÔæº¾§', 'ÕÔæºæº', 'ÕÔĞñÓñ', 'ÕÔæºÓñ', 'ÕÔèªè¤', 'ÕÔ¾²âù', 'ÕÔæºâù', 'ÕÔæºè¤', 'ÕÔ´³', 'ÕÔÃÀÁá', 'ÕÔ³¿âù', 'ÕÔ½¨Óî', 'ÕÔÌúÍî', 'ÕÔÂ´Ø©', 'ÕÔæøöÎ', 'ÕÔÓşã¯', 'ÕÔÂÔÊú', 'ÕÔÌ«åÑ', 'ÕÔÄÚÇı', 'ÕÔÄÚ·ª', 'ÕÔìµÒÄ', 'ÕÔÈôÍ®', 'ÕÔÒà¿¡', 'ÕÔŞÈ¿¡', 'ÕÔ½¨Î°', 'ÕÔÅ¯Å¯', 'ÕÔØî¿£', 'ÕÔÒÙ¿£', 'ÕÔŞÈ¿£', 'ÕÔŞÈ¿¥', 'ÕÔÒÙ¿¥', 'ÕÔØî¿¥',
+             'ÍõÂú', 'ÍõÁÕ', 'ÍõÈñ', 'ÍõÒÕ²©', 'ÍõÎ°', 'Íõ³½Ë¶', 'ÍõºèĞù', 'Íõº­Èó', 'Íõº­º­', 'ÍõĞË', 'Íõ´¾êØ', 'ÍõÓêÎ¢', 'Íõ¾ûº­', 'ÍõºÆêÌ', 'ÍõÜ·Óï', 'ÍõÀÖâù', 'Íõğ©ÔÂ', 'ÍõÎÄÌï', 'ÍõÎÄÌï', 'ÍõÎÄÌï', 'ÍõÓíÑ«', 'ÍõË¼×¿', 'Íõ¹úÕä', 'Íõ½¨', 'ÍõÌìÓÓ', 'Íõê¿', 'Íõ«hæÃ', 'ÍõºÆÄÏ', 'Íõ«hö©', 'ÍõÌìî£', 'ÍõÓê³½', 'Íõ¾¸ö©', 'Íõ¾µö©', 'Íõ´äéª', 'Íõ¾µÎÄ', 'Íõ¾²ÎÄ', 'Íõ¾²ö©', 'Íõéª', 'ÍõÖ®¿¥', 'Íõ×Ó¿¥', 'Íõ¾Å³û', 'ÍõèºÃ£', 'Íõ÷èÛ²', 'Íõµ¤', 'Íõ½·²ª', 'Íõ²´¾ı', 'ÍõÊ«Òé', 'ÍõË¼Ü°', 'ÍõÓşº­', 'ÍõË¼Ë¼', 'ÍõÃÎ·Æ', 'ÍõÏÍ²©', 'Íõ²©çû', 'Íõ¸´ÏÍ', 'Íõ²©ÏÍ', 'Íõ²©Òã', 'Íõ²©Òİ', 'ÍõÕØ²©', 'Íõ²©Èå', 'Íõ°ÁÒ°', 'ÍõèºÈÍ', 'Íõ°Áè¤', 'Íõ°Áè¯', 'Íõ°Áìã', 'Íõ°ÁÕÑ', 'Íõèº²©', 'Íõ°Áçş', 'Íõ°Á«h', 'Íõ°ÁÎõ', 'Íõ°ÁÑú',
+             'Áõ¼ÑÀÖ', 'Áõ»Ûæµ', 'Áõ¼ÎÔ´', 'ÁõÓ¯Èñ', 'ÁõµÂ»ª', 'ÁõÄÈ', 'ÁõĞÀ«h', 'ÁõêÏ«h', 'ÁõÒæ¼Î', 'ÁõÈç«h', 'ÁõÕ×Ïé', 'ÁõÓÀ²ı', 'ÁõÔóÁÖ', 'Áõ¹úÅå', 'Áõ¼Ñç²', 'ÁõÕÜÓî', 'Áõ¼ÑÎú', 'Áõ¼Ñçù', 'Áõ³¤öÎ', 'Áõ¼Ñİæ', 'ÁõË¼ÕÜ', 'Áõ³¤ºé', 'Áõ³¤Èó', 'Áõå·Ğñ', 'ÁõÒã', 'ÁõÉ­Öù', 'ÁõÓÀÊ¤', 'Áõê»Ìì', 'ÁõĞÂÆæ', 'ÁõÎÄ¾ü', 'ÁõöÎÔ´', 'ÁõÓÀĞñ', 'ÁõÏ£Áë', 'ÁõÏ£Áá', 'Áõ¹úÈÙ', 'ÁõÓÀÕğ', 'ÁõĞÂçù', 'ÁõÒ»Ô½', 'ÁõÒ»çá', 'ÁõÔ½', 'ÁõÄ½Ñş', 'ÁõÓêÁÖ', 'ÁõÉĞÖ±', 'ÁõÉĞÃÍ', 'Áõ¾ºÀÊ', 'ÁõĞùÃú', 'ÁõÔ¯Ãú', 'ÁõÔ¼Àñ', 'Áõ½ğÏ¼', 'ÁõİÕÇä', 'Áõºì', 'Áõè÷ºã', 'ÁõÖÇÚS', 'ÁõÓ¦ÇÙ', 'Áõ›Ï£', 'ÁõÓîÏ£',
+             'ÕÅ¹Û²©', 'ÕÅĞÀÖñ', 'ÕÅĞÀÑô', 'ÕÅ¸Õ¾ü', 'ÕÅÑïÑô', 'ÕÅ¾¸Ñô', 'ÕÅÎõÑô', 'ÕÅ¼Îİæ', 'ÕÅÃúÑô', 'ÕÅ·É', 'ÕÅÓêİ¡', 'ÕÅÎÄ²©', 'ÕÅÊ«º¬', 'ÕÅÊ«Èô', 'ÕÅ³½º£', 'ÕÅÏşÓê', 'ÕÅÕ¹Ãù', 'ÕÅÏş´º', 'ÕÅºéÎÄ', 'ÕÅÄ¬', 'ÕÅĞù½Ü', 'ÕÅ½ğº£', 'ÕÅ¿¡½Ü', 'ÕÅÕ¹Ğñ', 'ÕÅ½¨Ë¸', 'ÕÅæºç÷', 'ÕÅæºº­', 'ÕÅÊ«Çç', 'ÕÅ´«ºÆ', 'ÕÅâùÆ¼', 'ÕÅÊ«º­', 'ÕÅÑÅæÃ', 'ÕÅÑÅº­', 'ÕÅÆ¼', 'ÕÅÏşÆ¼', 'ÕÅĞË·É', 'ÕÅĞ¡Æ½', 'ÕÅ½¨Áú', 'ÕÅÓîÚÓ', 'ÕÅ×Ó³½', 'ÕÅ³½', 'ÕÅÍÄÁé', 'ÕÅæèÖê', 'ÕÅ´ºÁ«', 'ÕÅ¾êÃô', 'ÕÅÖÇº­', 'ÕÅĞÀåû', 'ÕÅ»Ûåû', 'ÕÅÑÅ¾²', 'ÕÅÔÂæÃ', 'ÕÅÓêæÃ', 'ÕÅÜ¿Ü°', 'ÕÅÔÏº­', 'ÕÅº­ÔÏ', 'ÕÅÓêĞÀ', 'ÕÅÜ°ÀÙ', 'ÕÅ¾²æÂ', 'ÕÅ×Óº­', 'ÕÅÓêÔó', 'ÕÅ¾²ÀÙ', 'ÕÅİ¢œU', 'ÕÅçç²×', 'ÕÅÜÇ¾ê', 'ÕÅè÷İæ', 'ÕÅéó³Ï', 'ÕÅ¼ÎÎÄ', 'ÕÅÏşÅó', 'ÕÅÒ»·²', 'ÕÅê»éª', 'ÕÅºÆéª', 'ÕÅÈğ¾ı', 'ÕÅ¼ÑÄş', 'ÕÅÓêÑî', 'ÕÅê»È»', 'ÕÅºÆÈ»', 'ÕÅëøºÆ', 'ÕÅÓêİÕ', 'ÕÅº£Ò»', 'ÕÅ³¿å·', 'ÕÅÖ®Õş', 'ÕÅ³¿·Æ', 'ÕÅĞŞÎÅ', 'ÕÅÄş·ò', 'ÕÅĞù',
+             'ÑîÎÄ½õ', 'ÑîÔó³¿', 'Ñî²©å«', 'ÑîÒÁçæ', 'Ñî×ÓÍ©', 'ÑîÓêÍ©', 'ÑîÑÅº­', 'Ñî½¨´¨', 'ÑîçùÈñ', 'Ñîçùì¿', 'Ñî×Óèª', 'Ñî×Ó³½', 'Ñî±ş', 'ÑîÃùº×', 'Ñî¾°ÒË', 'ÑîÀÖÀÖ', 'ÑîÓêäü', 'ÑîÌÎÁË', 'Ñîíµ', 'ÑîÃú', 'ÑîÓîĞÀ', 'ÑîÀö»ª', 'ÑîĞñ', 'ÑîĞñ·¼', 'ÑîÑÇí¨', 'ÑîÑÇÀ¼', 'Ñî×ÓÒ»', 'Ñîº£³½', 'Ñî¾ıºÆ', 'Ñî±ºÔª', 'ÑîÎÄ²©', 'Ñî½ğÅô', 'ÑîÈÙ', 'ÑîÀ¤', 'ÑîÉÜÎÄ', 'Ñî»»', 'ÑîêØ', 'ÑîºÆÈ»', 'ÑîÃúÓğ', 'ÑîºÆÓî', 'ÑîË¼³½', 'ÑîÔÃÎõ', 'Ñîº£Ó¢', 'Ñî°¬äü', 'ÑîÎ©á°', 'Ñîİí', 'ÑîÜ°æÂ', 'ÑîÅåÁÖ', 'ÑîÅåÔÆ', 'Ñî×Óçù', 'ÑîÔóË¶', 'ÑîÔóÌÎ', 'ÑîÌÎ', 'Ñî¹úÌÎ', 'ÑîÑÅ½à', 'Ñî¾²º­', 'Ñî·«', 'ÑîÈôÑ©', 'ÑîÊçÓ±', 'ÑîÙ»Ñ©', 'ÑîÂşÄİ', 'Ñî·æ', 'Ñîî£Ô¨']
+
 
 def add_student(start, end):
     ids = range(start, end)
     password = 1
-    types = ['æœºæ¢°å·¥ç¨‹', 'è½¯ä»¶å·¥ç¨‹', 'å·¥ä¸šå·¥ç¨‹', 'è‡ªåŠ¨åŒ–', 'ç”µå­ä¿¡æ¯å·¥ç¨‹', 'æ±½è½¦æœåŠ¡å·¥ç¨‹']
+    types = ['»úĞµ¹¤³Ì', 'Èí¼ş¹¤³Ì', '¹¤Òµ¹¤³Ì', '×Ô¶¯»¯', 'µç×ÓĞÅÏ¢¹¤³Ì', 'Æû³µ·şÎñ¹¤³Ì']
     for id in ids:
         major_types = random.choice(types)
         tel = random.randint(13000000000,19000000000)
         # print(major_types, tel)
-        name = ''.join(random.sample(
-            ['z', 'y', 'x', 'w', 'v', 'u', 't', 's', 'r', 'q', 'p', 'o', 'n', 'm', 'l', 'k', 'j', 'i', 'h', 'g', 'f',
-             'e', 'd', 'c', 'b', 'a'], 5))
-        username = 'stu_' + name
+        # name = ''.join(random.sample(
+        #     ['z', 'y', 'x', 'w', 'v', 'u', 't', 's', 'r', 'q', 'p', 'o', 'n', 'm', 'l', 'k', 'j', 'i', 'h', 'g', 'f',
+        #      'e', 'd', 'c', 'b', 'a'], 5))
+        username = random.choice(name_list)
         stu = Student(user_id=id,major_in=major_types,tel_num=tel, username=username)
         stu.set_password(str(password))
         db.session.add(stu)
@@ -24,10 +32,18 @@ def add_student(start, end):
     db.session.commit()
 
 
+def edit_user(start, end):
+    for i in range(start, end):
+        user = User.query.get(i)
+        if user:
+            user.username = random.choice(name_list)
+    db.session.commit()
+
+
 def add_teacher(start, end):
     ids = range(start, end)
     password = 1
-    # types = ['æœºæ¢°å·¥ç¨‹', 'è½¯ä»¶å·¥ç¨‹', 'å·¥ä¸šå·¥ç¨‹', 'è‡ªåŠ¨åŒ–', 'ç”µå­ä¿¡æ¯å·¥ç¨‹', 'æ±½è½¦æœåŠ¡å·¥ç¨‹']
+    # types = ['»úĞµ¹¤³Ì', 'Èí¼ş¹¤³Ì', '¹¤Òµ¹¤³Ì', '×Ô¶¯»¯', 'µç×ÓĞÅÏ¢¹¤³Ì', 'Æû³µ·şÎñ¹¤³Ì']
     for id in ids:
         # major_types = random.choice(types)
         tel = random.randint(13000000000,19000000000)
@@ -58,8 +74,8 @@ def randomtimes(start, end, frmt="%Y-%m-%d"):
 def add_contest(start, end):
     ids = range(start, end)
     password = 1
-    types = ['ç§‘æŠ€', 'äººæ–‡', 'ä½“è‚²', 'ç†ç§‘', 'ç»¼åˆ']
-    levels = ['æ ¡çº§', 'å¸‚çº§', 'çœçº§', 'å›½å®¶çº§', 'å›½é™…çº§']
+    types = ['¿Æ¼¼', 'ÈËÎÄ', 'ÌåÓı', 'Àí¿Æ', '×ÛºÏ']
+    levels = ['Ğ£¼¶', 'ÊĞ¼¶', 'Ê¡¼¶', '¹ú¼Ò¼¶', '¹ú¼Ê¼¶']
 
     for id in ids:
         # major_types = random.choice(types)
@@ -73,8 +89,8 @@ def add_contest(start, end):
         print(time)
         type = random.choice(types)
         level = random.choice(levels)
-        name = 'ç«èµ›' + str(id)
-        detail = 'ç¬¬' + str(id) + 'ä¸ªç«èµ›'
+        name = '¾ºÈü' + str(id)
+        detail = 'µÚ' + str(id) + '¸ö¾ºÈü'
         # email = str(id) + '@test.com'
         stu = Contest(contest_name=name, contest_type=type, contest_time=time, details=detail, level=level)
         # stu.set_password(str(password))
@@ -86,9 +102,9 @@ def add_contest(start, end):
 
 def add_request(type,count):
     '''
-    æ‰¹é‡æ·»åŠ ç«èµ›ç”³è¯·
-    :param type: é˜Ÿä¼æœ‰å¤šå°‘äºº
-    :param count: è¦æ·»åŠ å¤šå°‘æ¡ç”³è¯·ä¿¡æ¯
+    ÅúÁ¿Ìí¼Ó¾ºÈüÉêÇë
+    :param type: ¶ÓÎéÓĞ¶àÉÙÈË
+    :param count: ÒªÌí¼Ó¶àÉÙÌõÉêÇëĞÅÏ¢
     :return:
     '''
 
@@ -162,7 +178,7 @@ def agree_request(start, end):
 
 def award_in(start, end):
     ids = range(start, end)
-    types = ['ä¼˜ç§€å¥–', 'ä¸€ç­‰å¥–', 'äºŒç­‰å¥–', 'ä¸‰ç­‰å¥–', 'æ— ']
+    types = ['ÓÅĞã½±', 'Ò»µÈ½±', '¶şµÈ½±', 'ÈıµÈ½±', 'ÎŞ']
     for id in ids:
         type = random.choice(types)
         awd = Award.query.get(id)
@@ -173,11 +189,11 @@ def award_in(start, end):
 
 import xlrd
 
-def get_data(filename, sheetnum):       # è·å–ä¼ä¸šåˆ—è¡¨ï¼ŒåŠå¯¹åº”çš„ç±»å‹
+def get_data(filename, sheetnum):       # »ñÈ¡ÆóÒµÁĞ±í£¬¼°¶ÔÓ¦µÄÀàĞÍ
     dir_case = 'app/file/' + filename + '.xlsx'
     data = xlrd.open_workbook(dir_case)
-    table = data.sheets()[sheetnum]         # è¯»å–ç¬¬ä¸€ä¸ªå·¥ä½œç°¿
-    nor = table.nrows       # è·å–æ€»è¡Œæ•°
+    table = data.sheets()[sheetnum]         # ¶ÁÈ¡µÚÒ»¸ö¹¤×÷²¾
+    nor = table.nrows       # »ñÈ¡×ÜĞĞÊı
     # nol = table.ncols
     # print(nor)
     dict = {}
@@ -204,7 +220,7 @@ def work_in(start, end):
 
 import requests
 from lxml import etree
-def get_university():           # åˆ©ç”¨çˆ¬è™«ä»ç ”æ‹›ç½‘ä¸Šè·å–å­¦æ ¡ä¿¡æ¯ï¼Œä¿å­˜åˆ°è¡¨æ ¼ä¸­
+def get_university():           # ÀûÓÃÅÀ³æ´ÓÑĞÕĞÍøÉÏ»ñÈ¡Ñ§Ğ£ĞÅÏ¢£¬±£´æµ½±í¸ñÖĞ
     url = "https://yz.chsi.com.cn/sch/?start={}"
 
     lists = []
@@ -221,15 +237,15 @@ def get_university():           # åˆ©ç”¨çˆ¬è™«ä»ç ”æ‹›ç½‘ä¸Šè·å–å­¦æ ¡ä¿¡æ¯ï
     output = open('C:\\Users\\MRZhao\\Desktop\\data.xls', 'w', encoding='gbk')
     for i in range(len(lists)):
         # for j in range(len(list1[i])):
-        output.write(str(lists[i]))  # writeå‡½æ•°ä¸èƒ½å†™intç±»å‹çš„å‚æ•°ï¼Œæ‰€ä»¥ä½¿ç”¨str()è½¬åŒ–
-            # output.write('\t')  # ç›¸å½“äºTabä¸€ä¸‹ï¼Œæ¢ä¸€ä¸ªå•å…ƒæ ¼
-        output.write('\n')  # å†™å®Œä¸€è¡Œç«‹é©¬æ¢è¡Œ
+        output.write(str(lists[i]))  # writeº¯Êı²»ÄÜĞ´intÀàĞÍµÄ²ÎÊı£¬ËùÒÔÊ¹ÓÃstr()×ª»¯
+            # output.write('\t')  # Ïàµ±ÓÚTabÒ»ÏÂ£¬»»Ò»¸öµ¥Ôª¸ñ
+        output.write('\n')  # Ğ´ÍêÒ»ĞĞÁ¢Âí»»ĞĞ
     output.close()
 
     return lists
 
 
-def study_data():           # è·å¾—æ‰€æœ‰æœ‰ç ”ç©¶ç”Ÿæ‹›ç”Ÿçš„å­¦æ ¡ä¿¡æ¯
+def study_data():           # »ñµÃËùÓĞÓĞÑĞ¾¿ÉúÕĞÉúµÄÑ§Ğ£ĞÅÏ¢
     dir_case = 'app/file/' + 'study.xlsx'
     data = xlrd.open_workbook(dir_case)
     table = data.sheets()[0]
@@ -246,21 +262,21 @@ def study_data():           # è·å¾—æ‰€æœ‰æœ‰ç ”ç©¶ç”Ÿæ‹›ç”Ÿçš„å­¦æ ¡ä¿¡æ¯
         if type_985:
             list_985.append(type_985)
 
-    for item in list_none[::-1]:         # éœ€è¦å€’åºåˆ é™¤ï¼Œè¦ä¸è¿ç»­å…ƒç´ æ— æ³•æ­£ç¡®åˆ é™¤;è·å¾—æ™®é€šå­¦æ ¡åˆ—è¡¨
+    for item in list_none[::-1]:         # ĞèÒªµ¹ĞòÉ¾³ı£¬Òª²»Á¬ĞøÔªËØÎŞ·¨ÕıÈ·É¾³ı;»ñµÃÆÕÍ¨Ñ§Ğ£ÁĞ±í
         if item in list_211:
             list_none.remove(item)
 
-    for item in list_211[::-1]:         # éœ€è¦å€’åºåˆ é™¤ï¼Œè¦ä¸è¿ç»­å…ƒç´ æ— æ³•æ­£ç¡®åˆ é™¤ï¼›è·å¾—211é«˜æ ¡åˆ—è¡¨
+    for item in list_211[::-1]:         # ĞèÒªµ¹ĞòÉ¾³ı£¬Òª²»Á¬ĞøÔªËØÎŞ·¨ÕıÈ·É¾³ı£»»ñµÃ211¸ßĞ£ÁĞ±í
         if item in list_985:
             list_211.remove(item)
 
     dict1 = {}
     for item in list_none:
-        dict1[item] = 'æ™®é€šé«˜æ ¡'
+        dict1[item] = 'ÆÕÍ¨¸ßĞ£'
     for item in list_211:
-        dict1[item] = '211é«˜æ ¡'
+        dict1[item] = '211¸ßĞ£'
     for item in list_985:
-        dict1[item] = '985é«˜æ ¡'
+        dict1[item] = '985¸ßĞ£'
     # print(dict1)
     return dict1
 
@@ -292,10 +308,11 @@ def add_notice(count):
         db.session.add(notice)
     db.session.commit()
 
-study_in(140, 149)
+# study_in(140, 149)
 # add_notice(10)
 # add_contest(10,30)
 # add_teacher(200, 230)
+# edit_user(1, 230)
 # add_request(1, 50)
 # agree_request(75, 130)
 # award_in(52,106)
@@ -306,7 +323,7 @@ from pyecharts import Scatter
 # v1 = [10, 10, 20, 30, 40, 50, 60]
 # v2 = [10, 10, 20, 30, 40, 50, 60]
 # extra = [1,2,1,1,1,1,5]
-# scatter = Scatter("æ•£ç‚¹å›¾ç¤ºä¾‹")
+# scatter = Scatter("É¢µãÍ¼Ê¾Àı")
 # scatter.add("scatter",
 #     v1,
 #     v2,
@@ -352,7 +369,7 @@ from pyecharts import Scatter
 #     x_lst,
 #     y_lst,
 #     extra_data=extra_data,
-#     tooltip_formatter='ä¸ªæ•°{c}',
+#     tooltip_formatter='¸öÊı{c}',
 #     is_visualmap=True,
 #     visual_dimension=2,
 #     visual_orient="horizontal",
@@ -369,7 +386,7 @@ from pyecharts import Scatter
 # #
 # x = [1, 5,2,0,4,2]
 # y = [4000,8000,3000,8000,6000,5000]
-# # y = ['211','958','211','æ™®é€š','211','211']
+# # y = ['211','958','211','ÆÕÍ¨','211','211']
 # xnp = np.array(x)
 # ynp = np.array(y)
 # print(pearsonr(x,y)[0])
@@ -401,7 +418,7 @@ from pyecharts import Scatter
 # for s in ss:
 #     print(s[0],s[1])
 #     dict1[s[0]] = s[1]
-# # count1 = Award.query.join(  # é€‰å‡ºæ¯ä¸€ç±»çš„å‚èµ›äººæ•°
+# # count1 = Award.query.join(  # Ñ¡³öÃ¿Ò»ÀàµÄ²ÎÈüÈËÊı
 # #             Contest, (Award.contest_id == Contest.contest_id)).filter(
 # #             Contest.contest_type == types[0], Contest.contest_time >= start, Contest.contest_time <= end).count()
 # ss1 = db.session.query(Award.user_id, team_student.c.user_id, func.count(team_student.c.user_id)).\
