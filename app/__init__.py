@@ -8,6 +8,13 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from config import Config
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+sentry_sdk.init(
+    dsn=Config.SENTRY_DSN,
+    integrations=[FlaskIntegration()]
+)
 
 app = Flask(__name__)
 app.config.from_object(Config)
