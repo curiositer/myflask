@@ -4,7 +4,7 @@ from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, EditPassword, EditWorkForm, EditStudyForm,\
     AddContestForm, ApplyContestForm, AddUserForm, EditAwardForm, EditCreateForm, EditTimeForm, EditNoticeForm, \
     ResetPasswordRequestForm, ResetPasswordForm, AddContestTypeForm
-from flask import render_template, flash, redirect, url_for, request, send_from_directory, make_response, json
+from flask import render_template, flash, redirect, url_for, request, send_from_directory, make_response, abort
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student, Notice, Contest_type
 import datetime
@@ -92,7 +92,7 @@ def reset_password(token):
 @login_required
 def add_user():
     if current_user.type != 'admin':
-        return render_template('404.html'), 404
+        abort(404)
     form = AddUserForm()
     if form.validate_on_submit():
         user_type = form.type.data
@@ -141,7 +141,7 @@ def register():
 @login_required
 def add_notice():
     if current_user.type != 'admin':
-        return render_template('404.html'), 404
+        abort(404)
     form = EditNoticeForm()
     if form.validate_on_submit():
         filename1, filename2, filename3 = None, None, None
@@ -172,14 +172,14 @@ def add_notice():
         flash('公告添加成功.')
         return redirect(url_for('index'))
 
-    return render_template('edit_notice.html', title='添加公告', form=form)
+    return render_template('normal_form.html', title='添加公告', form=form)
 
 
 @app.route('/notice/edit/<id>', methods=['GET', 'POST'])
 @login_required
 def edit_notice(id):
     if current_user.type != 'admin':
-        return render_template('404.html'), 404
+        abort(404)
     form = EditNoticeForm()
     notice = Notice.query.get(id)
     if form.validate_on_submit():
@@ -198,7 +198,7 @@ def edit_notice(id):
 @login_required
 def delete_notice(id):
     if current_user.type != 'admin':
-        return render_template('404.html'), 404
+        abort(404)
     notice = Notice.query.get(id)
     db.session.delete(notice)
     # dirpath = os.path.join(app.root_path, app.config['NOTICE_FOLDER'], id)  # 获得文件路径
@@ -271,7 +271,7 @@ def edit_profile():
 @login_required
 def edit_work():
     if current_user.type != 'student':
-        return render_template('404.html'), 404
+        abort(404)
     stu = Student.query.get(current_user.user_id)
     if stu.company_name:
         exist = 'work'
@@ -306,7 +306,7 @@ def edit_work():
 @login_required
 def edit_study():
     if current_user.type != 'student':
-        return render_template('404.html'), 404
+        abort(404)
     stu = Student.query.get(current_user.user_id)
     if stu.company_name:
         exist = 'work'
@@ -337,7 +337,7 @@ def edit_study():
 @login_required
 def edit_create():
     if current_user.type != 'student':
-        return render_template('404.html'), 404
+        abort(404)
     stu = Student.query.get(current_user.user_id)
     if stu.company_name:
         exist = 'work'
@@ -398,7 +398,7 @@ def contest_list():
 @login_required
 def add_contest_type():
     if current_user.type != 'admin':
-        return render_template('404.html'), 404
+        abort(404)
     form = AddContestTypeForm()
     new_type = form.type.data
     if form.validate_on_submit():
@@ -416,7 +416,7 @@ def add_contest_type():
 @login_required
 def add_contest():
     if current_user.type != 'admin':
-        return render_template('404.html'), 404
+        abort(404)
     form = AddContestForm()
     if form.validate_on_submit():
         date = form.time.data.strftime('%Y-%m-%d')
@@ -455,7 +455,7 @@ def downloader(contest_name):
 @login_required
 def apply_contest(contest_id):
     if current_user.type != 'student':
-        return render_template('404.html'), 404
+        abort(404)
     form = ApplyContestForm()
     contest = Contest.query.filter(Contest.contest_id == contest_id).first()
     if form.validate_on_submit():
@@ -573,7 +573,7 @@ def request_list():
 @login_required
 def request_list_team():        # 如果为学生，将个人参赛和组队参赛分开查看
     if current_user.type != 'student':
-        return render_template('404.html'), 404
+        abort(404)
     page = request.args.get('page', 1, type=int)
     lists = Request.query.join(  # 选出组队参加中所有与自己相关的记录
         team_student, (team_student.c.team_id == Request.user_id)).filter(
@@ -630,7 +630,7 @@ def if_request_admin():             # 判断是否是有权限对学生申请信
 @login_required
 def agree_request(request_id):
     if not if_request_admin():
-        return render_template('404.html'), 404
+        abort(404)
     req1 = Request.query.filter_by(request_id=request_id).first()
     req1.status = 1
     award = Award(user_id=req1.user_id, user_type=req1.user_type, contest_id=req1.contest_id,
@@ -645,7 +645,7 @@ def agree_request(request_id):
 @login_required
 def disagree_request(request_id):
     if not if_request_admin():
-        return render_template('404.html'), 404
+        abort(404)
     req1 = Request.query.filter_by(request_id=request_id).first()
     req1.status = 2
     db.session.commit()
