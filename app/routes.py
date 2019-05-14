@@ -465,6 +465,9 @@ def apply_contest(contest_id):
         except ValueError:
             flash("指导教师的ID不存在！")
             return redirect(url_for('apply_contest', contest_id=contest_id))
+        if not teacher:
+            flash("指导教师的ID不存在！")
+            return redirect(url_for('apply_contest', contest_id=contest_id))
 
         id1 = current_user.user_id      # 第一个人即自己，直接获取当前用户信息即可
         if not form.id2.data:
@@ -483,52 +486,92 @@ def apply_contest(contest_id):
             #         return redirect(url_for('apply_contest', contest_id=contest_id))
             team.parts.append(Student.query.get(id))
 
-            id = form.id2.data
-            if id:
+            id2 = form.id2.data
+            if id2:
                 try:                 # 查看该ID是否存在
-                    id = int(form.id2.data)
-                    stu2 = Student.query.get(id)
-                    team.parts.append(stu2)
+                    id2 = int(form.id2.data)
+                    stu2 = Student.query.get(id2)
                 except ValueError:
                     flash("学生2的ID不存在！")
                     return redirect(url_for('apply_contest', contest_id=contest_id))
+                if id2 == current_user.user_id:
+                    flash("填写的ID有重复！")
+                    return redirect(url_for('apply_contest', contest_id=contest_id))
+                elif not stu2:
+                    flash("学生2的ID不存在！")
+                    return redirect(url_for('apply_contest', contest_id=contest_id))
+                else:
+                    team.parts.append(stu2)
 
-            id = form.id3.data
-            if id:
-                try:                 # 查看该ID是否存在
-                    id = int(form.id3.data)
-                    stu3 = Student.query.get(id)
-                    team.parts.append(stu3)
+            id3 = form.id3.data
+            if id3:
+                try:  # 查看该ID是否存在
+                    id3 = int(form.id3.data)
+                    stu3 = Student.query.get(id3)
                 except ValueError:
                     flash("学生3的ID不存在！")
                     return redirect(url_for('apply_contest', contest_id=contest_id))
+                if id3 == current_user.user_id or id3 == id2:
+                    flash("填写的ID有重复！")
+                    return redirect(url_for('apply_contest', contest_id=contest_id))
+                elif not stu3:
+                    flash("学生3的ID不存在！")
+                    return redirect(url_for('apply_contest', contest_id=contest_id))
+                else:
+                    team.parts.append(stu3)
 
-            id = form.id4.data
-            if id:
+            id4 = form.id4.data
+            if id4:
                 try:  # 查看该ID是否存在
-                    id = int(form.id4.data)
-                    stu4 = Student.query.get(id)
-                    team.parts.append(stu4)
+                    id4 = int(form.id4.data)
+                    stu4 = Student.query.get(id4)
                 except ValueError:
                     flash("学生4的ID不存在！")
                     return redirect(url_for('apply_contest', contest_id=contest_id))
-            id = form.id5.data
-            if id:
+                if id4 == current_user.user_id or id4 == id3 or id4 == id2:
+                    flash("填写的ID有重复！")
+                    return redirect(url_for('apply_contest', contest_id=contest_id))
+                elif not stu4:
+                    flash("学生4的ID不存在！")
+                    return redirect(url_for('apply_contest', contest_id=contest_id))
+                else:
+                    team.parts.append(stu4)
+
+            id5 = form.id5.data
+            if id5:
                 try:  # 查看该ID是否存在
-                    id = int(form.id5.data)
-                    stu5 = Student.query.get(id)
-                    team.parts.append(stu5)
+                    id5 = int(form.id5.data)
+                    stu5 = Student.query.get(id5)
                 except ValueError:
                     flash("学生5的ID不存在！")
                     return redirect(url_for('apply_contest', contest_id=contest_id))
-            db.session.add(team)
-            # print(team.team_id)
+                if id5 == current_user.user_id or id5 == id2 or id5 == id3 or id5 == id4:
+                    flash("填写的ID有重复！")
+                    return redirect(url_for('apply_contest', contest_id=contest_id))
+                elif not stu5:
+                    flash("学生5的ID不存在！")
+                    return redirect(url_for('apply_contest', contest_id=contest_id))
+                else:
+                    team.parts.append(stu5)
+            # id = form.id5.data
+            # if id:
+            #     try:  # 查看该ID是否存在
+            #         id = int(form.id5.data)
+            #         stu5 = Student.query.get(id)
+            #         team.parts.append(stu5)
+            #     except ValueError:
+            #         flash("学生5的ID不存在！")
+            #         return redirect(url_for('apply_contest', contest_id=contest_id))
+            # # print(team.team_id)
             req = Request(user_id=team.team_id, contest_id=contest_id, status=0, sup_teacher=form.teacher.data,
                           notes=form.notes.data, add_time=datetime.datetime.now(), user_type=1)
             db.session.add(req)
         db.session.commit()
         flash('恭喜您，竞赛%s已申请成功!' % contest.contest_name)
-        return redirect(url_for('request_list'))
+        if stu2:
+            return redirect(url_for('request_list_team'))
+        else:
+            return redirect(url_for('request_list'))
     # elif request.method == 'GET':
     #     form.id1.data = current_user.id
     #     form.name1.data = current_user.username
