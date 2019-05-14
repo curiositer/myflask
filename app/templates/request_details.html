@@ -70,7 +70,7 @@
                     </ul>
                 </td>
             {% elif team %}
-                <td><ol>
+                <td><div style="color: red"><b>成员1为队长</b></div><ol>
                 {% for part in team.parts %}
                     <li><ul>
                         <li>学号：{{ part.user_id }}</li>

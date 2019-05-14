@@ -27,5 +27,7 @@
         <b>忘记密码？<a href="{{ url_for('reset_password_request') }}">点击重置密码</a></b>
         </p>
         <b><p>新的用户？<a href="{{ url_for('register') }}">点击注册</a></p></b>
+    {% elif title == '添加公告' %}
+        <b><p>如果附件数大于三个，可再单独提交一个仅含附件的公告即可。</p></b>
     {% endif %}
 {% endblock %}
