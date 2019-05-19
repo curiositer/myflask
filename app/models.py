@@ -49,10 +49,24 @@ class User(UserMixin, db.Model):
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
             digest, size)
 
+    def user_type_ch(self):         # 给出用户类型对应中文
+        if self.type == 'student':
+            return "学生"
+        elif self.type == 'teacher':
+            return "教师"
+        elif self.type == 'admin':
+            return "管理员"
+
     def get_teacher_type(self):     # 获取教师类型
         teacher = Teacher.query.get(self.user_id)
         # print(teacher.tea_type)
         return teacher.tea_type
+
+    def if_admin(self):             # 判断是否有权限进行审核操作
+        if (self.type == 'admin') or (self.type == 'teacher' and self.get_teacher_type() == 1):
+            return True
+        else:
+            return False
 
     def get_reset_password_token(self, expires_in=600):   # 获取重置密码的令牌，expires_in=600即设置令牌有效时间为10分钟
         return jwt.encode(
@@ -151,7 +165,7 @@ def receive_mapper_configured(mapper, class_):
 
 class Contest_type(db.Model):
     __tablename__ = 'contest_type'
-    contest_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     contest_type = db.Column(db.String(20), nullable=True)
 
 
@@ -161,6 +175,7 @@ class Contest(db.Model):
     contest_name = db.Column(db.String(20))
     contest_type = db.Column(db.String(20))
     contest_time = db.Column(db.Date)
+    filename = db.Column(db.String(50))
     details = db.Column(db.String(150))
     level = db.Column(db.String(20))
 

@@ -13,12 +13,16 @@
         {% endif %}
         <h3>学号：{{ current_user.user_id }} &nbsp;&nbsp;&nbsp;姓名：{{ current_user.username }}</h3>
     {% elif title == '添加竞赛' %}
-        <a class="btn btn-danger" href="{{ url_for('add_contest_type') }}" role="button">添加竞赛类型</a>
+        <a class="btn btn-danger" href="{{ url_for('edit_contest_type') }}" role="button">管理竞赛类型</a>
     {% endif %}
     <div class="row">
+        {% if title != '编辑公告' and title != '添加公告' %}
         <div class="col-md-4">
+        {% endif %}
             {{ wtf.quick_form(form) }}
+        {% if title != '编辑公告' and title != '添加公告' %}
         </div>
+        {% endif %}
     </div>
 
     {% if title == '登陆' %}

@@ -69,20 +69,27 @@
                         <li>姓名：{{ user_details.username }}</li>
                     </ul>
                 </td>
-            {% elif team %}
-                <td><div style="color: red"><b>成员1为队长</b></div><ol>
-                {% for part in team.parts %}
-                    <li><ul>
-                        <li>学号：{{ part.user_id }}</li>
-                        <li>姓名：{{ part.username }}</li>
-                    </ul></li>
-                {% endfor %}
-                </ol></td>
+                        {% elif team %}
+                <td><div style="color: red"><b>成员1为队长</b></div>
+                <table class="table table-striped" border="1">
+                <tr>
+                    <th>学号：</th>
+                    {% for part in team.parts %}
+                        <td>{{ part.user_id }}</td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th>姓名：</th>
+                    {% for part in team.parts %}
+                        <td>{{ part.username }}</td>
+                    {% endfor %}
+                </tr>
+                </table>
+                </td>
             {% endif %}
         </tr>
     </table>
-    {% if ((current_user.type == 'admin') or (current_user.type == 'teacher' and current_user.get_teacher_type()==1))
-            and request.status == 0 %}      {#用户类型为管理员或管理教师，且申请并未经过审核#}
+    {% if current_user.if_admin() and request.status == 0 %}      {#用户类型为管理员或管理教师，且申请并未经过审核#}
         <blockquote class="pull-right">
             <a class="btn btn-success" type="button"
                href="{{ url_for('agree_request', request_id= request.request_id ) }}">同意</a>
