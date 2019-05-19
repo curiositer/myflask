@@ -1,4 +1,3 @@
-from flask import render_template
 import os
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, EditPassword, EditWorkForm, EditStudyForm,\
@@ -10,7 +9,7 @@ from app.models import User, Contest, Request, Student, Teacher, Team, Award, te
 import datetime
 
 from pyecharts import Bar, Pie, Grid, Page, Scatter, Line, configure        # 用于画图表
-from pyecharts_javascripthon.api import TRANSLATOR
+
 import numpy as np      # 用于计算相关性
 from scipy.stats import pearsonr
 from sqlalchemy import func     # 为在query中使用func.count()
@@ -25,8 +24,6 @@ configure(global_theme='dark')         # 规定pycharts的主题roma chalk hallo
 def index():
     notice = Notice.query.order_by(Notice.time.desc()).limit(10).all()
     contest = Contest.query.order_by(Contest.contest_time.desc()).limit(4).all()
-    # print(lists)
-    # print(lists[0].title)
     return render_template('index.html', title='主页', lists=notice, lists2=contest)
 
 
@@ -125,11 +122,9 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         id = int(form.user_id.data)
-        # print(id)
         student = Student(user_id=id, username=form.username.data, email=form.email.data, type='student',
                           major_in=form.major_in.data, tel_num=form.tel_num.data)
         student.set_password(form.password.data)
-        # print(student)
         db.session.add(student)
         db.session.commit()
         flash('恭喜您，学生用户%s已注册成功!' % form.username.data)
@@ -517,13 +512,7 @@ def apply_contest(contest_id):
         else:
             team = Team(team_name=form.team_name.data)
 
-            # student = Student.query.filter_by(user_id=)
             id = id1
-            # if id:
-            #     stu1 = User.query.get(id)
-            #     if not stu1:
-            #         flash("学生1的ID不存在！")
-            #         return redirect(url_for('apply_contest', contest_id=contest_id))
             team.parts.append(Student.query.get(id))
 
             id2 = form.id2.data
@@ -593,16 +582,7 @@ def apply_contest(contest_id):
                     return redirect(url_for('apply_contest', contest_id=contest_id))
                 else:
                     team.parts.append(stu5)
-            # id = form.id5.data
-            # if id:
-            #     try:  # 查看该ID是否存在
-            #         id = int(form.id5.data)
-            #         stu5 = Student.query.get(id)
-            #         team.parts.append(stu5)
-            #     except ValueError:
-            #         flash("学生5的ID不存在！")
-            #         return redirect(url_for('apply_contest', contest_id=contest_id))
-            # # print(team.team_id)
+
             req = Request(user_id=team.team_id, contest_id=contest_id, status=0, sup_teacher=form.teacher.data,
                           notes=form.notes.data, add_time=datetime.datetime.now(), user_type=1)
             db.session.add(req)
@@ -612,9 +592,7 @@ def apply_contest(contest_id):
             return redirect(url_for('request_list_team'))
         else:
             return redirect(url_for('request_list'))
-    # elif request.method == 'GET':
-    #     form.id1.data = current_user.id
-    #     form.name1.data = current_user.username
+
     return render_template('apply_contest.html', title='申请竞赛', form=form, contest=contest)
 
 
@@ -623,13 +601,9 @@ def apply_contest(contest_id):
 def request_list():
     page = request.args.get('page', 1, type=int)
 
-    # if current_user.type == 'admin':
-    #     lists = Request.query.filter().\
-    #         paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取所有学生申请信息
     if current_user.type == 'student':          # 如果为学生，将个人参赛和组队参赛分开查看e
         lists = Request.query.filter_by(user_id=current_user.user_id, user_type=0).order_by(Request.add_time.desc())\
             .paginate(page, app.config['POSTS_PER_PAGE'], False)     # 选取自己个人的申请信息
-        #
 
     elif current_user.type == 'admin':
         lists = Request.query.filter().order_by(Request.add_time.desc()).\
@@ -646,8 +620,7 @@ def request_list():
         if lists.has_next else None
     prev_url = url_for('request_list', page=lists.prev_num) \
         if lists.has_prev else None
-    # current_user.
-        # return redirect(url_for('index'))
+
     return render_template("request_list.html", title='竞赛申请列表',
                            lists=lists.items, next_url=next_url, prev_url=prev_url)
 
@@ -662,7 +635,7 @@ def request_list_team():        # 如果为学生，将个人参赛和组队参�
         team_student, (team_student.c.team_id == Request.user_id)).filter(
         Request.user_type == 1, team_student.c.user_id == current_user.user_id).order_by(Request.add_time.desc()). \
         paginate(page, app.config['POSTS_PER_PAGE'], False)
-    # print(lists.items)
+
     next_url = url_for('request_list_team', page=lists.next_num) \
         if lists.has_next else None
     prev_url = url_for('request_list_team', page=lists.prev_num) \
@@ -682,22 +655,6 @@ def request_details(request_id):
         team = Team.query.get(req.user_id)
         stu = None
     return render_template("request_details.html", title='申请详情', request=req, user_details=stu, team=team)
-
-
-# 最开始的ajax，采用JavaScript实现在当前界面做申请，后认为不合适改为跳转为另一界面显示其详细信息
-# @app.route('/contest/if_agree', methods=['POST'])
-# @login_required
-# def if_agree_request():
-#     req_id = request.form['req']
-#     status = request.form['agree_status']       # 利用ajax的post请求获取表单数据
-#     req1 = Request.query.filter_by(request_id=req_id).first()
-#
-#     if status == 'true':
-#         req1.status = 1
-#     else:
-#         req1.status = 2
-#     db.session.commit()
-#     return redirect('/contest/request_list')
 
 
 def if_request_admin():             # 判断是否是有权限对学生申请信息进行更改的用户
@@ -743,7 +700,7 @@ def award_list():
     lists = Award.query.join(Contest, (Contest.contest_id==Award.contest_id)).\
         order_by(Contest.contest_time.desc()).filter(). \
         paginate(page, app.config['POSTS_PER_PAGE'], False)
-    # print(lists.items)
+
     next_url = url_for('award_list', page=lists.next_num) \
         if lists.has_next else None
     prev_url = url_for('award_list', page=lists.prev_num) \
@@ -800,21 +757,13 @@ def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相�
     :return: pear,data,data2
     """
     x,y = [],[]     # 每个学生对应的参赛情况和就业情况
-    # for key,value in dict1.items():
-    #     x.append(key)
-    #     y.append(value)
     for record in dict1:
         x.append(record[0])
         y.append(record[1])
-        # data = cut_piece(record[1])
-        # piece.append(data)
-    # print(x)
-    # print(y)
     xnp = np.array(x)
     ynp = np.array(y)
     pear,p2 = pearsonr(xnp,ynp)
-    # print(dict1[0])
-    # data1 = dict1[0][0],dict1[0][1],1
+
     lists = []
     data = []
     for record in dict1:
@@ -827,12 +776,10 @@ def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相�
         if each in lists:
             for item in data:
                 if item[0] == record[0] and item[1] == record[1]:
-                    # print('item',item)
                     item[2] = item[2]+1
         else:
             lists.append(each)
             data.append(data1)
-    # print(data)
 
     lists = []
     data2 = []
@@ -842,17 +789,15 @@ def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相�
         each = list(each)
         data1 = record[0], piece1, 1
         data1 = list(data1)
-        # print('data;',data)
+
         if each in lists:
             for item in data2:
                 if item[0] == record[0] and item[1] == record[1]:
-                    # print('item',item)
                     item[2] = item[2] + 1
         else:
             lists.append(each)
             data2.append(data1)
-    # print(data2)
-    # print(pear)
+
     return format(pear, '.3f'), data, data2  # 保留三位小数
 
 
@@ -881,7 +826,6 @@ def relate(type):
             yaxis_name_pos='middle',
             yaxis_name_gap=40,
             extra_data=extra_data,
-            # tooltip_formatter='参赛次数,薪水区间,人数\n{c}',
             tooltip_formatter=custom_formatter,
             is_visualmap=True,
             visual_dimension=2,
@@ -908,7 +852,6 @@ def relate(type):
             yaxis_max=3,
             yaxis_force_interval=1,
             extra_data=extra_data2,
-            # tooltip_formatter='参赛次数,学校类型,人数\n{c}',
             tooltip_formatter=custom_formatter,
             is_visualmap=True,
             visual_dimension=2,
@@ -919,26 +862,15 @@ def relate(type):
             visual_text_color="#000",
         )
         page.add_chart(scatter2, name='参赛-考研')
-        # cs = contest_study()
-        # page.add_chart(cw, name='contest_work')
-        # cc = contest_create()
-        # page.add_chart(cw, name='contest_work')
+
     elif type == 'award':
         title = '获奖次数'
         a_w, a_s = relate_work('award')
-        # scatter = Scatter("获奖-就业")
-        pear1, piece, data = dict_to_numpy(a_w)
-        # scatter.add("获奖-就业", x, y, xaxis_name='获奖次数', yaxis_name='就职薪水', xaxis_name_pos='end', yaxis_name_pos='start')
-        # page.add_chart(scatter, name='获奖-就业')
-        # pear2, x, y = dict_to_numpy(a_s)r
-        # scatter.add("获奖-考研", x, y)
+        pear1, piece, data = dict_to_numpy(a_w)     # piece为分段后的数据，data为未分段的原始数据
+
         title = '获得奖项次数'
         c_w,c_s = relate_work('award')
         scatter = Scatter("获奖-就业")
-        pear1, piece, data = dict_to_numpy(c_w)     # piece为分段后的数据，data为未分段的原始数据
-        # scatter.add("获奖-就业", x, y, xaxis_name='获奖次数', yaxis_name='就职薪水', xaxis_name_pos='end',
-        #             yaxis_name_pos='start', tooltip_trigger='axis', tooltip_formatter='{b1}{b2} {c}{1,2,3}')
-        # page.add_chart(scatter, name='获奖-就业')
 
         x_lst = [v[0] for v in data]
         y_lst = [v[1] for v in data]
@@ -951,7 +883,6 @@ def relate(type):
             yaxis_name_pos='middle',
             yaxis_name_gap=40,
             extra_data=extra_data,
-            # tooltip_formatter='获奖次数,薪水区间,人数\n{c}',
             tooltip_formatter=custom_formatter,
             is_visualmap=True,
             visual_dimension=2,
@@ -978,7 +909,6 @@ def relate(type):
             yaxis_max=3,
             yaxis_force_interval=1,
             extra_data=extra_data2,
-            # tooltip_formatter='获奖次数,学校类型,人数\n{c}',
             tooltip_formatter=custom_formatter,
             is_visualmap=True,
             visual_dimension=2,
@@ -997,8 +927,6 @@ def relate(type):
 
 
 def relate_work(type):
-    # students = Award.query.filter(Award.user_type==0).group_by(Award.user_id).all()
-    # print(students)
     if type == 'contest':
         ss = db.session.query(Award.user_id, func.count(Award.user_id)).filter(Award.user_type == 0).group_by(
             Award.user_id).all()        # 获取个人的参赛记录
@@ -1008,7 +936,6 @@ def relate_work(type):
             Award.user_id).all()  # 获取个人的获奖记录
     dict1 = {}
     for s in ss:
-        # print(s[0], s[1])
         dict1[s[0]] = s[1]
     if type == 'contest':
         ss1 = db.session.query(Award.user_id, team_student.c.user_id, func.count(team_student.c.user_id)). \
@@ -1019,22 +946,18 @@ def relate_work(type):
             join(team_student, (team_student.c.team_id == Award.user_id)). \
             filter(Award.user_type == 1, Award.grade != '0', Award.grade != '无').\
             group_by(team_student.c.user_id).all()  # 获取组队的获奖记录
-    # print(ss1)
     dict2 = {}
     for s in ss1:
-        # print(s[1],':',s[2])
         dict2[s[1]] = s[2]
     for key, value in dict2.items():    # 将同一学生的个人、组队情况统一起来，放入dict1中，格式为{id:count}
         if key in dict1:
             dict1[key] += value
         else:
             dict1[key] = value
-    # print(dict1)
 
     c_w, c_s ,c_c = [],[],[]
     for key, value in dict1.items():       # key为id，value为参赛次数
         stu = Student.query.get(key)
-        # print(stu.salary,stu.college_type)
         if stu.company_name:    # 如果该学生为就业，则添加其薪水为一条记录
             c_w.append((value, stu.salary))
         elif stu.college_name:
@@ -1045,10 +968,6 @@ def relate_work(type):
                 c_s.append((value, 2))
             elif types == '普通高校':
                 c_s.append((value, 1))
-    # print(c_w,c_s)
-    # c_w.sort()     # 结果为该类型[(1, 4000), (2, 7000), (3, 10000), (4, 9000), (5, 6000), (6, 8000)]
-    # c_s.sort()
-    # print(c_w,c_s)
 
     return c_w,c_s
 
@@ -1058,18 +977,13 @@ def relate_work(type):
 def echarts(chart_type):
     end = datetime.date.today()
     start = datetime.datetime(end.year, 1, 1)  # 默认时间为今年第一天到今天为止
-    # print(type(end))        # <class 'datetime.date'>
     form = EditTimeForm()
     if request.method == 'POST':
         start = request.form['start']
         end = request.form['end']
-        # print(start)
-    # elif request.method == 'GET':
-    #     form.start.data = start
-    #     form.end.data = end
+
     if chart_type == 'contest_bar':     # 竞赛种类-柱状图
         _bar = contest_bar(start, end)
-        # type, contest, award = contest_bar()
         title = '参赛（获奖）情况-按竞赛种类'
     elif chart_type == 'award_bar':     # 获奖级别-柱状图
         _bar = award_bar(start, end)
@@ -1080,42 +994,14 @@ def echarts(chart_type):
     elif chart_type == 'award_pie':     # 获奖级别-饼图
         _bar = award_pie(start, end)
         title = '获奖情况-按获奖级别'
-    # elif chart_type == 'major_bar':   # 专业-柱状图
-    #     _bar = major_bar(start, end)
-    #     title = '参赛（获奖）情况-按专业类型'
-    # elif chart_type == 'time_bar':     # 竞赛时间-柱状图
 
-        # _bar = time_bar(start, end)
-
-    # elif chart_type == 'major_pie':   # 专业-饼图
-    #     _bar = major_pie()
-    #     title = '参赛（获奖）情况-按专业类型'
-
-    # elif chart_type == 'award_type_bar':
-    #     _bar = award_type_bar()
-    # elif chart_type == 'award_type_pie':
-    #     _bar = award_type_pie()
-    # javascript_snippet = TRANSLATOR.translate(_bar.options)     # TRANSLATOR即EChartsTranslator类
-    # print(title,type,contest,award)
     return render_template(
         "echarts.html",
         title=title,
-        # type=type,
-        # contest=contest,
-        # award=award
-
         form=form,
         myechart=_bar.render_embed(),
         host=app.config['REMOTE_HOST'],
         script_list=_bar.get_js_dependencies(),
-
-        # chart_id=_bar.chart_id,
-        # renderer=_bar.renderer,
-        # my_width="100%",
-        # my_height=600,
-        # custom_function=javascript_snippet.function_snippet,
-        # options=javascript_snippet.option_snippet,
-
     )
 
 
@@ -1126,7 +1012,6 @@ def contest_bar(start, end):
     award_count = []
     type = []
     for types in contest_types:     # types[0]即竞赛种类
-        # print(types)
         type.append(types[0])
         count1 = Award.query.join(  # 选出每一类的参赛人数
             Contest, (Award.contest_id == Contest.contest_id)).filter(
@@ -1137,22 +1022,16 @@ def contest_bar(start, end):
             Contest.contest_type == types[0], Contest.contest_time >= start, Contest.contest_time <= end,
             Award.grade != '0', Award.grade != '无').count()
         award_count.append(count2)
-    # print(type)
     bar.add("参赛人数", contest_types, join_count, legend_text_size=20, xaxis_label_textsize=20, yaxis_force_interval=1)
     bar.add("获奖人数", contest_types, award_count, legend_text_size=20, xaxis_label_textsize=20, yaxis_force_interval=1)
-    # bar.use_theme('dark')   # 更换主题
     return bar
-    # return type,join_count,award_count
 
 
 def award_bar(start, end):
     bar = Bar("获奖级别统计", height=500, width="100%", title_text_size=30)
-    # award_types = Award.query.with_entities(Award.grade).\
-    #     filter(Award.grade != '0', Award.grade != '无').order_by(Award.grade).distinct().all()
     award_types = ['一等奖', '二等奖', '三等奖', '优秀奖']
     award_count = []
     for types in award_types:  # types[0]即竞赛种类
-        # print(types[0])
         count1 = Award.query.join(Contest, (Contest.contest_id == Award.contest_id)).filter(
             Contest.contest_time >= start, Contest.contest_time <= end,
             Award.grade == types[0], Award.grade != '无').count()    # 选出每一获奖级别的人数
@@ -1160,12 +1039,7 @@ def award_bar(start, end):
 
     bar.add("获奖人数", award_types, award_count,
             legend_text_size=20, label_text_size=20, xaxis_label_textsize=20, yaxis_force_interval=1)
-    # bar.use_theme('dark')   # 更换主题
     return bar
-
-
-# def award_type_bar():
-#     bar = Bar("获奖情况统计", "这里是副标题", height=500, width="100%")
 
 
 def contest_pie(start, end):
@@ -1185,7 +1059,6 @@ def contest_pie(start, end):
             Award.grade != '0', Award.grade != '无').count()
         award_count.append(count2)
     pie1.add("参赛情况", contest_types, join_count, is_label_show=True, center=[25,60] ,legend_pos="20%", label_text_size=20)
-    # pie1.use_theme("shine")
     pie2.add("获奖情况", contest_types, award_count, is_label_show=True, center=[75,60], legend_pos="80%", label_text_size=20)
     gird = Grid(width=1200)
     gird.add(pie1, grid_right="55%")
@@ -1199,96 +1072,10 @@ def award_pie(start, end):
         filter(Award.grade != '0', Award.grade != '无').distinct().all()
     award_count = []
     for types in award_types:  # types[0]即竞赛种类
-        # print(types[0])
         count1 = Award.query.join(Contest, (Contest.contest_id == Award.contest_id)).filter(
             Contest.contest_time >= start, Contest.contest_time <= end,
             Award.grade == types[0], Award.grade != '无').count()     # 选出每一获奖级别的人数
         award_count.append(count1)
     pie.add("", award_types, award_count, is_label_show=True, label_text_size=20)
 
-    # bar.use_theme('dark')   # 更换主题
     return pie
-
-
-# def major_bar():
-#     bar = Bar("专业类型统计", height=500, width="100%")
-#     major_types = ['机械工程', '软件工程', '工业工程', '自动化', '电子信息工程', '汽车服务工程']
-#
-#     join_count = []
-#     award_count = []
-#     for types in major_types:  # types即专业种类
-#         count11 = Award.query.join(Student, (Student.user_id == Award.user_id)).\
-#             filter(Student.major_in == types, Award.user_type == 0).count()
-#         print(count11)
-#         # count12 = Award.query.join(Team, (Team.team_id == Award.user_id)).\
-#         #     filter(Team.parts.major_in == types, Award.user_type == 1).count()
-#         # print(str(count12))
-#         # count1 = Award.query.join(  # 选出每一类的参赛人数
-#         #     Contest, (Award.contest_id == Contest.contest_id)).filter(
-#         #     Contest.contest_type == types).count()
-#         # join_count.append(count1)
-#         # count2 = Award.query.join(  # 选出每一类的获奖人数
-#         #     Contest, (Award.contest_id == Contest.contest_id)).filter(
-#         #     Contest.contest_type == types, Award.grade != '0', Award.grade != '无').count()
-#         # award_count.append(count2)
-#     # bar.add("参赛人数", contest_types, join_count)
-#     # bar.add("获奖人数", contest_types, award_count)
-#     # bar.use_theme('dark')   # 更换主题
-#     return bar
-
-
-# def time_bar(start, end):
-#
-#     count1 = Award.query.join(  # 选出每一类的参赛人数
-#         Contest, (Award.contest_id == Contest.contest_id)).filter(
-#         Contest.contest_time >= start, Contest.contest_time < end ).count()
-#     join_count.append(count1)
-#     count2 = Award.query.join(  # 选出每一类的获奖人数
-#         Contest, (Award.contest_id == Contest.contest_id)).filter(
-#         Contest.contest_time >= start, Contest.contest_time < end, Award.grade != '0', Award.grade != '无').count()
-#     award_count.append(count2)
-
-
-#
-# @app.route('/chart')
-# def my_echarts():
-#     type = ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
-#     data = [5, 20, 36, 10, 10, 20]
-#     data2 = [15, 5, 7, 3, 5, 15]
-#     title = 'dslalflk'
-#     return render_template(
-#         "add_user.html", type_data=type, title=title, data=data, data2=data2
-#     )
-
-#
-# def scatter3d():
-#     data = [generate_3d_random_point() for _ in range(80)]
-#     range_color = [
-#         "#313695",
-#         "#4575b4",
-#         "#74add1",
-#         "#abd9e9",
-#         "#e0f3f8",
-#         "#fee090",
-#         "#fdae61",
-#         "#f46d43",
-#         "#d73027",
-#         "#a50026",
-#     ]
-#     scatter3D = Scatter3D("3D scattering plot demo", width=1200, height=500)
-#     scatter3D.add("", data, is_visualmap=True, visual_range_color=range_color)
-#     return scatter3D
-#
-#
-# def generate_3d_random_point():
-#     return [
-#         random.randint(0, 100), random.randint(0, 100), random.randint(0, 100)
-#     ]
-
-
-
-# @app.route('/request/<team_id>/popup')
-# @login_required
-# def user_popup(team_id):
-#     team = Team.query.filter_by(team_id=tueam_id).first_or_404()
-#     return render_template('request_popup.html', team=team.parts)

@@ -3,9 +3,6 @@
 
 {% block app_content %}
     <h1>提交竞赛申请</h1>
-{#    {% from "_field.html" import render_field %}#}
-
-
         <table class="table table-hover table-bordered">
             <tr>
                 <th>竞赛名</th>
@@ -36,26 +33,7 @@
 
                     {{ wtf.form_field(form.submit) }}
                 </form>
-{#                {{ wtf.quick_form(form) }}#}
             </div>
         </div>
-{#        <form action="" method="post">#}
-{#            {{ form.hidden_tag() }}#}
-{#            <div class="controls">#}
-{#                {{ wtf.form_field(form.name1,class="span1") }}#}
-{#            </div>#}
-{#        <table class="table table-hover table-bordered">#}
-{#            <tr>#}
-{#                <th>学号</th>#}
-{#                <th>姓名</th>#}
-{#            </tr>#}
-{#            <tr>#}
-{#                <td>{{ current_user.user_id }}</td>#}
-{#                <td>{{ current_user.username }}</td>#}
-{#            </tr>#}
-{#        </table>#}
-{##}
-{#        {{ wtf.form_field(form.notes) }}#}
-{#        {{ wtf.form_field(form.submit) }}#}
     </form>
 {% endblock %}

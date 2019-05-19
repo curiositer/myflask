@@ -12,7 +12,6 @@
     {% endif %}
 
     <table class="table table-hover">
-{#        <caption>申请列表</caption>#}
         <tr>
             <th>竞赛名</th>
             <th>竞赛时间</th>
@@ -36,19 +35,6 @@
                 {% endif %}
                 {% if list.status==0 %}
                     <td><a href="{{ url_for('request_details', request_id=list.request_id) }}">待审核(详情...)</a></td>
-{#                    {% if current_user.type == 'teacher' %}          {# 教师才能通过审核#}
-{#                        <form  action="" method="post">#}
-{#                        <td>#}
-{#                            <span id="{{ list.request_id }}">#}
-{#                                 <a href="javascript:if_agree('{{ list.request_id }}');">待审核(详情...)</a>#}
-{#                            </span>#}
-{#                        </td>#}
-{#                        </form>#}
-{##}
-{#                        <td><a href="{{ url_for('agree_request',request_id=list.request_id) }}"></a></td>#}
-{#                    {% else %}#}
-{#                        <td>待审核</td>#}
-{#                    {% endif %}#}
                 {% elif list.status==1 %}
                     <td><span style="color: green;">已通过</span>
                         <a href="{{ url_for('request_details', request_id=list.request_id) }}">(详情...)</a>

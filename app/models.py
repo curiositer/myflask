@@ -153,14 +153,6 @@ def receive_mapper_configured(mapper, class_):
 
     # for prevent 'incompatible polymorphic identity' warning, not necessarily
     mapper._validate_polymorphic_identity = None
-# class Admin(User):
-#     __tablename__ = 'admin'
-#     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
-#     admin_type = db.Column(db.Integer, default=0)
-#
-#     __mapper_args__ = {
-#         'polymorphic_identity': 'admin',
-#     }
 
 
 class Contest_type(db.Model):
@@ -179,8 +171,6 @@ class Contest(db.Model):
     details = db.Column(db.String(150))
     level = db.Column(db.String(20))
 
-    # def contest_list(self):
-
 
 class Request(db.Model):
     __tablename__ = 'request'  # 在数据库中表名称
@@ -195,9 +185,6 @@ class Request(db.Model):
     notes = db.Column(db.String(150))  # 设置为可变字符串类型varchar，长度150
     status = db.Column(db.Integer, default=0)
 
-    # applicant = db.relationship('User', backref=db.backref('requests'))   # 对于user_id申请人可能为用户或者队伍，故不能用外键
-    # # Request添加一个applicant属性，可直接访问申请人详细信息
-    # backref使得反向通过User.requests访问该表
     teacher_details = db.relationship('User')
     contest_details = db.relationship('Contest')
 
