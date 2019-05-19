@@ -42,5 +42,5 @@ microblog.log*
 *.docx
 *.xml
 *.iml
-
+*.sql
 config.py
