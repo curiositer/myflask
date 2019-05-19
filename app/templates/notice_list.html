@@ -20,18 +20,11 @@
         <tr>
             <th class="text-center">标题</th>
             <th class="text-center" width="10%">发布时间</th>
-{#            {% if current_user.type=='admin' %}#}
-{#                <th>删除此公告</th>#}
-{#            {% endif %}#}
         </tr>
         {% for list in lists %}
             <tr valign="top">
                 <td class="text-center"><a href="{{ url_for('notice_details', id=list.id) }}">{{ list.title }}</a></td>
                 <td class="text-center">{{ list.time }}</td>
-
-{#                {% if current_user.type== 'admin' %}#}
-{#                    <td><a href="{{ url_for('delete_notice',id=list.id) }}">申请</a></td>#}
-{#                {% endif %}#}
             </tr>
         {% endfor %}
     </table>

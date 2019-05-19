@@ -52,14 +52,28 @@
                     </ul>
                 </td>
             {% elif team %}
-                <td><ol>
-                {% for part in team.parts %}
-                    <li><ul>
-                        <li>学号：{{ part.user_id }}</li>
-                        <li>姓名：{{ part.username }}</li>
-                    </ul></li>
-                {% endfor %}
-                </ol></td>
+                <td><div style="color: red"><b>成员1为队长</b></div>
+                <table class="table table-striped" border="1">
+                <tr>
+                    <th>学号：</th>
+                    {% for part in team.parts %}
+                        <td>{{ part.user_id }}</td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th>姓名：</th>
+                    {% for part in team.parts %}
+                        <td>{{ part.username }}</td>
+                    {% endfor %}
+                </tr>
+{#                {% for part in team.parts %}#}
+{#                    <ol><ul>#}
+{#                        <li>学号：{{ part.user_id }}</li>#}
+{#                        <li>姓名：{{ part.username }}</li>#}
+{#                    </ul></ol>#}
+{#                {% endfor %}#}
+                </table>
+                </td>
             {% endif %}
         </tr>
         <tr>

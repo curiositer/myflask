@@ -20,12 +20,12 @@
         <tr>
             <th width="15%">竞赛名</th>
             <th width="10%">竞赛时间</th>
-            <th width="10%">竞赛类型</th>
-            <th width="10%">竞赛等级</th>
+            <th width="9%">竞赛类型</th>
+            <th width="8%">竞赛等级</th>
             <th width="20%">竞赛描述</th>
             <th width="10%">文件下载</th>
             {% if current_user.type=='student' %}
-                <th width="6%">申报该竞赛</th>
+                <th width="7%">申报该竞赛</th>
             {% endif %}
         </tr>
         {% for list in lists %}
@@ -35,7 +35,13 @@
                 <td>{{ list.contest_type }}</td>
                 <td>{{ list.level }}</td>
                 <td>{{ list.details }}</td>
-                <td><a href="{{ url_for('downloader', contest_name=list.contest_name) }}">文件下载</a> </td>
+                <td>
+                    {% if list.filename %}
+                        <a href="{{ url_for('downloader', contest_id=list.contest_id) }}">{{ list.filename }}</a>
+                    {% else %}
+                        无相关文件
+                    {% endif %}
+                </td>
                 {% if current_user.type== 'student' %}
                     <td class="text-center"><a href="{{ url_for('apply_contest',contest_id=list.contest_id) }}">申请</a></td>
                 {% endif %}
@@ -56,16 +62,4 @@
             </li>
         </ul>
     </nav>
-{#    {% if prev_url %}#}
-{#        <a href="{{ prev_url }}">上一页</a>#}
-{#        {% endif %}#}
-{#        {% if next_url %}#}
-{#        <a href="{{ next_url }}">下一页</a>#}
-{#        {% endif %}#}
-{#    {% if prev_url %}#}
-{#    <a href="{{ prev_url }}">Newer posts</a>#}
-{#    {% endif %}#}
-{#    {% if next_url %}#}
-{#    <a href="{{ next_url }}">Older posts</a>#}
-{#    {% endif %}#}
 {% endblock %}

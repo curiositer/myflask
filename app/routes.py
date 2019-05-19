@@ -147,7 +147,6 @@ def add_notice():
         filename1, filename2, filename3 = None, None, None
         if form.file1.data:
             filename1 = form.file1.data.filename
-        # print(filename1)
         if form.file2.data:
             filename2 = form.file2.data.filename
         if form.file3.data:
@@ -156,8 +155,7 @@ def add_notice():
                         filename3=filename3, time=datetime.datetime.today().date())
         db.session.add(notice)
         db.session.flush()
-        # print(form.file1.data)
-        # print(filename)
+
         basedir = os.path.abspath(os.path.dirname(__file__))  # 获取当前项目的绝对路径
         file_dir = os.path.join(basedir, app.config['NOTICE_FOLDER'], str(notice.id))  # 存在以竞赛名的子文件夹中
         if not os.path.exists(file_dir):
@@ -185,6 +183,36 @@ def edit_notice(id):
     if form.validate_on_submit():
         notice.title = form.title.data
         notice.text = form.text.data
+        filename1, filename2, filename3 = None, None, None
+        if form.file1.data:
+            print(form.file1.data)
+            filename1 = form.file1.data.filename
+        if form.file2.data:
+            filename2 = form.file2.data.filename
+        if form.file3.data:
+            filename3 = form.file3.data.filename
+        basedir = os.path.abspath(os.path.dirname(__file__))  # 获取当前项目的绝对路径
+        file_dir = os.path.join(basedir, app.config['NOTICE_FOLDER'], str(notice.id))  # 存在以竞赛名的子文件夹中
+        if not os.path.exists(file_dir):
+            os.makedirs(file_dir)  # 文件夹不存在就创建
+        if form.file1.data:         # 如果新上传了文件，那么覆盖（删除）之前的文件，并添加新的文件
+            oldfilename1 = notice.filename1
+            if os.path.exists(file_dir + oldfilename1):
+                os.remove(file_dir + oldfilename1)
+            form.file1.data.save(os.path.join(file_dir, filename1))  # 将上传的文件保存到服务器;
+            notice.filename1 = filename1
+        if form.file2.data:
+            oldfilename2 = notice.filename2
+            if os.path.exists(file_dir + oldfilename2):
+                os.remove(file_dir + oldfilename2)
+            form.file2.data.save(os.path.join(file_dir, filename2))
+            notice.filename2 = filename2
+        if form.file3.data:
+            oldfilename3 = notice.filename3
+            if os.path.exists(file_dir + oldfilename3):
+                os.remove(file_dir + oldfilename3)
+            form.file3.data.save(os.path.join(file_dir, filename3))
+            notice.filename3 = filename3
         db.session.commit()
         flash("公告修改成功！")
         return notice_details(id)
@@ -394,11 +422,12 @@ def contest_list():
                            lists=lists.items, next_url=next_url, prev_url=prev_url)
 
 
-@app.route('/contest/add/type', methods=['GET', 'POST'])
+@app.route('/contest/type/edit', methods=['GET', 'POST'])
 @login_required
-def add_contest_type():
+def edit_contest_type():
     if current_user.type != 'admin':
         abort(404)
+    contest_type = Contest_type.query.filter_by().all()
     form = AddContestTypeForm()
     new_type = form.type.data
     if form.validate_on_submit():
@@ -409,7 +438,21 @@ def add_contest_type():
         new = Contest_type(contest_type=new_type)
         db.session.add(new)
         db.session.commit()
-    return render_template("normal_form.html", title='添加竞赛类型', form=form)
+        flash("竞赛类型添加成功！")
+        return redirect(url_for('add_contest'))
+    return render_template('edit_type.html', lists=contest_type, form=form)
+
+
+@app.route('/contest/type/delete/<id>', methods=['GET', 'POST'])
+@login_required
+def delete_contest_type(id):
+    if current_user.type != 'admin':
+        abort(404)
+    type = Contest_type.query.get(id)
+    db.session.delete(type)
+    db.session.commit()
+    flash('删除成功！')
+    return redirect(url_for('edit_contest_type'))
 
 
 @app.route('/contest/add', methods=['GET', 'POST'])
@@ -421,31 +464,28 @@ def add_contest():
     if form.validate_on_submit():
         date = form.time.data.strftime('%Y-%m-%d')
         contest = Contest(contest_name=form.name.data, contest_type=form.type.data, contest_time=date,
-                          details=form.details.data, level=form.level.data)
-        # print(form.contest_time.data)
-        # 获取上传文件的文件名;
+                          details=form.details.data, level=form.level.data, filename=form.file.data.filename)
+        # 获取上传文件的文件名;记录到数据库中，方便标识该竞赛是否有文件
         filename = form.file.data.filename
+        db.session.add(contest)
+        db.session.flush()
         # print(filename)
         basedir = os.path.abspath(os.path.dirname(__file__))  # 获取当前项目的绝对路径
-        file_dir = os.path.join(basedir, app.config['UPLOAD_FOLDER'], form.name.data)      # 存在以竞赛名的子文件夹中
+        file_dir = os.path.join(basedir, app.config['UPLOAD_FOLDER'], str(contest.contest_id))  # 存在以竞赛id的子文件夹中
         if not os.path.exists(file_dir):
             os.makedirs(file_dir)  # 文件夹不存在就创建
         form.file.data.save(os.path.join(file_dir, filename))     # 将上传的文件保存到服务器;
-        db.session.add(contest)
         db.session.commit()
         flash('添加竞赛信息成功!')
         return redirect(url_for('index'))
     return render_template("normal_form.html", title='添加竞赛', form=form)
 
 
-@app.route("/download/<contest_name>")
+@app.route("/download/<contest_id>")
 @login_required
-def downloader(contest_name):
-    dirpath = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], contest_name)  #
-    # print(contest_name)
-    file_name = os.listdir(dirpath)[0]
-    # print(file_name)
-    # return redirect(url_for('index'))
+def downloader(contest_id):
+    dirpath = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], contest_id)  #
+    file_name = os.listdir(dirpath)[0]  # 因为只有一个文件，直接取即可
     response = make_response(send_from_directory(dirpath, file_name, as_attachment=True) )  # as_attachment=True 一定要写，不然会变成打开，而不是下载
     response.headers["Content-Disposition"] = "attachment; filename={}".format(file_name.encode().decode('latin-1'))
     return response
@@ -816,6 +856,10 @@ def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相�
     return format(pear, '.3f'), data, data2  # 保留三位小数
 
 
+def custom_formatter(params):
+    return '此点人数'+params.value[2]
+
+
 @app.route("/relate/<type>")
 @login_required
 def relate(type):
@@ -834,9 +878,11 @@ def relate(type):
             xaxis_name='参赛次数',
             yaxis_name='就职薪水',
             xaxis_name_pos='end',
-            yaxis_name_pos='start',
+            yaxis_name_pos='middle',
+            yaxis_name_gap=40,
             extra_data=extra_data,
-            tooltip_formatter='参赛次数,薪水区间,人数\n{c}',
+            # tooltip_formatter='参赛次数,薪水区间,人数\n{c}',
+            tooltip_formatter=custom_formatter,
             is_visualmap=True,
             visual_dimension=2,
             visual_orient="horizontal",
@@ -851,18 +897,19 @@ def relate(type):
         x_2st = [v[0] for v in data2]
         y_2st = [v[1] for v in data2]
         extra_data2 = [v[2] for v in data2]
-        scatter2 = Scatter("参赛-考研\n(类型[1,2,3]分别对应为[985,211,普通高校])")
+        scatter2 = Scatter("参赛-考研\n(类型1,2,3分别对应为985,211,普通高校)")
 
         scatter2.add(
             "参赛-考研", x_2st, y_2st,
             xaxis_name='参赛次数',
             yaxis_name='学校类型',
             xaxis_name_pos='end',
-            yaxis_name_pos='start',
+            yaxis_name_pos='middle',
             yaxis_max=3,
             yaxis_force_interval=1,
             extra_data=extra_data2,
-            tooltip_formatter='参赛次数,学校类型,人数\n{c}',
+            # tooltip_formatter='参赛次数,学校类型,人数\n{c}',
+            tooltip_formatter=custom_formatter,
             is_visualmap=True,
             visual_dimension=2,
             visual_orient="horizontal",
@@ -901,9 +948,11 @@ def relate(type):
             xaxis_name='获奖次数',
             yaxis_name='就职薪水',
             xaxis_name_pos='end',
-            yaxis_name_pos='start',
+            yaxis_name_pos='middle',
+            yaxis_name_gap=40,
             extra_data=extra_data,
-            tooltip_formatter='获奖次数,薪水区间,人数\n{c}',
+            # tooltip_formatter='获奖次数,薪水区间,人数\n{c}',
+            tooltip_formatter=custom_formatter,
             is_visualmap=True,
             visual_dimension=2,
             visual_orient="horizontal",
@@ -925,11 +974,12 @@ def relate(type):
             xaxis_name='获奖次数',
             yaxis_name='学校类型',
             xaxis_name_pos='end',
-            yaxis_name_pos='start',
+            yaxis_name_pos='middle',
             yaxis_max=3,
             yaxis_force_interval=1,
             extra_data=extra_data2,
-            tooltip_formatter='获奖次数,学校类型,人数\n{c}',
+            # tooltip_formatter='获奖次数,学校类型,人数\n{c}',
+            tooltip_formatter=custom_formatter,
             is_visualmap=True,
             visual_dimension=2,
             visual_orient="horizontal",
@@ -1070,9 +1120,8 @@ def echarts(chart_type):
 
 
 def contest_bar(start, end):
-    bar = Bar("参赛种类统计", height=500, width="100%")
+    bar = Bar("参赛种类统计", height=500, width="100%", title_text_size=30)
     contest_types = Contest.query.with_entities(Contest.contest_type).distinct().all()
-    # print(contest_types)
     join_count = []
     award_count = []
     type = []
@@ -1097,9 +1146,10 @@ def contest_bar(start, end):
 
 
 def award_bar(start, end):
-    bar = Bar("获奖级别统计", height=500, width="100%")
-    award_types = Award.query.with_entities(Award.grade).\
-        filter(Award.grade != '0', Award.grade != '无').order_by(Award.grade).distinct().all()
+    bar = Bar("获奖级别统计", height=500, width="100%", title_text_size=30)
+    # award_types = Award.query.with_entities(Award.grade).\
+    #     filter(Award.grade != '0', Award.grade != '无').order_by(Award.grade).distinct().all()
+    award_types = ['一等奖', '二等奖', '三等奖', '优秀奖']
     award_count = []
     for types in award_types:  # types[0]即竞赛种类
         # print(types[0])
@@ -1119,8 +1169,8 @@ def award_bar(start, end):
 
 
 def contest_pie(start, end):
-    pie1 = Pie("获奖比例", title_pos='center')
-    pie2 = Pie("参赛比例")
+    pie1 = Pie("获奖比例", title_pos='center', title_text_size=30)
+    pie2 = Pie("参赛比例", title_text_size=30)
     contest_types = Contest.query.with_entities(Contest.contest_type).distinct().all()
     join_count = []
     award_count = []
@@ -1144,7 +1194,7 @@ def contest_pie(start, end):
 
 
 def award_pie(start, end):
-    pie = Pie("各奖项获奖比例", height=500, width="100%")
+    pie = Pie("各奖项获奖比例", height=500, width="100%", title_text_size=30)
     award_types = Award.query.with_entities(Award.grade).\
         filter(Award.grade != '0', Award.grade != '无').distinct().all()
     award_count = []

@@ -84,7 +84,7 @@ class ResetPasswordForm(FlaskForm):
 
 class EditNoticeForm(FlaskForm):
     title = StringField('标题', validators=[DataRequired('请输入标题'), Length(max=50, message="标题长度需小于50字符")])
-    text = TextAreaField('正文', validators=[DataRequired('请输入正文')])
+    text = TextAreaField('正文', validators=[DataRequired('请输入正文')], id='contentcode')
     file1 = FileField("相关文件(请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg')",
                      validators=[FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'],
                                              "请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'")])

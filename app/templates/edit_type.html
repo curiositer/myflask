@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h1>{{ title }}</h1>
+    <div class="row">
+        <div class="col-md-4">
+        <table class="table table-hover table-bordered">
+        <tr class="info">
+            <th class="text-center">竞赛类型</th>
+            <th class="text-center">操作</th>
+        </tr>
+        {% for list in lists %}
+            <span id="{{ list.request_id }}">
+            <tr>
+                <td class="text-center">
+                    {{ list.contest_type }}
+                </td>
+                <td>
+                    <a class="btn btn-default center-block" role="button" onclick="confirmdelete()"
+                            href="{{ url_for('delete_contest_type', id= list.id ) }}">删除</a>
+                </td>
+            </tr>
+            </span>
+        {% endfor %}
+        </table>
+        </div>
+        <div class="col-md-4">
+            <div class="text-center"><h3>添加竞赛类型</h3></div>
+             {{ wtf.quick_form(form) }}
+        </div>
+    </div>
+{% endblock %}
