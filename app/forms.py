@@ -1,4 +1,4 @@
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm, RecaptchaField
 from wtforms import StringField, PasswordField, SelectField, BooleanField,\
     SubmitField, DateField, FileField, TextAreaField, IntegerField
 from flask_admin.form import widgets
@@ -11,6 +11,7 @@ from app.models import User, Contest_type
 class LoginForm(FlaskForm):
     user_id = StringField('学号/工号', validators=[DataRequired('请输入学号')])
     password = PasswordField('密码', validators=[DataRequired('请输入密码')])
+    # recaptcha = RecaptchaField()    # 验证码http://www.pythondoc.com/flask-wtf/form.html?highlight=recaptcha
     remember_me = BooleanField('记住我')
     submit = SubmitField('登陆')
 
@@ -103,10 +104,6 @@ class EditProfileForm(FlaskForm):
     tel_num = StringField('联系电话', validators=[DataRequired('请输入联系电话'), Length(min=11, max=11, message="请输入11位手机号")])
     # about_me = TextAreaField('About me', validators=[Length(min=0, max=140)])
     submit = SubmitField('提交修改')
-    #
-    # def __init__(self, original_email, *args, **kwargs):
-    #     super(EditProfileForm, self).__init__(*args, **kwargs)
-    #     self.original_email = original_email
 
     def validate_email(self, email):
         email_list = User.query.filter_by(email=email.data).first()
@@ -170,17 +167,11 @@ class AddContestTypeForm(FlaskForm):
 
 class ApplyContestForm(FlaskForm):
     teacher = StringField('指导教师ID', validators=[DataRequired("请填入教师ID")])
-    # id1 = StringField('成员1（队长）学号', validators=[DataRequired()])
-    # name1 = StringField('成员1（队长）姓名', validators=[DataRequired()])
     team_name = StringField('队伍名（以下信息请组队参赛时填写）', validators=[Length(max=30, message="长度需小于30字符")])
     id2 = StringField('成员2学号')
-    # name2 = StringField('成员2姓名')
     id3 = StringField('成员3学号')
-    # name3 = StringField('成员3姓名')
     id4 = StringField('成员4学号')
-    # name4 = StringField('成员4姓名')
     id5 = StringField('成员5学号')
-    # name5 = StringField('成员5姓名')
     notes = TextAreaField('备注', validators=[Length(min=0, max=150, message="填写内容过长")])
     submit = SubmitField('确认申请')
 

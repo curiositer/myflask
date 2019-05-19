@@ -2,15 +2,7 @@
 
 {% block app_content %}
     <h1>{{ title }}</h1>
-
-{#    <div class="btn-group" role="group" aria-label="...">#}
-{#        <a class="btn btn-default" href="{{ url_for('award_list') }}" role="button">个人</a>#}
-{#        <a class="btn btn-default" href="{{ url_for('award_list_team') }}" role="button">组队</a>#}
-{#        <br><br>#}
-{#        <span style="color: red;">请先选择个人或组队</span>#}
-{#    </div>#}
     <table class="table table-hover">
-{#        <caption>获奖列表</caption>#}
         <tr>
             <th>竞赛名</th>
             <th>竞赛时间</th>
@@ -35,19 +27,6 @@
 
                 {% if list.grade=='0' %}
                     <td><a href={{ url_for('award_details', award_id=list.award_id) }}>待录入(详情...)</a></td>
-{#                    {% if current_user.type == 'teacher' %}          {# 教师才能通过审核#}
-{#                        <form  action="" method="post">#}
-{#                        <td>#}
-{#                            <span id="{{ list.request_id }}">#}
-{#                                 <a href="javascript:if_agree('{{ list.request_id }}');">待审核(详情...)</a>#}
-{#                            </span>#}
-{#                        </td>#}
-{#                        </form>#}
-{##}
-{#                        <td><a href="{{ url_for('agree_request',request_id=list.request_id) }}"></a></td>#}
-{#                    {% else %}#}
-{#                        <td>待审核</td>#}
-{#                    {% endif %}#}
                 {% else %}
                     <td><span style="color: red;">{{ list.grade }}</span>
                         <a href={{ url_for('award_details', award_id=list.award_id) }}>(详情...)</a></td>

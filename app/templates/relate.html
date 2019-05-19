@@ -31,7 +31,6 @@
     <table class="table-bordered">
         <caption class="text-center"><span style="color: red">(参赛-就业)</span>
             每一单元格代表符合条件的人数</caption>
-{#        <td class="first" colspan="2"><span class="title1">产品</span><br><span class="title2">报道量</span><br><span class="title3">地区</span></td>#}
         <tr>
             <td height="41" style="background-color: #f2f2f2; padding: 0.0px;">
             <div class="out">
@@ -57,10 +56,8 @@
                 <td class="text-center">
                 {% with vars = [0] %}    {# 变量值只能在for外面生效，故借助字典实现赋值 #}
                     {% for datum in data %}
-{#                        {{ datum[0] }}#}
                         {% if datum[0]==x and datum[1]==y %}
                             {% do vars.append(vars.pop()+datum[2]) %}
-{#                            {{ vars.foo }}#}
                         {% endif %}
 
                     {% endfor %}
@@ -76,7 +73,6 @@
     <table class="table-bordered">
         <caption class="text-center"><span style="color: red">(参赛-考研)</span>
             每一单元格代表符合条件的人数</caption>
-{#        <td class="first" colspan="2"><span class="title1">产品</span><br><span class="title2">报道量</span><br><span class="title3">地区</span></td>#}
         <tr>
             <td height="41" style="background-color: #f2f2f2; padding: 0.0px;">
             <div class="out">
@@ -101,10 +97,8 @@
                 <td class="text-center">
                 {% with vars = [0] %}    {# 变量值只能在for外面生效，故借助字典实现赋值 #}
                     {% for datum in data2 %}
-{#                        {{ datum[0] }}#}
                         {% if datum[0]==x and datum[1]==y %}
                             {% do vars.append(vars.pop()+datum[2]) %}
-{#                            {{ vars.foo }}#}
                         {% endif %}
 
                     {% endfor %}

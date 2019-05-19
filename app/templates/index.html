@@ -45,13 +45,6 @@
             </div>
         </div>
         </div>
-{#        <div class="col-md-8">#}
-{#            <div class="jumbotron">#}
-{#            <h1>{{ current_user.username }}，欢迎您！</h1>#}
-{#            <p>...</p>#}
-{#            <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a></p>#}
-{#            </div>#}
-{#        </div>#}
 
         <div class="col-md-4">
                 <div class="panel panel-success">
@@ -73,27 +66,7 @@
             </div>
 
             </div>
-{#            <a href="#">#}
                 <img src="{{ url_for('static', filename='image/building2.png') }}" alt="综合实验楼">
-{#            </a>#}
-
-        </div>
+            </div>
     </div>
-{#    <div class="row">#}
-{#        &nbsp;&nbsp;&nbsp;常用功能:#}
-{#        <a class="btn btn-success" href="{{ url_for('contest_list') }}" role="button">#}
-{#            {% if current_user.type == 'student' %}竞赛申请#}
-{#            {% else %}竞赛列表#}
-{#            {% endif %}#}
-{#        </a>#}
-{#        <a class="btn btn-danger" href="{{ url_for('award_list') }}" role="button">获奖列表</a>#}
-{#        <a class="btn btn-primary" href="{{ url_for('notice_list') }}" role="button">公告列表</a>#}
-{#        {% if current_user.type == 'student' %}#}
-{#            <a class="btn btn-warning" href="{{ url_for('edit_work') }}" role="button">修改就业信息</a>#}
-{#        {% else %}#}
-{#            <a class="btn btn-warning" href="{{ url_for('request_list') }}" role="button">审核申请</a>#}
-{#        {% endif %}#}
-{##}
-{#    </div>#}
-
 {% endblock %}
