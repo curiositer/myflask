@@ -11,7 +11,7 @@ from app.models import User, Contest_type
 class LoginForm(FlaskForm):
     user_id = StringField('学号/工号', validators=[DataRequired('请输入学号')])
     password = PasswordField('密码', validators=[DataRequired('请输入密码')])
-    # recaptcha = RecaptchaField()    # 验证码http://www.pythondoc.com/flask-wtf/form.html?highlight=recaptcha
+    recaptcha = RecaptchaField('验证码')    # 验证码http://www.pythondoc.com/flask-wtf/form.html?highlight=recaptcha
     remember_me = BooleanField('记住我')
     submit = SubmitField('登陆')
 

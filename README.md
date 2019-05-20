@@ -41,6 +41,9 @@ https://github.com/luhuisicnu/The-Flask-Mega-Tutorial-zh *
         REMOTE_HOST = "https://pyecharts.github.io/assets/js"   # 获得图表pycharts的依赖
         
         SENTRY_DSN = os.environ.get('SENTRY_DSN')
+        
+        RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY')
+        RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY')
 
 linux部署教程:https://github.com/luhuisicnu/The-Flask-Mega-Tutorial-zh/blob/master/docs/%E7%AC%AC%E5%8D%81%E4%B8%83%E7%AB%A0%EF%BC%9ALinux%E4%B8%8A%E7%9A%84%E9%83%A8%E7%BD%B2.md
 

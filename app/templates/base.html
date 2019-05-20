@@ -6,6 +6,7 @@
     {% for jsfile_name in script_list %}
        <script src="{{ host }}/{{ jsfile_name }}.js"></script>    {# 获得所有所需的js文件#}
     {% endfor %}
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 {% endblock %}
 
 {% block styles %}
