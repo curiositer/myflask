@@ -8,14 +8,25 @@ from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student, Notice, Contest_type
 import datetime
 
-from pyecharts import Bar, Pie, Grid, Page, Scatter, Line, configure        # 用于画图表
+# from pyecharts import Bar, Pie, Grid, Page, Scatter, Line, configure        # 用于画图表
+# configure(global_theme='dark')         # 规定pycharts的主题roma chalk halloween essos
+# from jinja2 import Markup, Environment, FileSystemLoader
+# from pyecharts.globals import CurrentConfig
+#
+# # 关于 CurrentConfig，可参考 [基本使用-全局变量]
+# CurrentConfig.GLOBAL_ENV = Environment(loader=FileSystemLoader("./templates"))
+
+from pyecharts import options as opts
+from pyecharts.charts import Bar, Pie, Scatter, Grid, Page
+from pyecharts.globals import ThemeType
+
 
 import numpy as np      # 用于计算相关性
 from scipy.stats import pearsonr
 from sqlalchemy import func     # 为在query中使用func.count()
 from app.email import send_password_reset_email     # 用于重置密码
 # import shutil   # 用于删除文件及文件夹
-configure(global_theme='dark')         # 规定pycharts的主题roma chalk halloween essos
+
 
 
 @app.route('/')
@@ -805,125 +816,125 @@ def custom_formatter(params):
     return '此点人数'+params.value[2]
 
 
-@app.route("/relate/<type>")
-@login_required
-def relate(type):
-    page = Page()
-    if type == 'contest':
-        title = '参加比赛次数'
-        c_w,c_s = relate_work('contest')
-        scatter = Scatter("参赛-就业")
-        pear1, piece, data = dict_to_numpy(c_w)     # piece为分段后的数据，data为未分段的原始数据
-
-        x_lst = [v[0] for v in data]
-        y_lst = [v[1] for v in data]
-        extra_data = [v[2] for v in data]
-        scatter.add(
-            "参赛-就业", x_lst, y_lst,
-            xaxis_name='参赛次数',
-            yaxis_name='就职薪水',
-            xaxis_name_pos='end',
-            yaxis_name_pos='middle',
-            yaxis_name_gap=40,
-            extra_data=extra_data,
-            tooltip_formatter=custom_formatter,
-            is_visualmap=True,
-            visual_dimension=2,
-            visual_orient="horizontal",
-            visual_range_size=[6, 200],
-            visual_type="size",
-            visual_range=[0, 100],
-            visual_text_color="#000",
-        )
-        page.add_chart(scatter, name='参赛-就业')
-
-        pear2, piece2, data2 = dict_to_numpy(c_s)
-        x_2st = [v[0] for v in data2]
-        y_2st = [v[1] for v in data2]
-        extra_data2 = [v[2] for v in data2]
-        scatter2 = Scatter("参赛-考研\n(类型1,2,3分别对应为985,211,普通高校)")
-
-        scatter2.add(
-            "参赛-考研", x_2st, y_2st,
-            xaxis_name='参赛次数',
-            yaxis_name='学校类型',
-            xaxis_name_pos='end',
-            yaxis_name_pos='middle',
-            yaxis_max=3,
-            yaxis_force_interval=1,
-            extra_data=extra_data2,
-            tooltip_formatter=custom_formatter,
-            is_visualmap=True,
-            visual_dimension=2,
-            visual_orient="horizontal",
-            visual_range_size=[6, 200],
-            visual_type="size",
-            visual_range=[0, 100],
-            visual_text_color="#000",
-        )
-        page.add_chart(scatter2, name='参赛-考研')
-
-    elif type == 'award':
-        title = '获奖次数'
-        a_w, a_s = relate_work('award')
-        pear1, piece, data = dict_to_numpy(a_w)     # piece为分段后的数据，data为未分段的原始数据
-
-        title = '获得奖项次数'
-        c_w,c_s = relate_work('award')
-        scatter = Scatter("获奖-就业")
-
-        x_lst = [v[0] for v in data]
-        y_lst = [v[1] for v in data]
-        extra_data = [v[2] for v in data]
-        scatter.add(
-            "获奖-就业", x_lst, y_lst,
-            xaxis_name='获奖次数',
-            yaxis_name='就职薪水',
-            xaxis_name_pos='end',
-            yaxis_name_pos='middle',
-            yaxis_name_gap=40,
-            extra_data=extra_data,
-            tooltip_formatter=custom_formatter,
-            is_visualmap=True,
-            visual_dimension=2,
-            visual_orient="horizontal",
-            visual_range_size=[6, 200],
-            visual_type="size",
-            visual_range=[0, 100],
-            visual_text_color="#000",
-        )
-        page.add_chart(scatter, name='获奖-就业')
-
-        pear2, piece2, data2 = dict_to_numpy(c_s)
-        x_2st = [v[0] for v in data2]
-        y_2st = [v[1] for v in data2]
-        extra_data2 = [v[2] for v in data2]
-        scatter2 = Scatter("获奖-考研\n(类型[1,2,3]分别对应为[985,211,普通高校])")
-
-        scatter2.add(
-            "获奖-考研", x_2st, y_2st,
-            xaxis_name='获奖次数',
-            yaxis_name='学校类型',
-            xaxis_name_pos='end',
-            yaxis_name_pos='middle',
-            yaxis_max=3,
-            yaxis_force_interval=1,
-            extra_data=extra_data2,
-            tooltip_formatter=custom_formatter,
-            is_visualmap=True,
-            visual_dimension=2,
-            visual_orient="horizontal",
-            visual_range_size=[6, 200],
-            visual_type="size",
-            visual_range=[0, 100],
-            visual_text_color="#000",
-        )
-        page.add_chart(scatter2, name='获奖-考研')
-    return render_template("relate.html", title=title, pear1=pear1, configure=configure,
-                           myechart=page.render_embed(), host=app.config['REMOTE_HOST'],
-                           script_list=page.get_js_dependencies(),
-                           data=piece, x_list=range(0,10), y_list=[0,4000,6000,8000,10000],
-                           pear2=pear2, data2=data2, x_list2=range(0,10), y_list2=[1,2,3])
+# @app.route("/relate/<type>")
+# @login_required
+# def relate(type):
+#     page = Page()
+#     if type == 'contest':
+#         title = '参加比赛次数'
+#         c_w,c_s = relate_work('contest')
+#         scatter = Scatter("参赛-就业")
+#         pear1, piece, data = dict_to_numpy(c_w)     # piece为分段后的数据，data为未分段的原始数据
+#
+#         x_lst = [v[0] for v in data]
+#         y_lst = [v[1] for v in data]
+#         extra_data = [v[2] for v in data]
+#         scatter.add(
+#             "参赛-就业", x_lst, y_lst,
+#             xaxis_name='参赛次数',
+#             yaxis_name='就职薪水',
+#             xaxis_name_pos='end',
+#             yaxis_name_pos='middle',
+#             yaxis_name_gap=40,
+#             extra_data=extra_data,
+#             tooltip_formatter=custom_formatter,
+#             is_visualmap=True,
+#             visual_dimension=2,
+#             visual_orient="horizontal",
+#             visual_range_size=[6, 200],
+#             visual_type="size",
+#             visual_range=[0, 100],
+#             visual_text_color="#000",
+#         )
+#         page.add_chart(scatter, name='参赛-就业')
+#
+#         pear2, piece2, data2 = dict_to_numpy(c_s)
+#         x_2st = [v[0] for v in data2]
+#         y_2st = [v[1] for v in data2]
+#         extra_data2 = [v[2] for v in data2]
+#         scatter2 = Scatter("参赛-考研\n(类型1,2,3分别对应为985,211,普通高校)")
+#
+#         scatter2.add(
+#             "参赛-考研", x_2st, y_2st,
+#             xaxis_name='参赛次数',
+#             yaxis_name='学校类型',
+#             xaxis_name_pos='end',
+#             yaxis_name_pos='middle',
+#             yaxis_max=3,
+#             yaxis_force_interval=1,
+#             extra_data=extra_data2,
+#             tooltip_formatter=custom_formatter,
+#             is_visualmap=True,
+#             visual_dimension=2,
+#             visual_orient="horizontal",
+#             visual_range_size=[6, 200],
+#             visual_type="size",
+#             visual_range=[0, 100],
+#             visual_text_color="#000",
+#         )
+#         page.add_chart(scatter2, name='参赛-考研')
+#
+#     elif type == 'award':
+#         title = '获奖次数'
+#         a_w, a_s = relate_work('award')
+#         pear1, piece, data = dict_to_numpy(a_w)     # piece为分段后的数据，data为未分段的原始数据
+#
+#         title = '获得奖项次数'
+#         c_w,c_s = relate_work('award')
+#         scatter = Scatter("获奖-就业")
+#
+#         x_lst = [v[0] for v in data]
+#         y_lst = [v[1] for v in data]
+#         extra_data = [v[2] for v in data]
+#         scatter.add(
+#             "获奖-就业", x_lst, y_lst,
+#             xaxis_name='获奖次数',
+#             yaxis_name='就职薪水',
+#             xaxis_name_pos='end',
+#             yaxis_name_pos='middle',
+#             yaxis_name_gap=40,
+#             extra_data=extra_data,
+#             tooltip_formatter=custom_formatter,
+#             is_visualmap=True,
+#             visual_dimension=2,
+#             visual_orient="horizontal",
+#             visual_range_size=[6, 200],
+#             visual_type="size",
+#             visual_range=[0, 100],
+#             visual_text_color="#000",
+#         )
+#         page.add_chart(scatter, name='获奖-就业')
+#
+#         pear2, piece2, data2 = dict_to_numpy(c_s)
+#         x_2st = [v[0] for v in data2]
+#         y_2st = [v[1] for v in data2]
+#         extra_data2 = [v[2] for v in data2]
+#         scatter2 = Scatter("获奖-考研\n(类型[1,2,3]分别对应为[985,211,普通高校])")
+#
+#         scatter2.add(
+#             "获奖-考研", x_2st, y_2st,
+#             xaxis_name='获奖次数',
+#             yaxis_name='学校类型',
+#             xaxis_name_pos='end',
+#             yaxis_name_pos='middle',
+#             yaxis_max=3,
+#             yaxis_force_interval=1,
+#             extra_data=extra_data2,
+#             tooltip_formatter=custom_formatter,
+#             is_visualmap=True,
+#             visual_dimension=2,
+#             visual_orient="horizontal",
+#             visual_range_size=[6, 200],
+#             visual_type="size",
+#             visual_range=[0, 100],
+#             visual_text_color="#000",
+#         )
+#         page.add_chart(scatter2, name='获奖-考研')
+#     return render_template("relate.html", title=title, pear1=pear1, configure=configure,
+#                            myechart=page.render_embed(), host=app.config['REMOTE_HOST'],
+#                            script_list=page.get_js_dependencies(),
+#                            data=piece, x_list=range(0,10), y_list=[0,4000,6000,8000,10000],
+#                            pear2=pear2, data2=data2, x_list2=range(0,10), y_list2=[1,2,3])
 
 
 def relate_work(type):
@@ -995,18 +1006,17 @@ def echarts(chart_type):
         _bar = award_pie(start, end)
         title = '获奖情况-按获奖级别'
 
+    # return _bar.dump_options()
     return render_template(
         "echarts.html",
         title=title,
         form=form,
         myechart=_bar.render_embed(),
-        host=app.config['REMOTE_HOST'],
-        script_list=_bar.get_js_dependencies(),
     )
 
 
 def contest_bar(start, end):
-    bar = Bar("参赛种类统计", height=500, width="100%", title_text_size=30)
+    # bar = Bar("参赛种类统计", height=500, width="100%", title_text_size=30)
     contest_types = Contest.query.with_entities(Contest.contest_type).distinct().all()
     join_count = []
     award_count = []
@@ -1022,29 +1032,49 @@ def contest_bar(start, end):
             Contest.contest_type == types[0], Contest.contest_time >= start, Contest.contest_time <= end,
             Award.grade != '0', Award.grade != '无').count()
         award_count.append(count2)
-    bar.add("参赛人数", contest_types, join_count, legend_text_size=20, xaxis_label_textsize=20, yaxis_force_interval=1)
-    bar.add("获奖人数", contest_types, award_count, legend_text_size=20, xaxis_label_textsize=20, yaxis_force_interval=1)
+    bar = Bar(init_opts=opts.InitOpts(width="100%",theme=ThemeType.DARK)).\
+        add_xaxis(contest_types).\
+        add_yaxis("参赛人数", join_count).\
+        add_yaxis("获奖人数", award_count).\
+        set_global_opts(
+            title_opts=opts.TitleOpts(title="参赛种类统计",),
+            xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(font_size=20, rotate=-25)),
+            yaxis_opts=opts.AxisOpts(min_interval=1, axislabel_opts=opts.LabelOpts(font_size=20)),
+            legend_opts=opts.LegendOpts(textstyle_opts=opts.TextStyleOpts(font_size=20)
+        ))
+    # bar.add("参赛人数", contest_types, join_count, legend_text_size=20, xaxis_label_textsize=20, yaxis_force_interval=1)
+    # bar.add("获奖人数", contest_types, award_count, legend_text_size=20, xaxis_label_textsize=20, yaxis_force_interval=1)
     return bar
 
 
 def award_bar(start, end):
-    bar = Bar("获奖级别统计", height=500, width="100%", title_text_size=30)
+    # bar = Bar("获奖级别统计", height=500, width="100%", title_text_size=30)
     award_types = ['一等奖', '二等奖', '三等奖', '优秀奖']
     award_count = []
     for types in award_types:  # types[0]即竞赛种类
         count1 = Award.query.join(Contest, (Contest.contest_id == Award.contest_id)).filter(
             Contest.contest_time >= start, Contest.contest_time <= end,
-            Award.grade == types[0], Award.grade != '无').count()    # 选出每一获奖级别的人数
+            Award.grade == types, Award.grade != '无').count()    # 选出每一获奖级别的人数
         award_count.append(count1)
 
-    bar.add("获奖人数", award_types, award_count,
-            legend_text_size=20, label_text_size=20, xaxis_label_textsize=20, yaxis_force_interval=1)
+    bar = Bar(init_opts=opts.InitOpts(width="100%", theme=ThemeType.DARK)). \
+        add_xaxis(award_types). \
+        add_yaxis("参赛人数", award_count, category_gap="60%"). \
+        set_global_opts(
+            title_opts=opts.TitleOpts(title="获奖级别统计",
+                                      title_textstyle_opts=opts.TextStyleOpts(font_size=30)),
+            xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(font_size=20)),
+            yaxis_opts=opts.AxisOpts(min_interval=1, axislabel_opts=opts.LabelOpts(font_size=20)),
+            legend_opts=opts.LegendOpts(textstyle_opts=opts.TextStyleOpts(font_size=20))
+        ).set_series_opts(label_opts=opts.LabelOpts(font_size=20))
+    # bar.add("获奖人数", award_types, award_count,
+    #         legend_text_size=20, label_text_size=20, xaxis_label_textsize=20, yaxis_force_interval=1)
     return bar
 
 
 def contest_pie(start, end):
-    pie1 = Pie("获奖比例", title_pos='center', title_text_size=30)
-    pie2 = Pie("参赛比例", title_text_size=30)
+    # pie1 = Pie("获奖比例", title_pos='center', title_text_size=30)
+    # pie2 = Pie("参赛比例", title_text_size=30)
     contest_types = Contest.query.with_entities(Contest.contest_type).distinct().all()
     join_count = []
     award_count = []
@@ -1052,22 +1082,43 @@ def contest_pie(start, end):
         count1 = Award.query.join(  # 选出每一类的参赛人数
             Contest, (Award.contest_id == Contest.contest_id)).filter(
             Contest.contest_type == types[0], Contest.contest_time >= start, Contest.contest_time <= end).count()
-        join_count.append(count1)
+        join_count.append((types[0], count1))
         count2 = Award.query.join(  # 选出每一类的获奖人数
             Contest, (Award.contest_id == Contest.contest_id)).filter(
             Contest.contest_type == types[0], Contest.contest_time >= start, Contest.contest_time <= end,
             Award.grade != '0', Award.grade != '无').count()
-        award_count.append(count2)
-    pie1.add("参赛情况", contest_types, join_count, is_label_show=True, center=[25,60] ,legend_pos="20%", label_text_size=20)
-    pie2.add("获奖情况", contest_types, award_count, is_label_show=True, center=[75,60], legend_pos="80%", label_text_size=20)
-    gird = Grid(width=1200)
-    gird.add(pie1, grid_right="55%")
-    gird.add(pie2, grid_left="60%")
-    return gird
+        award_count.append((types[0], count2))
+    pie1 = Pie(init_opts=opts.InitOpts(width="100%",theme=ThemeType.DARK)).\
+        add("", join_count, label_opts=opts.LabelOpts(is_show=True, font_size=20)).\
+        set_global_opts(
+            title_opts=opts.TitleOpts(title="参赛情况"),
+            # legend_opts=opts.LegendOpts(pos_left="20%")
+        ).\
+        set_series_opts(label_opts=opts.LabelOpts(is_show=True, font_size=20, formatter="{b}: {d}%"))
+    pie2 = Pie(init_opts=opts.InitOpts(width="100%", theme=ThemeType.DARK)). \
+        add("", award_count,label_opts=opts.LabelOpts(is_show=True, font_size=20)).\
+        set_global_opts(
+            title_opts=opts.TitleOpts(title="获奖情况"),
+            # legend_opts=opts.LegendOpts(pos_right="20%")
+        ).\
+        set_series_opts(label_opts=opts.LabelOpts(is_show=True, font_size=20, formatter="{b}: {d}%"))
+
+    page = Page().add(pie1, pie2)
+    return page
+    # gird = Grid(init_opts=opts.InitOpts(width=1200)).\
+    #     add(pie1, grid_opts=opts.GridOpts(pos_left="55%")).\
+    #     add(pie2, grid_opts=opts.GridOpts(pos_right="55%"))
+
+    # return gird
+    # pie1.add("参赛情况", contest_types, join_count, is_label_show=True, center=[25,60] ,legend_pos="20%", label_text_size=20)
+    # pie2.add("获奖情况", contest_types, award_count, is_label_show=True, center=[75,60], legend_pos="80%", label_text_size=20)
+    # gird = Grid(width=1200)
+    # gird.add(pie1, grid_right="55%")
+    # gird.add(pie2, grid_left="60%")
 
 
 def award_pie(start, end):
-    pie = Pie("各奖项获奖比例", height=500, width="100%", title_text_size=30)
+    # pie = Pie("各奖项获奖比例", height=500, width="100%", title_text_size=30)
     award_types = Award.query.with_entities(Award.grade).\
         filter(Award.grade != '0', Award.grade != '无').distinct().all()
     award_count = []
@@ -1075,7 +1126,12 @@ def award_pie(start, end):
         count1 = Award.query.join(Contest, (Contest.contest_id == Award.contest_id)).filter(
             Contest.contest_time >= start, Contest.contest_time <= end,
             Award.grade == types[0], Award.grade != '无').count()     # 选出每一获奖级别的人数
-        award_count.append(count1)
-    pie.add("", award_types, award_count, is_label_show=True, label_text_size=20)
+        award_count.append((types[0], count1))
+    # print(award_count)
+    pie = Pie(init_opts=opts.InitOpts(theme=ThemeType.DARK)).\
+        add("", award_count).\
+        set_series_opts(label_opts=opts.LabelOpts(is_show=True, font_size=20, formatter="{b}: {d}%"))
+    # 饼图、仪表盘、漏斗图formatter: {a}（系列名称），{b}（数据项名称），{c}（数值）, {d}（百分比）
+    # pie.add("", award_types, award_count, is_label_show=True, label_text_size=20)
 
     return pie

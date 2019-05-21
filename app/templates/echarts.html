@@ -39,6 +39,25 @@
         <span style="color: red"><b>默认为今年1月1日至今</b></span>
     </form>
     <br>
+{#    <div id="bar" style="width:1000px; height:600px;"></div>#}
     {{ myechart|safe }}
-
 {% endblock %}
+
+{#{% block scripts %}#}
+{#    {{ super() }}#}
+{#    <script>#}
+{#        $(#}
+{#            function abc(chart_type) {#}
+{#                var chart = echarts.init(document.getElementById('bar'), 'white', {renderer: 'canvas'});#}
+{#                $.ajax({#}
+{#                    type: "GET",#}
+{#                    url: "{{ url_for('get_echarts', chart_type='contest_bar') }}",#}
+{#                    dataType: 'json',#}
+{#                    success: function (result) {#}
+{#                        chart.setOption(result);#}
+{#                    }#}
+{#                });#}
+{#            }#}
+{#        )#}
+{#    </script>#}
+{#{% endblock %}#}
