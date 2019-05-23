@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
+from flask_ckeditor import CKEditor
 from config import Config
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -23,6 +24,7 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 mail = Mail(app)
 bootstrap = Bootstrap(app)
+ckeditor = CKEditor(app)
 login.login_view = 'login'
 # dashboard.bind(app)     # 访问/dashboard来查看检测情况
 
