@@ -3,6 +3,7 @@ from wtforms import StringField, PasswordField, SelectField, BooleanField,\
     SubmitField, DateField, FileField, TextAreaField, IntegerField
 from flask_admin.form import widgets
 from flask_login import current_user
+from flask_ckeditor import CKEditorField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length, InputRequired
 from flask_wtf.file import FileRequired, FileAllowed
 from app.models import User, Contest_type
@@ -85,7 +86,7 @@ class ResetPasswordForm(FlaskForm):
 
 class EditNoticeForm(FlaskForm):
     title = StringField('标题', validators=[DataRequired('请输入标题'), Length(max=50, message="标题长度需小于50字符")])
-    text = TextAreaField('正文', validators=[DataRequired('请输入正文')], id='contentcode')
+    text = CKEditorField('正文', validators=[DataRequired('请输入正文')], id='contentcode')
     file1 = FileField("相关文件(请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg')",
                      validators=[FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'],
                                              "请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'")])

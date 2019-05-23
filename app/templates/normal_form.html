@@ -3,6 +3,7 @@
 
 {% block app_content %}
     <h1>{{ title }}</h1>
+    {{ ckeditor.load(custom_url=url_for('static', filename='ckeditor/ckeditor.js')) }}
     {% if title == '编辑资料' %}
         {% if current_user.type=='admin' %}
             <h4>用户类型：管理员</h4>
