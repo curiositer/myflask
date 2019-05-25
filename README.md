@@ -7,6 +7,8 @@
 * 感谢@luhuisicnu翻译自Miguel Grinberg的blog https://blog.miguelgrinberg.com 的2017年新版The Flask Mega-Tutorial教程
 https://github.com/luhuisicnu/The-Flask-Mega-Tutorial-zh *
 
+* 注意！！依赖包中mysqlclient==1.4.2在windows下需要下载相应包后手动安装；certifi可能无法回退版本，不影响使用*
+
 在config.py文件中添加
 
     class Config(object):
@@ -55,3 +57,5 @@ linux部署教程:https://github.com/luhuisicnu/The-Flask-Mega-Tutorial-zh/blob/
     export FLASK_APP=myflask.py   # linux系统中
     set FLASK_APP=myflask.py      # windows系统
  
+ 如果想要使用验证码，需要将flask_wtf中的recaptcha部分
+ https://www.google.com/替换为https://www.recaptcha.net/
