@@ -9,14 +9,14 @@
             {% if pear1 == 'nan' %}
                 {{ title }}-就业数据不足，无法分析
             {% else %}
-                {{ title }}-就业相关性系数为:{{ pear1 }}
+                {{ title }}-就业{{ flag1 }}（相关性系数为:{{ pear1 }}）
             {% endif %}
         </div>
         <div class="alert alert-success" role="alert">
             {% if pear2 == 'nan' %}
                 {{ title }}-考研数据不足，无法分析
             {% else %}
-                {{ title }}-考研相关性系数为:{{ pear2 }}
+                {{ title }}-考研{{ flag2 }}（相关性系数为:{{ pear2 }}）
             {% endif %}
         </div>
     {{ myechart|safe }}

@@ -801,6 +801,25 @@ def dict_to_numpy(dict1):       # 将字典类型转换为数组，并计算相�
     return format(pear, '.3f'), data, data2  # 保留三位小数
 
 
+def user_describe(pear):
+    flag1 = None
+    if pear != 'nan':
+        pear = float(pear)
+        if pear > 0:
+            flag1 = '正相关，且'
+        else:
+            flag1 = '负相关，且'
+            pear = -pear
+        if pear<0.3:
+            flag1 = flag1 + '相关性非常弱'
+        elif pear<0.7:
+            flag1 = flag1 + '相关性较强'
+        else:
+            flag1 = flag1 + '相关性极强'
+        return flag1
+    return None
+
+
 def custom_formatter(params):
     return '此点人数'+params.value[2]
 
@@ -814,6 +833,7 @@ def relate(type):
         c_w,c_s = relate_work('contest')
         scatter = Scatter("参赛-就业")
         pear1, piece, data = dict_to_numpy(c_w)     # piece为分段后的数据，data为未分段的原始数据
+        flag1 = user_describe(pear1)
 
         x_lst = [v[0] for v in data]
         y_lst = [v[1] for v in data]
@@ -838,6 +858,8 @@ def relate(type):
         page.add_chart(scatter, name='参赛-就业')
 
         pear2, piece2, data2 = dict_to_numpy(c_s)
+        flag2 = user_describe(pear2)
+
         x_2st = [v[0] for v in data2]
         y_2st = [v[1] for v in data2]
         extra_data2 = [v[2] for v in data2]
@@ -867,6 +889,7 @@ def relate(type):
         title = '获奖次数'
         a_w, a_s = relate_work('award')
         pear1, piece, data = dict_to_numpy(a_w)     # piece为分段后的数据，data为未分段的原始数据
+        flag1 = user_describe(pear1)
 
         title = '获得奖项次数'
         c_w,c_s = relate_work('award')
@@ -895,6 +918,8 @@ def relate(type):
         page.add_chart(scatter, name='获奖-就业')
 
         pear2, piece2, data2 = dict_to_numpy(c_s)
+        flag2 = user_describe(pear2)
+
         x_2st = [v[0] for v in data2]
         y_2st = [v[1] for v in data2]
         extra_data2 = [v[2] for v in data2]
@@ -919,11 +944,11 @@ def relate(type):
             visual_text_color="#000",
         )
         page.add_chart(scatter2, name='获奖-考研')
-    return render_template("relate.html", title=title, pear1=pear1, configure=configure,
+    return render_template("relate.html", title=title, pear1=pear1, flag1=flag1, configure=configure,
                            myechart=page.render_embed(), host=app.config['REMOTE_HOST'],
                            script_list=page.get_js_dependencies(),
                            data=piece, x_list=range(0,10), y_list=[0,4000,6000,8000,10000],
-                           pear2=pear2, data2=data2, x_list2=range(0,10), y_list2=[1,2,3])
+                           pear2=pear2, flag2=flag2, data2=data2, x_list2=range(0,10), y_list2=[1,2,3])
 
 
 def relate_work(type):
