@@ -4,6 +4,7 @@
     {{ super() }}
     <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
     <link rel="icon" href="{{ url_for('static', filename='image/favicon.ico') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='image/favicon.ico') }}" type="image/x-icon">
     {% for jsfile_name in script_list %}
        <script src="{{ host }}/{{ jsfile_name }}.js"></script>    {# 获得所有所需的js文件#}
     {% endfor %}
