@@ -16,7 +16,7 @@ from datetime import datetime
 
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
-    user_id = db.Column(db.Integer, primary_key=True, unique=True)
+    user_id = db.Column(db.Integer, index=True, primary_key=True, unique=True)
     username = db.Column(db.String(64), nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=True)
     tel_num = db.Column(db.String(20))
