@@ -238,12 +238,9 @@ def notice_list():
     page = request.args.get('page', 1, type=int)
     lists = Notice.query.filter().order_by(Notice.time.desc()).paginate(
         page, app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('notice_list', page=lists.next_num) \
-        if lists.has_next else None
-    prev_url = url_for('notice_list', page=lists.prev_num) \
-        if lists.has_prev else None
+
     return render_template("notice_list.html", title='公告列表',
-                           lists=lists.items, next_url=next_url, prev_url=prev_url)
+                           lists=lists.items, pagination=lists)
 
 
 @app.route('/notice/<id>', methods=['GET', 'POST'])
@@ -398,12 +395,9 @@ def contest_list():
     page = request.args.get('page', 1, type=int)
     lists = Contest.query.filter().order_by(Contest.contest_time.desc()).paginate(
         page, app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('contest_list', page=lists.next_num) \
-        if lists.has_next else None
-    prev_url = url_for('contest_list', page=lists.prev_num) \
-        if lists.has_prev else None
+
     return render_template("contest_list.html", title='竞赛列表',
-                           lists=lists.items, next_url=next_url, prev_url=prev_url)
+                           lists=lists.items, pagination=lists)
 
 
 @app.route('/contest/type/edit', methods=['GET', 'POST'])
@@ -605,13 +599,9 @@ def request_list():
         else:                   # 管理层教师
             lists = Request.query.filter().order_by(Request.add_time.desc()). \
                 paginate(page, app.config['POSTS_PER_PAGE'], False)  # 选取所有学生申请信息
-    next_url = url_for('request_list', page=lists.next_num) \
-        if lists.has_next else None
-    prev_url = url_for('request_list', page=lists.prev_num) \
-        if lists.has_prev else None
 
     return render_template("request_list.html", title='竞赛申请列表',
-                           lists=lists.items, next_url=next_url, prev_url=prev_url)
+                           lists=lists.items, pagination=lists)
 
 
 @app.route('/request/team', methods=['GET', 'POST'])
@@ -625,12 +615,8 @@ def request_list_team():        # 如果为学生，将个人参赛和组队参�
         Request.user_type == 1, team_student.c.user_id == current_user.user_id).order_by(Request.add_time.desc()). \
         paginate(page, app.config['POSTS_PER_PAGE'], False)
 
-    next_url = url_for('request_list_team', page=lists.next_num) \
-        if lists.has_next else None
-    prev_url = url_for('request_list_team', page=lists.prev_num) \
-        if lists.has_prev else None
     return render_template("request_list.html", title='竞赛申请列表',
-                           lists=lists.items, next_url=next_url, prev_url=prev_url)
+                           lists=lists.items, pagination=lists)
 
 
 @app.route('/request/<request_id>', methods=['GET', 'POST'])
@@ -690,12 +676,8 @@ def award_list():
         order_by(Contest.contest_time.desc()).filter(). \
         paginate(page, app.config['POSTS_PER_PAGE'], False)
 
-    next_url = url_for('award_list', page=lists.next_num) \
-        if lists.has_next else None
-    prev_url = url_for('award_list', page=lists.prev_num) \
-        if lists.has_prev else None
     return render_template("award_list.html", title='参赛/获奖列表',
-                           lists=lists.items, next_url=next_url, prev_url=prev_url)
+                           lists=lists.items, pagination=lists)
 
 
 @app.route('/award/<award_id>', methods=['GET', 'POST'])
