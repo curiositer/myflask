@@ -203,7 +203,7 @@ class Award(db.Model):
     contest_details = db.relationship('Contest')
 
 
-@login.user_loader
+@login.user_loader      # 使用Flask-Login的@login.user_loader装饰器来为用户加载功能注册函数。
 def load_user(user_id):
     return User.query.get(int(user_id))
 

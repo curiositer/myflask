@@ -5,6 +5,7 @@ from app.forms import LoginForm, RegistrationForm, EditProfileForm, EditPassword
     ResetPasswordRequestForm, ResetPasswordForm, AddContestTypeForm
 from flask import render_template, flash, redirect, url_for, request, send_from_directory, make_response, abort
 from flask_login import current_user, login_user, logout_user, login_required
+from werkzeug.urls import url_parse
 from app.models import User, Contest, Request, Student, Teacher, Team, Award, team_student, Notice, Contest_type
 import datetime
 
@@ -38,7 +39,10 @@ def login():
             flash('用户名或密码错误')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
-        return redirect(url_for('index'))
+        next_page = request.args.get('next')
+        if not next_page or url_parse(next_page).netloc != '':  # 如果不是相对地址，为防止恶意攻击，跳转到主页
+            next_page = url_for('index')
+        return redirect(next_page)
     return render_template('normal_form.html', title='登陆', form=form)
 
 
