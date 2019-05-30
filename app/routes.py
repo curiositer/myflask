@@ -143,15 +143,7 @@ def add_notice():
         abort(404)
     form = EditNoticeForm()
     if form.validate_on_submit():
-        filename1, filename2, filename3 = None, None, None
-        if form.file1.data:
-            filename1 = form.file1.data.filename
-        if form.file2.data:
-            filename2 = form.file2.data.filename
-        if form.file3.data:
-            filename3 = form.file3.data.filename
-        notice = Notice(title=form.title.data, text=form.text.data, filename1=filename1, filename2=filename2,
-                        filename3=filename3, time=datetime.datetime.today().date())
+        notice = Notice(title=form.title.data, text=form.text.data, time=datetime.datetime.today().date())
         db.session.add(notice)
         db.session.flush()
 
@@ -159,12 +151,10 @@ def add_notice():
         file_dir = os.path.join(basedir, app.config['NOTICE_FOLDER'], str(notice.id))  # 存在以竞赛名的子文件夹中
         if not os.path.exists(file_dir):
             os.makedirs(file_dir)  # 文件夹不存在就创建
-        if form.file1.data:
-            form.file1.data.save(os.path.join(file_dir, filename1))  # 将上传的文件保存到服务器;
-        if form.file2.data:
-            form.file2.data.save(os.path.join(file_dir, filename2))
-        if form.file3.data:
-            form.file3.data.save(os.path.join(file_dir, filename3))
+        if form.files.data:     # 从上传的多个文件中获取文件列表
+            for file in form.files.data:
+                file.save(os.path.join(file_dir, file.filename))        # 将上传的文件保存到服务器;
+
         db.session.commit()
         flash('公告添加成功.')
         return redirect(url_for('index'))
@@ -182,36 +172,18 @@ def edit_notice(id):
     if form.validate_on_submit():
         notice.title = form.title.data
         notice.text = form.text.data
-        filename1, filename2, filename3 = None, None, None
-        if form.file1.data:
-            print(form.file1.data)
-            filename1 = form.file1.data.filename
-        if form.file2.data:
-            filename2 = form.file2.data.filename
-        if form.file3.data:
-            filename3 = form.file3.data.filename
+
         basedir = os.path.abspath(os.path.dirname(__file__))  # 获取当前项目的绝对路径
         file_dir = os.path.join(basedir, app.config['NOTICE_FOLDER'], str(notice.id))  # 存在以竞赛名的子文件夹中
         if not os.path.exists(file_dir):
             os.makedirs(file_dir)  # 文件夹不存在就创建
-        if form.file1.data:         # 如果新上传了文件，那么覆盖（删除）之前的文件，并添加新的文件
-            oldfilename1 = notice.filename1
-            if os.path.exists(file_dir + oldfilename1):
-                os.remove(file_dir + oldfilename1)
-            form.file1.data.save(os.path.join(file_dir, filename1))  # 将上传的文件保存到服务器;
-            notice.filename1 = filename1
-        if form.file2.data:
-            oldfilename2 = notice.filename2
-            if os.path.exists(file_dir + oldfilename2):
-                os.remove(file_dir + oldfilename2)
-            form.file2.data.save(os.path.join(file_dir, filename2))
-            notice.filename2 = filename2
-        if form.file3.data:
-            oldfilename3 = notice.filename3
-            if os.path.exists(file_dir + oldfilename3):
-                os.remove(file_dir + oldfilename3)
-            form.file3.data.save(os.path.join(file_dir, filename3))
-            notice.filename3 = filename3
+        if form.files.data:  # 从上传的多个文件中获取文件列表
+            file_list = os.listdir(file_dir)  # 给出文件列表
+            for old_file in file_list:         # 删除原文件
+                os.remove(file_dir + old_file)
+            for file in form.files.data:        # 添加新文件
+                file.save(os.path.join(file_dir, file.filename))  # 将上传的文件保存到服务器;
+
         db.session.commit()
         flash("公告修改成功！")
         return notice_details(id)
@@ -251,7 +223,9 @@ def notice_list():
 @login_required
 def notice_details(id):
     notice = Notice.query.get(id)
-    return render_template("notice_details.html", list=notice)
+    dirpath = os.path.join(app.root_path, app.config['NOTICE_FOLDER'], id)  # 获得文件路径
+    file_list = os.listdir(dirpath)     # 给出文件列表
+    return render_template("notice_details.html", list=notice, file_list=file_list)
 
 
 @app.route("/notice/download/<id>/<filename>")
@@ -496,12 +470,11 @@ def apply_contest(contest_id):
             req = Request(user_id=id1,contest_id=contest_id,status=0,sup_teacher=tea1,
                           notes=form.notes.data, add_time=datetime.datetime.now(), user_type=0)
             db.session.add(req)
+
         else:
             team = Team(team_name=form.team_name.data)
-
             id = id1
             team.parts.append(Student.query.get(id))
-
             id2 = form.id2.data
             if id2:
                 try:                 # 查看该ID是否存在

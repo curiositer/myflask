@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm, RecaptchaField
 from wtforms import StringField, PasswordField, SelectField, BooleanField,\
-    SubmitField, DateField, FileField, TextAreaField, IntegerField
+    SubmitField, DateField, FileField, TextAreaField, IntegerField, MultipleFileField
 from flask_admin.form import widgets
 from flask_login import current_user
 from flask_ckeditor import CKEditorField
@@ -87,15 +87,9 @@ class ResetPasswordForm(FlaskForm):
 class EditNoticeForm(FlaskForm):
     title = StringField('标题', validators=[DataRequired('请输入标题'), Length(max=50, message="标题长度需小于50字符")])
     text = CKEditorField('正文', validators=[DataRequired('请输入正文')], id='contentcode')
-    file1 = FileField("相关文件(请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg')",
-                     validators=[FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'],
-                                             "请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'")])
-    file2 = FileField("相关文件",
-                     validators=[FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'],
-                                             "请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'")])
-    file3 = FileField("相关文件",
-                     validators=[FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'],
-                                             "请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'")])
+    files = MultipleFileField("相关文件(请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg')且再次上传会覆盖之前的文件。",
+                              validators=[FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'],
+                                                      "请上传以下格式的文件'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg'")])
     submit = SubmitField('发布')
 
 
