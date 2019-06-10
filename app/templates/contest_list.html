@@ -9,11 +9,13 @@
             <th width="10%">竞赛时间</th>
             <th width="9%">竞赛类型</th>
             <th width="8%">竞赛等级</th>
-            <th width="20%">竞赛描述</th>
-            <th width="10%">文件下载</th>
-            {% if current_user.type=='student' %}
-                <th width="7%">申报该竞赛</th>
-            {% endif %}
+{#            <th width="20%">竞赛描述</th>#}
+{#            <th width="10%">文件下载</th>#}
+            <th width="7%">竞赛详情
+                {%- if current_user.type=='student' -%}
+                    及申报
+                {% endif %}
+            </th>
         </tr>
         {% for list in lists %}
             <tr valign="top">
@@ -21,23 +23,22 @@
                 <td>{{ list.contest_time }}</td>
                 <td>{{ list.contest_type }}</td>
                 <td>{{ list.level }}</td>
-                <td>{{ list.details }}</td>
-                <td>
-                    {% if list.filename %}
-                        <a href="{{ url_for('downloader', contest_id=list.contest_id) }}">{{ list.filename }}</a>
-                    {% else %}
-                        无相关文件
-                    {% endif %}
-                </td>
-                {% if current_user.type== 'student' %}
-                    <td class="text-center"><a href="{{ url_for('apply_contest',contest_id=list.contest_id) }}">申请</a></td>
-                {% endif %}
+{#                <td>{{ list.details }}</td>#}
+{#                <td>#}
+{#                    {% if list.filename %}#}
+{#                        <a href="{{ url_for('downloader', contest_id=list.contest_id) }}">{{ list.filename }}</a>#}
+{#                    {% else %}#}
+{#                        无相关文件#}
+{#                    {% endif %}#}
+{#                </td>#}
+                <td><a href="{{ url_for('contest_details',contest_id=list.contest_id) }}">详情
+                    {%- if current_user.type=='student' -%}及申请{% endif %}...</a></td>
             </tr>
         {% endfor %}
     </table>
 
     {% if pagination %}
-        {{ macros.pagination_widget(pagination, 'notice_list') }}
+        {{ macros.pagination_widget(pagination, 'contest_list') }}
     {% endif %}
 
 {% endblock %}

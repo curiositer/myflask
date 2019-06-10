@@ -19,6 +19,7 @@
             <th>竞赛等级</th>
             <th>指导教师</th>
             <th>个人(组队)</th>
+            <th>申请时间</th>
             <th>申请状态</th>
         </tr>
         {% for list in lists %}
@@ -28,22 +29,25 @@
                 <td>{{ list.contest_details.contest_type }}</td>
                 <td>{{ list.contest_details.level }}</td>
                 <td>{{ list.teacher_details.username }}</td>
-                {% if list.user_type == 0 %}
-                    <td>个人</td>
-                {% else %}
-                    <td>组队</td>
-                {% endif %}
+                <td>
+                    {% if list.user_type == 0 %}
+                        个人
+                    {% else %}
+                        组队
+                    {% endif %}
+                </td>
+                <td>{{ moment(list.add_time).fromNow() }}</td>
+                <td>
                 {% if list.status==0 %}
-                    <td><a href="{{ url_for('request_details', request_id=list.request_id) }}">待审核(详情...)</a></td>
+                    <a href="{{ url_for('request_details', request_id=list.request_id) }}">待审核(详情...)</a>
                 {% elif list.status==1 %}
-                    <td><span style="color: green;">已通过</span>
+                    <span style="color: green;">已通过</span>
                         <a href="{{ url_for('request_details', request_id=list.request_id) }}">(详情...)</a>
-                    </td>
                 {% elif list.status==2 %}
-                    <td><span style="color: red;">已拒绝</span>
+                    <span style="color: red;">已拒绝</span>
                         <a href="{{ url_for('request_details', request_id=list.request_id) }}">(详情...)</a>
-                    </td>
                 {% endif %}
+                </td>
             </tr>
         {% endfor %}
     </table>

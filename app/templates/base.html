@@ -3,13 +3,14 @@
 
 {% block head %}
     {{ super() }}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker.standalone.min.css" rel="stylesheet">
     <link rel="icon" href="{{ url_for('static', filename='image/favicon.ico') }}" type="image/x-icon">
     <link rel="shortcut icon" href="{{ url_for('static', filename='image/favicon.ico') }}" type="image/x-icon">
     {% for jsfile_name in script_list %}
        <script src="{{ host }}/{{ jsfile_name }}.js"></script>    {# 获得所有所需的js文件#}
     {% endfor %}
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{#    <script src="https://www.google.com/recaptcha/api.js" async defer></script>#}
 {% endblock %}
 
 {% block styles %}
@@ -65,7 +66,8 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a href="{{ url_for('request_list') }}">申请列表</a></li>
-                            <li><a href="{{ url_for('contest_list') }}">竞赛列表及申请</a></li>
+                            <li><a href="{{ url_for('contest_list') }}">竞赛列表
+                                {%- if current_user.type == 'student' -%}及申请{% endif %}</a></li>
                             <li><a href="{{ url_for('award_list') }}">参赛/获奖列表</a></li>
                             <li><a href="{{ url_for('notice_list') }}">公告列表</a></li>
                         </ul>
@@ -114,6 +116,8 @@
 
 {% block scripts %}
     {{ super() }}
+    {{ moment.include_moment() }}
+    {{ moment.locale('zh_CN') }}
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/locales/bootstrap-datepicker.zh-CN.min.js"></script>
     <script>
