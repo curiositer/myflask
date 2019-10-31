@@ -39,7 +39,7 @@ mysqlclient==1.4.2
 nbformat==4.4.0
 numpy==1.16.2
 peppercorn==0.6
-Pillow==6.0.0
+Pillow==6.2.0
 plotly==3.7.1
 prettytable==0.7.2
 protobuf==3.6.1
