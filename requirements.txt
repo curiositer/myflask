@@ -43,7 +43,7 @@ Pillow==6.0.0
 plotly==3.7.1
 prettytable==0.7.2
 protobuf==3.6.1
-psutil==5.6.1
+psutil==5.6.6
 pyecharts==0.5.11
 pyecharts-javascripthon==0.0.6
 pyecharts-jupyter-installer==0.0.3
